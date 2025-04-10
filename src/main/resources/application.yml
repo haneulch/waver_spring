@@ -1,3 +1,16 @@
 spring:
   application:
     name: waver
+  cache:
+    type: caffeine
+    caffeine:
+      spec: maximumSize=500,expireAfterAccess=5m
+  datasource:
+    url: jdbc:mysql://localhost:3306
+    username: root
+    password: 12345
+
+waver:
+  secret:
+    name: USER_ID
+    key: "wH5pbJDmpvIKWy3k5CXHTIApJEb3M/EAT7EwSrBscJA="
