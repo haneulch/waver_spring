@@ -1,0 +1,22 @@
+spring:
+  datasource:
+    url: jdbc:mysql://localhost:3306/test
+    username: root
+    password: 12345
+  jpa:
+    hibernate:
+      ddl-auto: update
+
+springdoc:
+  api-docs:
+    enabled: false
+
+waver:
+  secret:
+    key: "production"
+    access-token-validity: 30d
+
+logging:
+  level:
+    root: error
+

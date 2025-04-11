@@ -6,11 +6,30 @@ spring:
     caffeine:
       spec: maximumSize=500,expireAfterAccess=5m
   datasource:
-    url: jdbc:mysql://localhost:3306
+    url: jdbc:mysql://localhost:3306/test
     username: root
     password: 12345
+  jackson:
+    default-property-inclusion: non_null
+  jpa:
+    hibernate:
+      ddl-auto: update
+
+springdoc:
+  api-docs:
+    path: /v3/api-docs        # OpenAPI JSON 경로
+  swagger-ui:
+    path: /swagger-ui         # Swagger UI 접속 경로
+    disable-swagger-default-url: true  # 🧨 Petstore 제거
+    url: /v3/api-docs         # 내 API 문서 명시
 
 waver:
   secret:
     name: USER_ID
     key: "wH5pbJDmpvIKWy3k5CXHTIApJEb3M/EAT7EwSrBscJA="
+    access-token-validity: 300d
+
+logging:
+  level:
+    root: info
+
