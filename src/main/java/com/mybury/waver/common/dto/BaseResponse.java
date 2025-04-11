@@ -1,21 +1,28 @@
 package com.mybury.waver.common.dto;
 
 import com.mybury.waver.common.code.ResultCode;
-import lombok.Getter;
 
-@Getter
-public class BaseResponse {
+public record BaseResponse<T>(
+    String code,
+    String message,
+    T data
+) {
 
-    private String code;
-    private String message;
-
-    public BaseResponse(ResultCode resultCode) {
-        this.code = resultCode.getCode();
-        this.message = resultCode.getDescription();
+    public static <T> BaseResponse<T> ok() {
+        ResultCode resultCode = ResultCode.SUCCESS;
+        return new BaseResponse<>(resultCode.getCode(), resultCode.getDescription(), null);
     }
 
-    public BaseResponse(ResultCode resultCode, Throwable cause) {
-        this.code = resultCode.getCode();
-        this.message = cause != null ? cause.getMessage() : null;
+    public static <T> BaseResponse<T> ok(T data) {
+        ResultCode resultCode = ResultCode.SUCCESS;
+        return new BaseResponse<>(resultCode.getCode(), resultCode.getDescription(), data);
+    }
+
+    public static <T> BaseResponse<T> error(ResultCode resultCode) {
+        return new BaseResponse<>(resultCode.getCode(), resultCode.getDescription(), null);
+    }
+
+    public static <T> BaseResponse<T> error(ResultCode resultCode, T data) {
+        return new BaseResponse<>(resultCode.getCode(), resultCode.getDescription(), data);
     }
 }
