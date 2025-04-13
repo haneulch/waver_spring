@@ -33,14 +33,14 @@ public class JwtTokenParser {
         return Keys.hmacShaKeyFor(keyBytes);
     }
 
-    public String getUserIdFromToken(String token) {
+    public Long getUserIdFromToken(String token) {
         try {
             Claims claims = Jwts.parserBuilder()
                 .setSigningKey(getSigningKey())
                 .build()
                 .parseClaimsJws(token)
                 .getBody();
-            return claims.get(name, String.class);
+            return claims.get(name, Long.class);
 
         } catch (ExpiredJwtException expiredJwtException) {
             log.error("Token Expired: {}", expiredJwtException.getMessage());
@@ -51,7 +51,7 @@ public class JwtTokenParser {
         }
     }
 
-    public String generateToken(String userId) {
+    public String generateToken(Long userId) {
         Date now = new Date();
         Date expiryDate = new Date(now.getTime() + accessTokenValidity.toMillis());
 

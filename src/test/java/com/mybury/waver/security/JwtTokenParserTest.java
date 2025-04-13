@@ -15,11 +15,11 @@ class JwtTokenParserTest {
 
     @Test
     void generateToken() {
-        String username = "test";
+        Long username = 1212L;
         String testToken = jwtTokenParser.generateToken(username);
         log.info(testToken);
 
-        String result = jwtTokenParser.getUserIdFromToken(testToken);
+        Long result = jwtTokenParser.getUserIdFromToken(testToken);
         assertThat(result).isEqualTo(username);
     }
 }
