@@ -1,5 +1,7 @@
 package com.mybury.waver.annotation;
 
+import static com.mybury.waver.common.code.ResultCode.UNAUTHORIZED;
+import com.mybury.waver.exception.WaverException;
 import com.mybury.waver.security.JwtTokenParser;
 import lombok.RequiredArgsConstructor;
 import org.springframework.core.MethodParameter;
@@ -29,7 +31,7 @@ public class UserIdHandler implements HandlerMethodArgumentResolver {
 
         String token = webRequest.getHeader("Authorization");
         if (token == null || !token.startsWith("Bearer ")) {
-            throw new IllegalArgumentException("Invalid token");
+            throw new WaverException(UNAUTHORIZED);
         }
         token = token.substring(7);
         return jwtUtil.getUserIdFromToken(token);
