@@ -3,6 +3,7 @@ package com.mybury.waver.controller;
 import com.mybury.waver.annotation.UserId;
 import com.mybury.waver.dto.follow.FollowRequest;
 import com.mybury.waver.service.FollowService;
+import io.swagger.v3.oas.annotations.Parameter;
 import io.swagger.v3.oas.annotations.tags.Tag;
 import jakarta.validation.Valid;
 import lombok.RequiredArgsConstructor;
@@ -17,32 +18,38 @@ import org.springframework.web.bind.annotation.RestController;
 @RequestMapping("waver/follow")
 @RequiredArgsConstructor
 public class FollowController {
-  private final FollowService followService;
 
-  @GetMapping
-  public void getFollow() {
+    private final FollowService followService;
 
-  }
+    @GetMapping
+    public void getFollow() {
 
-  @PostMapping
-  public void postFollow(@UserId Long userId, @Valid @RequestBody FollowRequest request) {
-    System.out.println(userId);
-    followService.follow(userId, request.followUserId());
-  }
+    }
 
-  @PostMapping("unfollow")
-  public void postUnfollow() {}
+    @PostMapping
+    public void postFollow(@Parameter(hidden = true) @UserId Long userId, @Valid @RequestBody FollowRequest request) {
+        System.out.println(userId);
+        followService.follow(userId, request.followUserId());
+    }
 
-  @PostMapping("block")
-  public void postBlock() {}
+    @PostMapping("unfollow")
+    public void postUnfollow() {
+    }
 
-  @PostMapping("block/release")
-  public void postBlockRelease() {}
+    @PostMapping("block")
+    public void postBlock() {
+    }
 
-  @GetMapping("blockUsers")
-  public void getBlockUsers() {}
+    @PostMapping("block/release")
+    public void postBlockRelease() {
+    }
 
-  @GetMapping("mutual")
-  public void getMutual() {}
+    @GetMapping("blockUsers")
+    public void getBlockUsers() {
+    }
+
+    @GetMapping("mutual")
+    public void getMutual() {
+    }
 }
 
