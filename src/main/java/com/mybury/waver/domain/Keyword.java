@@ -1,0 +1,38 @@
+package com.mybury.waver.domain;
+
+import com.mybury.waver.common.code.KeywordType;
+import com.mybury.waver.common.code.YesNo;
+import jakarta.persistence.Column;
+import jakarta.persistence.Entity;
+import jakarta.persistence.EnumType;
+import jakarta.persistence.Enumerated;
+import jakarta.persistence.GeneratedValue;
+import jakarta.persistence.GenerationType;
+import jakarta.persistence.Id;
+import lombok.AccessLevel;
+import lombok.AllArgsConstructor;
+import lombok.Builder;
+import lombok.NoArgsConstructor;
+
+@Entity
+@NoArgsConstructor(access = AccessLevel.PROTECTED)
+@AllArgsConstructor(access = AccessLevel.PRIVATE)
+@Builder
+public class Keyword {
+  @Id
+  @GeneratedValue(strategy = GenerationType.IDENTITY)
+  private Long id;
+
+  @Enumerated(value = EnumType.STRING)
+  @Column(columnDefinition = "varchar(10) default 'KEYWORD'")
+  private KeywordType type;
+
+  private String name;
+
+  @Column(columnDefinition = "int default 0")
+  private int seq;
+
+  @Enumerated(value = EnumType.STRING)
+  @Column(columnDefinition = "varchar(1) default 'N'")
+  private YesNo recommendYn;
+}
