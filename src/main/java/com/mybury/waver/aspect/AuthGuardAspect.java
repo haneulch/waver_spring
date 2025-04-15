@@ -23,18 +23,24 @@ public class AuthGuardAspect {
     private final JwtTokenProvider jwtTokenProvider;
 
     @Pointcut("within(@org.springframework.web.bind.annotation.RestController *)")
-    public void restController() {}
+    public void restController() {
+    }
 
     @Around("restController()")
     public Object checkTokenIfRequired(ProceedingJoinPoint joinPoint) throws Throwable {
+        HttpServletRequest request = ((ServletRequestAttributes)
+            Objects.requireNonNull(RequestContextHolder.getRequestAttributes())).getRequest();
+
+        if (!request.getRequestURI().startsWith("/waver")) {
+            return joinPoint.proceed();
+        }
+
         Method method = ((MethodSignature) joinPoint.getSignature()).getMethod();
         Class<?> clazz = method.getDeclaringClass();
 
         boolean isPublic = method.isAnnotationPresent(Public.class) || clazz.isAnnotationPresent(Public.class);
 
         if (!isPublic) {
-            HttpServletRequest request = ((ServletRequestAttributes) Objects.requireNonNull(
-                RequestContextHolder.getRequestAttributes())).getRequest();
             String token = jwtTokenProvider.extractToken(request.getHeader("Authorization"));
             jwtTokenProvider.getUserIdFromToken(token);
         }
