@@ -1,6 +1,6 @@
 package com.mybury.waver.config;
 
-import com.mybury.waver.annotation.UserIdHandler;
+import com.mybury.waver.annotation.UserIdArgumentResolver;
 import java.util.List;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
@@ -13,10 +13,10 @@ import org.springframework.web.servlet.config.annotation.WebMvcConfigurer;
 @RequiredArgsConstructor
 public class WebConfig implements WebMvcConfigurer {
 
-    private final UserIdHandler userIdHandler;
+    private final UserIdArgumentResolver userIdArgumentResolver;
 
     @Override
     public void addArgumentResolvers(List<HandlerMethodArgumentResolver> resolvers) {
-        resolvers.add(userIdHandler);
+        resolvers.add(userIdArgumentResolver);
     }
 }

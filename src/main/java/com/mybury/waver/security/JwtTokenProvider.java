@@ -1,6 +1,7 @@
 package com.mybury.waver.security;
 
 import com.mybury.waver.common.code.ResultCode;
+import static com.mybury.waver.common.code.ResultCode.UNAUTHORIZED;
 import com.mybury.waver.exception.WaverException;
 import io.jsonwebtoken.Claims;
 import io.jsonwebtoken.ExpiredJwtException;
@@ -14,10 +15,11 @@ import java.util.Date;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.stereotype.Component;
+import org.springframework.util.StringUtils;
 
 @Slf4j
 @Component
-public class JwtTokenParser {
+public class JwtTokenProvider {
 
     @Value("${waver.secret.name}")
     private String name;
@@ -61,5 +63,12 @@ public class JwtTokenParser {
             .setExpiration(expiryDate)
             .signWith(getSigningKey(), SignatureAlgorithm.HS256)
             .compact();
+    }
+
+    public String extractToken(String tokenHeaderValue) {
+        if (!StringUtils.hasText(tokenHeaderValue) || !tokenHeaderValue.startsWith("Bearer ")) {
+            throw new WaverException(UNAUTHORIZED);
+        }
+        return tokenHeaderValue.substring(7);
     }
 }
