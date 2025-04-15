@@ -4,6 +4,7 @@ import com.mybury.waver.annotation.Public;
 import com.mybury.waver.annotation.UserId;
 import com.mybury.waver.dto.user.UserCreateRequest;
 import com.mybury.waver.dto.user.UserUpdateRequest;
+import com.mybury.waver.service.UserService;
 import io.swagger.v3.oas.annotations.Operation;
 import io.swagger.v3.oas.annotations.Parameter;
 import io.swagger.v3.oas.annotations.tags.Tag;
@@ -24,9 +25,13 @@ import org.springframework.web.bind.annotation.RestController;
 @RequiredArgsConstructor
 public class UserController {
 
+    private final UserService userService;
+
+    @Public
     @Operation(summary = "회원가입")
     @PostMapping(value = "join", consumes = MediaType.MULTIPART_FORM_DATA_VALUE)
     public void createUser(@Valid @ModelAttribute UserCreateRequest request) {
+        userService.create(request);
     }
 
     @Operation(summary = "프로필 조회")

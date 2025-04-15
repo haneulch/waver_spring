@@ -1,6 +1,7 @@
 package com.mybury.waver.dto.user;
 
 import com.mybury.waver.common.code.AccountType;
+import com.mybury.waver.domain.User;
 import io.swagger.v3.oas.annotations.media.Schema;
 import jakarta.validation.constraints.NotEmpty;
 import jakarta.validation.constraints.NotNull;
@@ -22,4 +23,12 @@ public record UserCreateRequest(
     MultipartFile profileImage
 ) {
 
+    public User user() {
+        return User.builder()
+            .email(email)
+            .accountType(accountType)
+            .name(name)
+            .bio(bio)
+            .build();
+    }
 }

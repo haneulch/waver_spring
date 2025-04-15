@@ -8,6 +8,7 @@ import jakarta.persistence.Column;
 import jakarta.persistence.Entity;
 import jakarta.persistence.EnumType;
 import jakarta.persistence.Enumerated;
+import jakarta.persistence.FetchType;
 import jakarta.persistence.GeneratedValue;
 import jakarta.persistence.GenerationType;
 import jakarta.persistence.Id;
@@ -16,13 +17,13 @@ import lombok.AccessLevel;
 import lombok.AllArgsConstructor;
 import lombok.Builder;
 import lombok.NoArgsConstructor;
-import org.checkerframework.checker.units.qual.C;
 
 import java.time.LocalDateTime;
 import java.util.List;
+import lombok.Setter;
 
 @Entity
-@NoArgsConstructor(access = AccessLevel.PRIVATE)
+@NoArgsConstructor(access = AccessLevel.PROTECTED)
 @AllArgsConstructor(access = AccessLevel.PRIVATE)
 @Builder
 public class User extends BaseEntity {
@@ -41,6 +42,7 @@ public class User extends BaseEntity {
     @Column(nullable = false)
     private String name;
 
+    @Setter
     private String imgUrl;
 
     private String bio;
@@ -59,9 +61,10 @@ public class User extends BaseEntity {
 
     private LocalDateTime lastLoginAt;
 
-    @OneToMany
-    private List<Bucketlist> bucketlist;
+    @OneToMany(fetch = FetchType.LAZY, mappedBy = "user")
+    private List<Bucket> bucketlist;
 
-    @OneToMany
+    @OneToMany(fetch = FetchType.LAZY, mappedBy = "user")
     private List<RecentSearch> recentSearch;
+
 }
