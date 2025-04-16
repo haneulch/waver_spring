@@ -1,5 +1,7 @@
 package com.mybury.waver.controller;
 
+import com.mybury.waver.annotation.UserId;
+import com.mybury.waver.service.MyService;
 import io.swagger.v3.oas.annotations.Operation;
 import io.swagger.v3.oas.annotations.tags.Tag;
 import lombok.RequiredArgsConstructor;
@@ -14,9 +16,12 @@ import org.springframework.web.bind.annotation.RestController;
 @RequiredArgsConstructor
 public class MyController {
 
+    private final MyService myService;
+
     @Operation(summary = "마이페이지 메인")
     @GetMapping
-    public void my() {
+    public void my(@UserId Long userId) {
+        myService.my(userId);
     }
 
     @Operation(summary = "타인 > 마이페이지 메인")
