@@ -1,6 +1,5 @@
 package com.mybury.waver.domain;
 
-import static com.mybury.waver.common.Constants.DEFAULT_CATEGORY;
 import com.mybury.waver.common.code.YesNo;
 import jakarta.persistence.Column;
 import jakarta.persistence.Entity;
@@ -21,24 +20,40 @@ import lombok.NoArgsConstructor;
 @NoArgsConstructor(access = AccessLevel.PROTECTED)
 @AllArgsConstructor(access = AccessLevel.PRIVATE)
 @Builder
-public class Category extends BaseEntity {
+public class Badge extends BaseEntity {
 
     @Id
     @GeneratedValue(strategy = GenerationType.IDENTITY)
     private Long id;
 
-    private String name;
+    @Builder.Default
+    @Column(nullable = false)
+    private Integer achieveCount = 0;
 
     @Builder.Default
     @Enumerated(value = EnumType.STRING)
     @Column(length = 1, nullable = false)
-    private YesNo defaultYn = YesNo.N;
+    private YesNo selectYn = YesNo.N;
+
+    @Builder.Default
+    @Enumerated(value = EnumType.STRING)
+    @Column(length = 1, nullable = false)
+    private YesNo achieveYn = YesNo.N;
 
     @OneToOne(fetch = FetchType.LAZY)
     @JoinColumn(name = "user_id")
     private User user;
 
-    public static Category createDefaultCategoryFor(User user) {
-        return Category.builder().name(DEFAULT_CATEGORY).defaultYn(YesNo.Y).user(user).build();
+    @OneToOne(fetch = FetchType.LAZY)
+    @JoinColumn(name = "badge_type_id")
+    private BadgeType badgeType;
+
+    public static Badge createDefaultBadgeFor(User user) {
+        return Badge.builder()
+            .achieveYn(YesNo.Y)
+            .selectYn(YesNo.Y)
+            .user(user)
+            .badgeType(BadgeType.builder().id(1L).build())
+            .build();
     }
 }

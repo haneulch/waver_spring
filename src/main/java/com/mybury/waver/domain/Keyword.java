@@ -19,20 +19,24 @@ import lombok.NoArgsConstructor;
 @AllArgsConstructor(access = AccessLevel.PRIVATE)
 @Builder
 public class Keyword {
-  @Id
-  @GeneratedValue(strategy = GenerationType.IDENTITY)
-  private Long id;
 
-  @Enumerated(value = EnumType.STRING)
-  @Column(columnDefinition = "varchar(10) default 'KEYWORD'")
-  private KeywordType type;
+    @Id
+    @GeneratedValue(strategy = GenerationType.IDENTITY)
+    private Long id;
 
-  private String name;
+    @Builder.Default
+    @Enumerated(value = EnumType.STRING)
+    @Column(length = 10, nullable = false)
+    private KeywordType type = KeywordType.KEYWORD;
 
-  @Column(columnDefinition = "int default 0")
-  private int seq;
+    private String name;
 
-  @Enumerated(value = EnumType.STRING)
-  @Column(columnDefinition = "varchar(1) default 'N'")
-  private YesNo recommendYn;
+    @Builder.Default
+    @Column(nullable = false)
+    private Integer seq = 0;
+
+    @Builder.Default
+    @Enumerated(value = EnumType.STRING)
+    @Column(length = 1, nullable = false)
+    private YesNo recommendYn = YesNo.N;
 }

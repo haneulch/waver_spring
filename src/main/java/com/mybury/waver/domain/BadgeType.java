@@ -1,10 +1,6 @@
 package com.mybury.waver.domain;
 
-import com.mybury.waver.common.code.ReportType;
-import jakarta.persistence.Column;
 import jakarta.persistence.Entity;
-import jakarta.persistence.EnumType;
-import jakarta.persistence.Enumerated;
 import jakarta.persistence.GeneratedValue;
 import jakarta.persistence.GenerationType;
 import jakarta.persistence.Id;
@@ -17,21 +13,13 @@ import lombok.NoArgsConstructor;
 @NoArgsConstructor(access = AccessLevel.PROTECTED)
 @AllArgsConstructor(access = AccessLevel.PRIVATE)
 @Builder
-public class Report extends BaseEntity {
+public class BadgeType {
 
     @Id
     @GeneratedValue(strategy = GenerationType.IDENTITY)
     private Long id;
 
-    @Column(nullable = false)
-    private String reason;
+    private String title;
 
-    @Builder.Default
-    @Enumerated(value = EnumType.STRING)
-    @Column(length = 10, nullable = false)
-    private ReportType reportType = ReportType.BUCKET;
-
-    private Long bucketlistId;
-
-    private Long commentId;
+    private String imgUrl;
 }

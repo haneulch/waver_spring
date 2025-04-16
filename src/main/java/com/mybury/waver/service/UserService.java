@@ -1,12 +1,14 @@
 package com.mybury.waver.service;
 
 import com.mybury.waver.common.code.ResultCode;
+import com.mybury.waver.domain.Badge;
 import com.mybury.waver.domain.Category;
 import static com.mybury.waver.domain.Category.createDefaultCategoryFor;
 import com.mybury.waver.domain.User;
 import com.mybury.waver.domain.vo.IdProjection;
 import com.mybury.waver.dto.user.UserCreateRequest;
 import com.mybury.waver.exception.WaverException;
+import com.mybury.waver.repository.BadgeRepository;
 import com.mybury.waver.repository.CategoryRepository;
 import com.mybury.waver.repository.UserRepository;
 import com.mybury.waver.util.FileUploadUtils;
@@ -21,6 +23,7 @@ public class UserService {
     private final FileUploadUtils fileUploadUtils;
     private final UserRepository userRepository;
     private final CategoryRepository categoryRepository;
+    private final BadgeRepository badgeRepository;
 
     public Long getUserIdByEmail(String email) {
         IdProjection id = userRepository.findIdByEmail(email);
@@ -40,6 +43,9 @@ public class UserService {
         User newUser = userRepository.save(user);
         Category defaultCategory = createDefaultCategoryFor(newUser);
         categoryRepository.save(defaultCategory);
+
+        Badge badge = Badge.createDefaultBadgeFor(newUser);
+        badgeRepository.save(badge);
     }
 
 }

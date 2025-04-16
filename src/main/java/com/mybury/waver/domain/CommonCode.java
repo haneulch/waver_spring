@@ -15,19 +15,21 @@ import lombok.NoArgsConstructor;
 @AllArgsConstructor(access = AccessLevel.PRIVATE)
 @Builder
 public class CommonCode {
-  @Id
-  @GeneratedValue(strategy = GenerationType.IDENTITY)
-  private Long id;
 
-  @Column(nullable = false)
-  private String groupCode;
+    @Id
+    @GeneratedValue(strategy = GenerationType.IDENTITY)
+    private Long id;
 
-  @Column(nullable = false)
-  private String code;
+    @Column(nullable = false)
+    private String groupCode;
 
-  @Column(nullable = false)
-  private String codeName;
+    @Column(nullable = false)
+    private String code;
 
-  @Column(columnDefinition = "int default 0")
-  private int seq;
+    @Column(nullable = false)
+    private String codeName;
+
+    @Builder.Default
+    @Column(nullable = false)
+    private Integer seq = 0;
 }

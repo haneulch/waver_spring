@@ -15,83 +15,93 @@ import jakarta.persistence.Id;
 import jakarta.persistence.JoinColumn;
 import jakarta.persistence.OneToMany;
 import jakarta.persistence.OneToOne;
+import java.time.LocalDate;
+import java.time.LocalDateTime;
+import java.util.List;
 import lombok.AccessLevel;
 import lombok.AllArgsConstructor;
 import lombok.Builder;
 import lombok.NoArgsConstructor;
-
-import java.time.LocalDate;
-import java.time.LocalDateTime;
-import java.util.List;
 
 @Entity
 @NoArgsConstructor(access = AccessLevel.PROTECTED)
 @AllArgsConstructor(access = AccessLevel.PRIVATE)
 @Builder
 public class Bucket extends BaseEntity {
-  @Id
-  @GeneratedValue(strategy = GenerationType.IDENTITY)
-  private Long id;
 
-  @Column(nullable = false)
-  private String title;
+    @Id
+    @GeneratedValue(strategy = GenerationType.IDENTITY)
+    private Long id;
 
-  private String memo;
+    @Column(nullable = false)
+    private String title;
 
-  @Enumerated(value = EnumType.STRING)
-  @Column(columnDefinition = "varchar(10) default 'ORIGINAL'")
-  private ContentType type;
+    private String memo;
 
-  @Enumerated(value = EnumType.STRING)
-  @Column(columnDefinition = "varchar(10) default 'PRIVATE'")
-  private ExposureStatus exposureStatus;
+    @Builder.Default
+    @Enumerated(value = EnumType.STRING)
+    @Column(length = 10, nullable = false)
+    private ContentType type = ContentType.ORIGINAL;
 
-  @Enumerated(value = EnumType.STRING)
-  @Column(columnDefinition = "varchar(1) default 'N'")
-  private YesNo pin;
+    @Builder.Default
+    @Enumerated(value = EnumType.STRING)
+    @Column(length = 10, nullable = false)
+    private ExposureStatus exposureStatus = ExposureStatus.PRIVATE;
 
-  @Enumerated(value = EnumType.STRING)
-  @Column(columnDefinition = "varchar(10) default 'PROGRESS'")
-  private BucketStatus status;
+    @Builder.Default
+    @Enumerated(value = EnumType.STRING)
+    @Column(length = 1, nullable = false)
+    private YesNo pin = YesNo.N;
 
-  @Enumerated(value = EnumType.STRING)
-  @Column(columnDefinition = "varchar(1) default 'N'")
-  private YesNo scrapYn;
+    @Builder.Default
+    @Enumerated(value = EnumType.STRING)
+    @Column(length = 10, nullable = false)
+    private BucketStatus status = BucketStatus.PROGRESS;
 
-  private LocalDate targetDate;
+    @Builder.Default
+    @Enumerated(value = EnumType.STRING)
+    @Column(length = 1, nullable = false)
+    private YesNo scrapYn = YesNo.N;
 
-  @Column(columnDefinition = "int default 0")
-  private int userCount;
+    private LocalDate targetDate;
 
-  @Column(columnDefinition = "int default 0")
-  private int goalCount;
+    @Builder.Default
+    @Column(nullable = false)
+    private Integer userCount = 0;
 
-  private LocalDateTime completedDate;
+    @Builder.Default
+    @Column(nullable = false)
+    private Integer goalCount = 0;
 
-  @Column(columnDefinition = "int default 0")
-  private int seq;
+    private LocalDateTime completedDate;
 
-  private String imgUrl1;
+    @Builder.Default
+    @Column(nullable = false)
+    private Integer seq = 0;
 
-  private String imgUrl2;
+    private String imgUrl1;
 
-  private String imgUrl3;
+    private String imgUrl2;
 
-  @Column(columnDefinition = "int default 0")
-  private int likeCount;
+    private String imgUrl3;
 
-  @Enumerated(value = EnumType.STRING)
-  @Column(columnDefinition = "varchar(1) default 'N'")
-  private YesNo deleted;
+    @Builder.Default
+    @Column(nullable = false)
+    private Integer likeCount = 0;
 
-  @OneToOne(fetch = FetchType.LAZY)
-  @JoinColumn(name = "user_id")
-  private User user;
+    @Builder.Default
+    @Enumerated(value = EnumType.STRING)
+    @Column(length = 1, nullable = false)
+    private YesNo deleted = YesNo.N;
 
-  @OneToOne(fetch = FetchType.LAZY)
-  @JoinColumn(name = "category_id")
-  private Category category;
+    @OneToOne(fetch = FetchType.LAZY)
+    @JoinColumn(name = "user_id")
+    private User user;
 
-  @OneToMany(fetch = FetchType.LAZY, mappedBy = "bucket")
-  private List<Comment> comments;
+    @OneToOne(fetch = FetchType.LAZY)
+    @JoinColumn(name = "category_id")
+    private Category category;
+
+    @OneToMany(fetch = FetchType.LAZY, mappedBy = "bucket")
+    private List<Comment> comments;
 }

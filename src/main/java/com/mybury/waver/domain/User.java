@@ -13,13 +13,12 @@ import jakarta.persistence.GeneratedValue;
 import jakarta.persistence.GenerationType;
 import jakarta.persistence.Id;
 import jakarta.persistence.OneToMany;
+import java.time.LocalDateTime;
+import java.util.List;
 import lombok.AccessLevel;
 import lombok.AllArgsConstructor;
 import lombok.Builder;
 import lombok.NoArgsConstructor;
-
-import java.time.LocalDateTime;
-import java.util.List;
 import lombok.Setter;
 
 @Entity
@@ -35,9 +34,10 @@ public class User extends BaseEntity {
     @Column(nullable = false)
     private String email;
 
+    @Builder.Default
     @Enumerated(EnumType.STRING)
-    @Column(columnDefinition = "varchar(10) default 'ANDROID'")
-    private AccountType accountType;
+    @Column(length = 10, nullable = false)
+    private AccountType accountType = AccountType.ANDROID;
 
     @Column(nullable = false)
     private String name;
@@ -47,17 +47,20 @@ public class User extends BaseEntity {
 
     private String bio;
 
+    @Builder.Default
     @Enumerated(EnumType.STRING)
-    @Column(columnDefinition = "varchar(1) default 'N'")
-    private YesNo alarmYn;
+    @Column(length = 1, nullable = false)
+    private YesNo alarmYn = YesNo.N;
 
+    @Builder.Default
     @Enumerated(EnumType.STRING)
-    @Column(columnDefinition = "varchar(10) default 'ACTIVE'")
-    private UserStatus status;
+    @Column(length = 10, nullable = false)
+    private UserStatus status = UserStatus.ACTIVE;
 
+    @Builder.Default
     @Enumerated(EnumType.STRING)
-    @Column(columnDefinition = "varchar(10) default 'NONE'")
-    private PremiumStatus premiumStatus;
+    @Column(length = 10, nullable = false)
+    private PremiumStatus premiumStatus = PremiumStatus.NONE;
 
     private LocalDateTime lastLoginAt;
 
@@ -67,4 +70,6 @@ public class User extends BaseEntity {
     @OneToMany(fetch = FetchType.LAZY, mappedBy = "user")
     private List<RecentSearch> recentSearch;
 
+    @OneToMany(fetch = FetchType.LAZY, mappedBy = "user")
+    private List<Badge> badges;
 }
