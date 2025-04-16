@@ -29,6 +29,7 @@ public class CommonCode {
     @Column(nullable = false)
     private String codeName;
 
+    @Builder.Default
     @Column(nullable = false)
     private Integer seq = 0;
 }

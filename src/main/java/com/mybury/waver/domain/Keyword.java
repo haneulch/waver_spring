@@ -24,15 +24,18 @@ public class Keyword {
     @GeneratedValue(strategy = GenerationType.IDENTITY)
     private Long id;
 
+    @Builder.Default
     @Enumerated(value = EnumType.STRING)
     @Column(length = 10, nullable = false)
     private KeywordType type = KeywordType.KEYWORD;
 
     private String name;
 
+    @Builder.Default
     @Column(nullable = false)
     private Integer seq = 0;
 
+    @Builder.Default
     @Enumerated(value = EnumType.STRING)
     @Column(length = 1, nullable = false)
     private YesNo recommendYn = YesNo.N;

@@ -26,13 +26,16 @@ public class Badge extends BaseEntity {
     @GeneratedValue(strategy = GenerationType.IDENTITY)
     private Long id;
 
+    @Builder.Default
     @Column(nullable = false)
     private Integer achieveCount = 0;
 
+    @Builder.Default
     @Enumerated(value = EnumType.STRING)
     @Column(length = 1, nullable = false)
     private YesNo selectYn = YesNo.N;
 
+    @Builder.Default
     @Enumerated(value = EnumType.STRING)
     @Column(length = 1, nullable = false)
     private YesNo achieveYn = YesNo.N;
@@ -45,4 +48,12 @@ public class Badge extends BaseEntity {
     @JoinColumn(name = "badge_type_id")
     private BadgeType badgeType;
 
+    public static Badge createDefaultBadgeFor(User user) {
+        return Badge.builder()
+            .achieveYn(YesNo.Y)
+            .selectYn(YesNo.Y)
+            .user(user)
+            .badgeType(BadgeType.builder().id(1L).build())
+            .build();
+    }
 }

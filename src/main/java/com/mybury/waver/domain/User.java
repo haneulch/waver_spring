@@ -34,6 +34,7 @@ public class User extends BaseEntity {
     @Column(nullable = false)
     private String email;
 
+    @Builder.Default
     @Enumerated(EnumType.STRING)
     @Column(length = 10, nullable = false)
     private AccountType accountType = AccountType.ANDROID;
@@ -46,14 +47,17 @@ public class User extends BaseEntity {
 
     private String bio;
 
+    @Builder.Default
     @Enumerated(EnumType.STRING)
     @Column(length = 1, nullable = false)
     private YesNo alarmYn = YesNo.N;
 
+    @Builder.Default
     @Enumerated(EnumType.STRING)
     @Column(length = 10, nullable = false)
     private UserStatus status = UserStatus.ACTIVE;
 
+    @Builder.Default
     @Enumerated(EnumType.STRING)
     @Column(length = 10, nullable = false)
     private PremiumStatus premiumStatus = PremiumStatus.NONE;
@@ -66,4 +70,6 @@ public class User extends BaseEntity {
     @OneToMany(fetch = FetchType.LAZY, mappedBy = "user")
     private List<RecentSearch> recentSearch;
 
+    @OneToMany(fetch = FetchType.LAZY, mappedBy = "user")
+    private List<Badge> badges;
 }

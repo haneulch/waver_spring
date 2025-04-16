@@ -31,10 +31,12 @@ public class Comment extends BaseEntity {
 
     private String mentionIds;
 
+    @Builder.Default
     @Enumerated(EnumType.STRING)
     @Column(length = 1, nullable = false)
     private YesNo isBlocked = YesNo.N;
 
+    @Builder.Default
     @Enumerated(EnumType.STRING)
     @Column(length = 1, nullable = false)
     private YesNo isHide = YesNo.N;

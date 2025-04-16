@@ -26,6 +26,7 @@ public class Report extends BaseEntity {
     @Column(nullable = false)
     private String reason;
 
+    @Builder.Default
     @Enumerated(value = EnumType.STRING)
     @Column(length = 10, nullable = false)
     private ReportType reportType = ReportType.BUCKET;

@@ -29,6 +29,7 @@ public class Category extends BaseEntity {
 
     private String name;
 
+    @Builder.Default
     @Enumerated(value = EnumType.STRING)
     @Column(length = 1, nullable = false)
     private YesNo defaultYn = YesNo.N;
