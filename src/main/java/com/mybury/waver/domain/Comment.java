@@ -32,12 +32,12 @@ public class Comment extends BaseEntity {
     private String mentionIds;
 
     @Enumerated(EnumType.STRING)
-    @Column(columnDefinition = "varchar(1) default 'N'")
-    private YesNo isBlocked;
+    @Column(length = 1, nullable = false)
+    private YesNo isBlocked = YesNo.N;
 
     @Enumerated(EnumType.STRING)
-    @Column(columnDefinition = "varchar(1) default 'N'")
-    private YesNo isHide;
+    @Column(length = 1, nullable = false)
+    private YesNo isHide = YesNo.N;
 
     @OneToOne(fetch = FetchType.LAZY)
     @JoinColumn(name = "user_id")

@@ -1,6 +1,5 @@
 package com.mybury.waver.domain;
 
-import jakarta.persistence.Column;
 import jakarta.persistence.Entity;
 import jakarta.persistence.GeneratedValue;
 import jakarta.persistence.GenerationType;
@@ -14,21 +13,13 @@ import lombok.NoArgsConstructor;
 @NoArgsConstructor(access = AccessLevel.PROTECTED)
 @AllArgsConstructor(access = AccessLevel.PRIVATE)
 @Builder
-public class CommonCode {
+public class BadgeType {
 
     @Id
     @GeneratedValue(strategy = GenerationType.IDENTITY)
     private Long id;
 
-    @Column(nullable = false)
-    private String groupCode;
+    private String title;
 
-    @Column(nullable = false)
-    private String code;
-
-    @Column(nullable = false)
-    private String codeName;
-
-    @Column(nullable = false)
-    private Integer seq = 0;
+    private String imgUrl;
 }

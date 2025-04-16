@@ -18,18 +18,19 @@ import lombok.NoArgsConstructor;
 @AllArgsConstructor(access = AccessLevel.PRIVATE)
 @Builder
 public class Report extends BaseEntity {
-  @Id
-  @GeneratedValue(strategy = GenerationType.IDENTITY)
-  private Long id;
 
-  @Column(nullable = false)
-  private String reason;
+    @Id
+    @GeneratedValue(strategy = GenerationType.IDENTITY)
+    private Long id;
 
-  @Enumerated(value = EnumType.STRING)
-  @Column(columnDefinition = "varchar(10) default 'BUCKET'")
-  private ReportType reportType;
+    @Column(nullable = false)
+    private String reason;
 
-  private Long bucketlistId;
+    @Enumerated(value = EnumType.STRING)
+    @Column(length = 10, nullable = false)
+    private ReportType reportType = ReportType.BUCKET;
 
-  private Long commentId;
+    private Long bucketlistId;
+
+    private Long commentId;
 }
