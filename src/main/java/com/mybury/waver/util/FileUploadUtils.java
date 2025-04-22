@@ -47,7 +47,7 @@ public class FileUploadUtils {
             Files.createDirectories(targetDir);
             Path targetLocation = targetDir.resolve(fileName);
             file.transferTo(targetLocation.toFile());
-            return datePath + "/" + fileName;
+            return targetLocation.toString();
         } catch (IOException ex) {
             log.error("Could not upload file: {}", originalFilename, ex);
         }

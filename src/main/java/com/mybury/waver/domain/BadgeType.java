@@ -21,5 +21,11 @@ public class BadgeType {
 
     private String title;
 
-    private String imgUrl;
+    private String imgUrl1;
+
+    private String imgUrl2;
+
+    private String imgUrl3;
+
+    private String imgUrl4;
 }
