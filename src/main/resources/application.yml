@@ -6,7 +6,7 @@ spring:
     caffeine:
       spec: maximumSize=500,expireAfterAccess=5m
   datasource:
-    url: jdbc:mysql://localhost:3306/test
+    url: jdbc:mysql://localhost:3306/waver
     username: root
     password: 12345
   jackson:
@@ -14,6 +14,9 @@ spring:
   jpa:
     hibernate:
       ddl-auto: update
+  web:
+    resources:
+      static-locations: classpath:/static/
 
 springdoc:
   api-docs:
@@ -28,6 +31,8 @@ waver:
     name: USER_ID
     key: "wH5pbJDmpvIKWy3k5CXHTIApJEb3M/EAT7EwSrBscJA="
     access-token-validity: 300d
+  upload:
+    path: /waver_spring/upload
 
 logging:
   level:
