@@ -1,9 +1,8 @@
 package com.mybury.waver.annotation;
 
-import static com.mybury.waver.common.code.ResultCode.UNAUTHORIZED;
-import com.mybury.waver.exception.WaverException;
 import com.mybury.waver.security.JwtTokenProvider;
 import lombok.RequiredArgsConstructor;
+import org.springframework.beans.factory.annotation.Value;
 import org.springframework.core.MethodParameter;
 import org.springframework.stereotype.Component;
 import org.springframework.web.bind.support.WebDataBinderFactory;
@@ -15,19 +14,27 @@ import org.springframework.web.method.support.ModelAndViewContainer;
 @RequiredArgsConstructor
 public class UserIdArgumentResolver implements HandlerMethodArgumentResolver {
 
-    private final JwtTokenProvider jwtTokenProvider;
+  private final JwtTokenProvider jwtTokenProvider;
 
-    @Override
-    public boolean supportsParameter(MethodParameter parameter) {
-        return parameter.hasParameterAnnotation(UserId.class) && parameter.getParameterType().equals(Long.class);
+  @Value("${spring.profiles.active:default}")
+  private String activeProfile;
+
+  @Override
+  public boolean supportsParameter(MethodParameter parameter) {
+    return parameter.hasParameterAnnotation(UserId.class) && parameter.getParameterType().equals(Long.class);
+  }
+
+  @Override
+  public Object resolveArgument(MethodParameter parameter, ModelAndViewContainer mavContainer,
+                                NativeWebRequest webRequest, WebDataBinderFactory binderFactory) {
+
+    // for test
+    if (activeProfile.equals("local")) {
+      return 3L;
     }
 
-    @Override
-    public Object resolveArgument(MethodParameter parameter, ModelAndViewContainer mavContainer,
-        NativeWebRequest webRequest, WebDataBinderFactory binderFactory) {
-
-        String tokenHeaderValue = webRequest.getHeader("Authorization");
-        String token = jwtTokenProvider.extractToken(tokenHeaderValue);
-        return jwtTokenProvider.getUserIdFromToken(token);
-    }
+    String tokenHeaderValue = webRequest.getHeader("Authorization");
+    String token = jwtTokenProvider.extractToken(tokenHeaderValue);
+    return jwtTokenProvider.getUserIdFromToken(token);
+  }
 }
