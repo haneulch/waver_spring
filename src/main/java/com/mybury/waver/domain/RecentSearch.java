@@ -8,16 +8,18 @@ import jakarta.persistence.GenerationType;
 import jakarta.persistence.Id;
 import jakarta.persistence.JoinColumn;
 import jakarta.persistence.ManyToOne;
+import jakarta.persistence.Transient;
 import lombok.AccessLevel;
 import lombok.AllArgsConstructor;
 import lombok.Builder;
 import lombok.NoArgsConstructor;
+import org.springframework.data.domain.Persistable;
 
 @Entity
 @NoArgsConstructor(access = AccessLevel.PROTECTED)
 @AllArgsConstructor(access = AccessLevel.PRIVATE)
 @Builder
-public class RecentSearch extends BaseEntity {
+public class RecentSearch extends BaseEntity implements Persistable<Long> {
   @Id
   @GeneratedValue(strategy = GenerationType.IDENTITY)
   private Long id;
@@ -28,4 +30,25 @@ public class RecentSearch extends BaseEntity {
   @ManyToOne(fetch = FetchType.LAZY)
   @JoinColumn(name = "user_id")
   private User user;
+
+  @Transient
+  private boolean isNew = false;
+
+  @Override
+  public Long getId() {
+    return id;
+  }
+
+  @Override
+  public boolean isNew() {
+    return isNew;
+  }
+
+  public static RecentSearch create(long userId, String query) {
+    return RecentSearch.builder()
+        .user(User.builder().id(userId).build())
+        .query(query)
+        .isNew(true)
+        .build();
+  }
 }
