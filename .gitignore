@@ -26,3 +26,5 @@ replay_pid*
 target
 .idea
 upload
+src/main/resources/application.yml
+src/main/resources/application-prod.yml
