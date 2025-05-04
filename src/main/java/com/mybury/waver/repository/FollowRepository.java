@@ -8,17 +8,17 @@ import org.springframework.data.jpa.repository.Query;
 
 import java.util.List;
 
-import java.util.List;
-
 public interface FollowRepository extends JpaRepository<Follow, Long> {
   @Modifying
   @Transactional
   @Query(value = "INSERT INTO follow (user_id, follow_user_id) VALUES (:userId, :followUserId)", nativeQuery = true)
   void insertFollow(Long userId, Long followUserId);
 
-  Long countByUser_Id(Long userId);
+  Long countByUserId(Long userId);
 
-  Long countByFollowUser_Id(Long followUserId);
+  Long countByFollowUserId(Long followUserId);
 
   List<Follow> findByUserIdOrFollowUserId(Long userId, Long followUserId);
+
+  boolean existsByUserIdAndFollowUserId(Long userId, Long followUserId);
 }

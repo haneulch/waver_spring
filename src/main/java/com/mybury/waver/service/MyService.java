@@ -9,14 +9,14 @@ import org.springframework.stereotype.Service;
 @RequiredArgsConstructor
 public class MyService {
 
-    private final BucketRepository bucketRepository;
-    private final FollowRepository followRepository;
+  private final BucketRepository bucketRepository;
+  private final FollowRepository followRepository;
 
-    public void my(Long userId) {
-        bucketRepository.findByUser_Id(userId);
+  public void my(Long userId) {
+    bucketRepository.findByUser_Id(userId);
 
-        long followerCount = followRepository.countByUser_Id(userId);
-        long followingCount = followRepository.countByFollowUser_Id(userId);
-    }
+    long followerCount = followRepository.countByUserId(userId);
+    long followingCount = followRepository.countByFollowUserId(userId);
+  }
 
 }
