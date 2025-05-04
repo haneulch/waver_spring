@@ -29,14 +29,16 @@ public class Category extends BaseEntity {
 
     private String name;
 
+  private Long userId;
+
     @Builder.Default
     @Enumerated(value = EnumType.STRING)
     @Column(length = 1, nullable = false)
     private YesNo defaultYn = YesNo.N;
 
-    @ManyToOne(fetch = FetchType.LAZY)
-    @JoinColumn(name = "user_id")
-    private User user;
+  @ManyToOne(fetch = FetchType.LAZY)
+  @JoinColumn(name = "userId", insertable = false, updatable = false)
+  private User user;
 
     public static Category createDefaultCategoryFor(User user) {
         return Category.builder().name(DEFAULT_CATEGORY).defaultYn(YesNo.Y).user(user).build();

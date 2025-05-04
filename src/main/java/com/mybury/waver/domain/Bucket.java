@@ -15,13 +15,14 @@ import jakarta.persistence.Id;
 import jakarta.persistence.JoinColumn;
 import jakarta.persistence.ManyToOne;
 import jakarta.persistence.OneToMany;
-import java.time.LocalDate;
-import java.time.LocalDateTime;
-import java.util.List;
 import lombok.AccessLevel;
 import lombok.AllArgsConstructor;
 import lombok.Builder;
 import lombok.NoArgsConstructor;
+
+import java.time.LocalDate;
+import java.time.LocalDateTime;
+import java.util.List;
 
 @Entity
 @NoArgsConstructor(access = AccessLevel.PROTECTED)
@@ -38,12 +39,16 @@ public class Bucket extends BaseEntity {
 
     private String memo;
 
-    @Builder.Default
-    @Enumerated(value = EnumType.STRING)
-    @Column(length = 10, nullable = false)
-    private ContentType type = ContentType.ORIGINAL;
+  private Long userId;
 
-    @Builder.Default
+  private Long categoryId;
+
+  @Builder.Default
+  @Enumerated(value = EnumType.STRING)
+  @Column(length = 10, nullable = false)
+  private ContentType type = ContentType.ORIGINAL;
+
+  @Builder.Default
     @Enumerated(value = EnumType.STRING)
     @Column(length = 10, nullable = false)
     private ExposureStatus exposureStatus = ExposureStatus.PRIVATE;
@@ -94,13 +99,13 @@ public class Bucket extends BaseEntity {
     @Column(length = 1, nullable = false)
     private YesNo deleted = YesNo.N;
 
-    @ManyToOne(fetch = FetchType.LAZY)
-    @JoinColumn(name = "user_id")
-    private User user;
+  @ManyToOne(fetch = FetchType.LAZY)
+  @JoinColumn(name = "userId", insertable = false, updatable = false)
+  private User user;
 
-    @ManyToOne(fetch = FetchType.LAZY)
-    @JoinColumn(name = "category_id")
-    private Category category;
+  @ManyToOne(fetch = FetchType.LAZY)
+  @JoinColumn(name = "categoryId", insertable = false, updatable = false)
+  private Category category;
 
     @OneToMany(fetch = FetchType.LAZY, mappedBy = "bucket")
     private List<Comment> comments;
