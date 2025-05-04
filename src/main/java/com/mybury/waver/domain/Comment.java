@@ -22,30 +22,34 @@ import lombok.NoArgsConstructor;
 @Builder
 public class Comment extends BaseEntity {
 
-    @Id
-    @GeneratedValue(strategy = GenerationType.IDENTITY)
-    private Long id;
+  @Id
+  @GeneratedValue(strategy = GenerationType.IDENTITY)
+  private Long id;
 
-    @Column(nullable = false)
-    private String comment;
+  @Column(nullable = false)
+  private String comment;
 
-    private String mentionIds;
+  private String mentionIds;
 
-    @Builder.Default
-    @Enumerated(EnumType.STRING)
-    @Column(length = 1, nullable = false)
-    private YesNo isBlocked = YesNo.N;
+  private Long userId;
+
+  private Long categoryId;
+
+  @Builder.Default
+  @Enumerated(EnumType.STRING)
+  @Column(length = 1, nullable = false)
+  private YesNo isBlocked = YesNo.N;
 
     @Builder.Default
     @Enumerated(EnumType.STRING)
     @Column(length = 1, nullable = false)
     private YesNo isHide = YesNo.N;
 
-    @ManyToOne(fetch = FetchType.LAZY)
-    @JoinColumn(name = "user_id")
-    private User user;
+  @ManyToOne(fetch = FetchType.LAZY)
+  @JoinColumn(name = "userId", insertable = false, updatable = false)
+  private User user;
 
-    @ManyToOne(fetch = FetchType.LAZY)
-    @JoinColumn(name = "bucket_id")
-    private Bucket bucket;
+  @ManyToOne(fetch = FetchType.LAZY)
+  @JoinColumn(name = "categoryId", insertable = false, updatable = false)
+  private Bucket bucket;
 }

@@ -27,8 +27,10 @@ public class RecentSearch extends BaseEntity implements Persistable<Long> {
   @Column(nullable = false)
   private String query;
 
+  private Long userId;
+
   @ManyToOne(fetch = FetchType.LAZY)
-  @JoinColumn(name = "user_id")
+  @JoinColumn(name = "userId", insertable = false, updatable = false)
   private User user;
 
   @Transient

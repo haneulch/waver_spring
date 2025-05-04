@@ -13,63 +13,66 @@ import jakarta.persistence.GeneratedValue;
 import jakarta.persistence.GenerationType;
 import jakarta.persistence.Id;
 import jakarta.persistence.OneToMany;
-import java.time.LocalDateTime;
-import java.util.List;
 import lombok.AccessLevel;
 import lombok.AllArgsConstructor;
 import lombok.Builder;
+import lombok.Getter;
 import lombok.NoArgsConstructor;
 import lombok.Setter;
 
+import java.time.LocalDateTime;
+import java.util.List;
+
+@Getter
 @Entity
 @NoArgsConstructor(access = AccessLevel.PROTECTED)
 @AllArgsConstructor(access = AccessLevel.PRIVATE)
 @Builder
 public class User extends BaseEntity {
 
-    @Id
-    @GeneratedValue(strategy = GenerationType.IDENTITY)
-    private Long id;
+  @Id
+  @GeneratedValue(strategy = GenerationType.IDENTITY)
+  private Long id;
 
-    @Column(nullable = false)
-    private String email;
+  @Column(nullable = false)
+  private String email;
 
-    @Builder.Default
-    @Enumerated(EnumType.STRING)
-    @Column(length = 10, nullable = false)
-    private AccountType accountType = AccountType.ANDROID;
+  @Builder.Default
+  @Enumerated(EnumType.STRING)
+  @Column(length = 10, nullable = false)
+  private AccountType accountType = AccountType.ANDROID;
 
-    @Column(nullable = false)
-    private String name;
+  @Column(nullable = false)
+  private String name;
 
-    @Setter
-    private String imgUrl;
+  @Setter
+  private String imgUrl;
 
-    private String bio;
+  private String bio;
 
-    @Builder.Default
-    @Enumerated(EnumType.STRING)
-    @Column(length = 1, nullable = false)
-    private YesNo alarmYn = YesNo.N;
+  @Builder.Default
+  @Enumerated(EnumType.STRING)
+  @Column(length = 1, nullable = false)
+  private YesNo alarmYn = YesNo.N;
 
-    @Builder.Default
-    @Enumerated(EnumType.STRING)
-    @Column(length = 10, nullable = false)
-    private UserStatus status = UserStatus.ACTIVE;
+  @Builder.Default
+  @Enumerated(EnumType.STRING)
+  @Column(length = 10, nullable = false)
+  private UserStatus status = UserStatus.ACTIVE;
 
-    @Builder.Default
-    @Enumerated(EnumType.STRING)
-    @Column(length = 10, nullable = false)
-    private PremiumStatus premiumStatus = PremiumStatus.NONE;
+  @Builder.Default
+  @Enumerated(EnumType.STRING)
+  @Column(length = 10, nullable = false)
+  private PremiumStatus premiumStatus = PremiumStatus.NONE;
 
-    private LocalDateTime lastLoginAt;
+  private LocalDateTime lastLoginAt;
 
-    @OneToMany(fetch = FetchType.LAZY, mappedBy = "user")
-    private List<Bucket> bucketlist;
+  @OneToMany(fetch = FetchType.LAZY, mappedBy = "user")
+  private List<Bucket> bucketlist;
 
-    @OneToMany(fetch = FetchType.LAZY, mappedBy = "user")
-    private List<RecentSearch> recentSearch;
+  @OneToMany(fetch = FetchType.LAZY, mappedBy = "user")
+  private List<RecentSearch> recentSearch;
 
-    @OneToMany(fetch = FetchType.LAZY, mappedBy = "user")
-    private List<Badge> badges;
+  @OneToMany(fetch = FetchType.LAZY, mappedBy = "user")
+  private List<Badge> badges;
 }
