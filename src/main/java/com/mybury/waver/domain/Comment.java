@@ -14,8 +14,10 @@ import jakarta.persistence.ManyToOne;
 import lombok.AccessLevel;
 import lombok.AllArgsConstructor;
 import lombok.Builder;
+import lombok.Getter;
 import lombok.NoArgsConstructor;
 
+@Getter
 @Entity
 @NoArgsConstructor(access = AccessLevel.PROTECTED)
 @AllArgsConstructor(access = AccessLevel.PRIVATE)
@@ -33,7 +35,7 @@ public class Comment extends BaseEntity {
 
   private Long userId;
 
-  private Long categoryId;
+  private Long bucketId;
 
   @Builder.Default
   @Enumerated(EnumType.STRING)
@@ -50,6 +52,6 @@ public class Comment extends BaseEntity {
   private User user;
 
   @ManyToOne(fetch = FetchType.LAZY)
-  @JoinColumn(name = "categoryId", insertable = false, updatable = false)
+  @JoinColumn(name = "bucketId", insertable = false, updatable = false)
   private Bucket bucket;
 }

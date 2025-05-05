@@ -1,8 +1,11 @@
 package com.mybury.waver.service;
 
+import com.mybury.waver.common.code.YesNo;
 import com.mybury.waver.domain.Bucket;
+import com.mybury.waver.domain.Keyword;
 import com.mybury.waver.domain.KeywordConnector;
 import com.mybury.waver.dto.bucket.BucketCreateRequest;
+import com.mybury.waver.dto.bucket.BucketDetailResponse;
 import com.mybury.waver.dto.bucket.BucketRequest;
 import com.mybury.waver.repository.BucketRepository;
 import com.mybury.waver.repository.KeywordConnectorRepository;
@@ -44,5 +47,13 @@ public class BucketService {
 
   public List<Bucket> bucketList(Long userId, @Valid BucketRequest request) {
     return bucketRepository.findBucket(userId, request);
+  }
+
+  public BucketDetailResponse bucketDetail(long id, long userId) {
+    Bucket bucket = bucketRepository.findByIdAndDeleted(id, YesNo.N);
+    List<KeywordConnector> keywordConnectors = keywordConnectorRepository.findByUserIdAndBucketId(userId, id);
+    List<Keyword> keywords = keywordConnectors.stream().map(KeywordConnector::getKeyword).toList();
+    // TODO: 함께하기 친구
+    return BucketDetailResponse.of(bucket, userId, keywords, List.of());
   }
 }
