@@ -4,10 +4,12 @@ import com.mybury.waver.annotation.UserId;
 import com.mybury.waver.domain.Bucket;
 import com.mybury.waver.dto.common.ReportRequest;
 import com.mybury.waver.dto.feed.FeedResponse;
+import com.mybury.waver.dto.feed.KeywordRequest;
 import com.mybury.waver.service.FeedService;
 import io.swagger.v3.oas.annotations.Operation;
 import io.swagger.v3.oas.annotations.Parameter;
 import io.swagger.v3.oas.annotations.tags.Tag;
+import jakarta.validation.Valid;
 import lombok.RequiredArgsConstructor;
 import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.PathVariable;
@@ -32,14 +34,16 @@ public class FeedController {
     return buckets.stream().map(FeedResponse::of).toList();
   }
 
-  @Operation(summary = "관신 키워드 저장")
+  @Operation(summary = "관심 키워드 저장")
   @PostMapping("keyword")
-  public void keyword() {
+  public void keyword(@Parameter(hidden = true) @UserId Long userId, @Valid @RequestBody KeywordRequest request) {
+    feedService.keyword(userId, request.keywordIds());
   }
 
   @Operation(summary = "피드 좋아요/취소")
   @PostMapping("{id}/like")
-  public void like(@PathVariable Long id) {
+  public void like(@PathVariable Long id, @Parameter(hidden = true) @UserId Long userId) {
+    feedService.like(userId, id);
   }
 
   @Operation(summary = "피드 스크랩")

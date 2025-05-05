@@ -33,7 +33,7 @@ public class Comment extends BaseEntity {
 
   private Long userId;
 
-  private Long categoryId;
+  private Long bucketId;
 
   @Builder.Default
   @Enumerated(EnumType.STRING)
@@ -50,6 +50,6 @@ public class Comment extends BaseEntity {
   private User user;
 
   @ManyToOne(fetch = FetchType.LAZY)
-  @JoinColumn(name = "categoryId", insertable = false, updatable = false)
+  @JoinColumn(name = "bucketId", insertable = false, updatable = false)
   private Bucket bucket;
 }
