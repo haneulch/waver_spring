@@ -37,7 +37,8 @@ public class FollowController {
 
   @Operation(summary = "언팔로우")
   @PostMapping("unfollow")
-  public void postUnfollow() {
+  public void postUnfollow(@Parameter(hidden = true) @UserId Long userId, @Valid @RequestBody FollowRequest request) {
+    followService.unfollow(userId, request.followUserId());
   }
 
   @Operation(summary = "사용자 차단")

@@ -14,6 +14,11 @@ public interface FollowRepository extends JpaRepository<Follow, Long> {
   @Query(value = "INSERT INTO follow (user_id, follow_user_id) VALUES (:userId, :followUserId)", nativeQuery = true)
   void insertFollow(Long userId, Long followUserId);
 
+  @Modifying
+  @Transactional
+  @Query(value = "DELETE FROM Follow WHERE userId = :userId AND followUserId = :followUserId")
+  void deleteFollow(long userId, long followUserId);
+
   Long countByUserId(Long userId);
 
   Long countByFollowUserId(Long followUserId);

@@ -4,6 +4,7 @@ import com.mybury.waver.domain.Follow;
 import com.mybury.waver.dto.follow.FollowElement;
 import com.mybury.waver.dto.follow.GetFollowersResponse;
 import com.mybury.waver.repository.FollowRepository;
+import jakarta.validation.constraints.NotNull;
 import lombok.RequiredArgsConstructor;
 import org.springframework.stereotype.Service;
 
@@ -53,5 +54,9 @@ public class FollowService {
         .toList();
 
     return new GetFollowersResponse(followElements, followerElements);
+  }
+
+  public void unfollow(long userId, @NotNull long followUserId) {
+    followRepository.deleteFollow(userId, followUserId);
   }
 }
