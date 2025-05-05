@@ -1,5 +1,6 @@
 package com.mybury.waver.repository;
 
+import com.mybury.waver.common.code.YesNo;
 import com.mybury.waver.domain.Bucket;
 import jakarta.transaction.Transactional;
 import org.springframework.data.jpa.repository.JpaRepository;
@@ -15,4 +16,6 @@ public interface BucketRepository extends JpaRepository<Bucket, Long>, BucketRep
   @Transactional
   @Query(value = "UPDATE Bucket SET likeCount = likeCount + :count WHERE id = :id")
   void updateLike(long id, int count);
+
+  Bucket findByIdAndDeleted(Long id, YesNo deleted);
 }
