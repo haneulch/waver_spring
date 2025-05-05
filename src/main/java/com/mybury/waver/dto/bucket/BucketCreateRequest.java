@@ -1,15 +1,18 @@
-package com.mybury.waver.dto;
+package com.mybury.waver.dto.bucket;
 
 import com.mybury.waver.common.code.ContentType;
 import com.mybury.waver.common.code.ExposureStatus;
 import com.mybury.waver.common.code.YesNo;
+import com.mybury.waver.domain.Bucket;
 import io.swagger.v3.oas.annotations.media.ArraySchema;
 import io.swagger.v3.oas.annotations.media.Schema;
 import jakarta.validation.constraints.Min;
 import jakarta.validation.constraints.NotBlank;
 import jakarta.validation.constraints.NotNull;
-import java.util.List;
 import org.springframework.web.multipart.MultipartFile;
+
+import java.time.LocalDate;
+import java.util.List;
 
 public record BucketCreateRequest(
     @NotNull
@@ -37,18 +40,32 @@ public record BucketCreateRequest(
     YesNo scrapYn,
 
     @Schema(description = "목표완료일(yyyy-MM-dd)")
-    String targetDate,
+    LocalDate targetDate,
 
     @Min(1)
     @NotNull
     @Schema(description = "목표 횟수")
     Integer goalCount,
 
+    @Min(1)
+    @NotNull
     @Schema(description = "카테고리 ID")
-    Integer categoryId,
+    Long categoryId,
 
     @ArraySchema(items = @Schema(description = "이미지 목록(최대 3)", type = "string", format = "binary"))
     List<MultipartFile> images
 ) {
-
+  public Bucket toBucket(long userId) {
+    return Bucket.builder()
+        .title(title)
+        .memo(memo)
+        .userId(userId)
+        .categoryId(categoryId)
+        .type(bucketType)
+        .exposureStatus(exposureStatus)
+        .scrapYn(scrapYn)
+        .targetDate(targetDate)
+        .goalCount(goalCount)
+        .build();
+  }
 }
