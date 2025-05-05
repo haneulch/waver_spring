@@ -25,10 +25,24 @@ public class FollowService {
   }
 
   public GetFollowersResponse getFollowList(Long userId) {
-    List<Follow> all = followRepository.findByUserIdOrFollowUserId(userId, userId);
-
     List<Follow> follows = new ArrayList<>();
     List<Follow> followers = new ArrayList<>();
+    Set<Long> mutualIds = new HashSet<>();
+    followInfo(userId, follows, followers, mutualIds);
+
+    List<FollowElement> followElements = follows.stream()
+        .map(f -> FollowElement.follow(f, mutualIds.contains(f.getFollowUserId())))
+        .toList();
+
+    List<FollowElement> followerElements = followers.stream()
+        .map(f -> FollowElement.follower(f, mutualIds.contains(f.getUserId())))
+        .toList();
+
+    return new GetFollowersResponse(followElements, followerElements);
+  }
+
+  private void followInfo(long userId, List<Follow> follows, List<Follow> followers, Set<Long> mutualIds) {
+    List<Follow> all = followRepository.findByUserIdOrFollowUserId(userId, userId);
 
     for (Follow follow : all) {
       if (Objects.equals(follow.getUserId(), userId)) {
@@ -42,21 +56,20 @@ public class FollowService {
     Set<Long> followIds = follows.stream().map(Follow::getFollowUserId).collect(Collectors.toSet());
     Set<Long> followerIds = followers.stream().map(Follow::getUserId).collect(Collectors.toSet());
 
-    Set<Long> mutualIds = new HashSet<>(followIds);
+    mutualIds.addAll(followIds);
     mutualIds.retainAll(followerIds);
-
-    List<FollowElement> followElements = follows.stream()
-        .map(f -> FollowElement.follow(f, mutualIds.contains(f.getFollowUserId())))
-        .toList();
-
-    List<FollowElement> followerElements = followers.stream()
-        .map(f -> FollowElement.follower(f, mutualIds.contains(f.getUserId())))
-        .toList();
-
-    return new GetFollowersResponse(followElements, followerElements);
   }
 
   public void unfollow(long userId, @NotNull long followUserId) {
     followRepository.deleteFollow(userId, followUserId);
+  }
+
+  public List<Follow> getMutual(Long userId) {
+    List<Follow> follows = new ArrayList<>();
+    List<Follow> followers = new ArrayList<>();
+    Set<Long> mutualIds = new HashSet<>();
+    followInfo(userId, follows, followers, mutualIds);
+
+    return follows.stream().filter(item -> mutualIds.contains(item.getUserId())).toList();
   }
 }

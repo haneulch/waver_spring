@@ -1,6 +1,8 @@
 package com.mybury.waver.controller;
 
 import com.mybury.waver.annotation.UserId;
+import com.mybury.waver.domain.Follow;
+import com.mybury.waver.dto.follow.FollowElement;
 import com.mybury.waver.dto.follow.FollowRequest;
 import com.mybury.waver.dto.follow.GetFollowersResponse;
 import com.mybury.waver.service.FollowService;
@@ -14,6 +16,8 @@ import org.springframework.web.bind.annotation.PostMapping;
 import org.springframework.web.bind.annotation.RequestBody;
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RestController;
+
+import java.util.List;
 
 @Tag(name = "팔로우")
 @RestController
@@ -58,7 +62,9 @@ public class FollowController {
 
   @Operation(summary = "맞팔목록")
   @GetMapping("mutual")
-  public void getMutual() {
+  public List<FollowElement> getMutual(@Parameter(hidden = true) @UserId Long userId) {
+    List<Follow> follows = followService.getMutual(userId);
+    return follows.stream().map(FollowElement::new).toList();
   }
 }
 

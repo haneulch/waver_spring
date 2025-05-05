@@ -1,10 +1,6 @@
 package com.mybury.waver.domain;
 
-import com.mybury.waver.common.code.YesNo;
-import jakarta.persistence.Column;
 import jakarta.persistence.Entity;
-import jakarta.persistence.EnumType;
-import jakarta.persistence.Enumerated;
 import jakarta.persistence.FetchType;
 import jakarta.persistence.GeneratedValue;
 import jakarta.persistence.GenerationType;
@@ -20,36 +16,27 @@ import lombok.NoArgsConstructor;
 @NoArgsConstructor(access = AccessLevel.PROTECTED)
 @AllArgsConstructor(access = AccessLevel.PRIVATE)
 @Builder
-public class Comment extends BaseEntity {
+public class KeywordConnector {
 
   @Id
   @GeneratedValue(strategy = GenerationType.IDENTITY)
   private Long id;
 
-  @Column(nullable = false)
-  private String comment;
+  private Long bucketId;
 
-  private String mentionIds;
+  private Integer keywordId;
 
   private Long userId;
 
-  private Long categoryId;
+  @ManyToOne(fetch = FetchType.LAZY)
+  @JoinColumn(name = "bucketId", insertable = false, updatable = false)
+  private Bucket bucket;
 
-  @Builder.Default
-  @Enumerated(EnumType.STRING)
-  @Column(length = 1, nullable = false)
-  private YesNo isBlocked = YesNo.N;
-
-  @Builder.Default
-  @Enumerated(EnumType.STRING)
-  @Column(length = 1, nullable = false)
-  private YesNo isHide = YesNo.N;
+  @ManyToOne(fetch = FetchType.LAZY)
+  @JoinColumn(name = "keywordId", insertable = false, updatable = false)
+  private Keyword keyword;
 
   @ManyToOne(fetch = FetchType.LAZY)
   @JoinColumn(name = "userId", insertable = false, updatable = false)
   private User user;
-
-  @ManyToOne(fetch = FetchType.LAZY)
-  @JoinColumn(name = "categoryId", insertable = false, updatable = false)
-  private Bucket bucket;
 }

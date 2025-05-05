@@ -18,4 +18,8 @@ public record FollowElement(
     User follower = follow.getUser();
     return new FollowElement(follow.getUserId(), follower.getName(), follower.getImgUrl(), mutualFollow);
   }
+
+  public FollowElement(Follow follow) {
+    this(follow.getFollowUserId(), follow.getFollowUser().getName(), follow.getFollowUser().getImgUrl(), true);
+  }
 }
