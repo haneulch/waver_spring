@@ -58,8 +58,8 @@ public class Badge extends BaseEntity {
     return Badge.builder()
         .achieveYn(YesNo.Y)
         .selectYn(YesNo.Y)
-        .user(user)
-        .badgeType(BadgeType.builder().id(1L).build())
+        .userId(user.getId())
+        .badgeTypeId(1L)
         .build();
   }
 }
