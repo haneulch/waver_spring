@@ -9,4 +9,6 @@ public interface BucketRepositoryCustom {
   List<Bucket> findBucket(long userId, BucketRequest request);
 
   List<Bucket> findFeed();
+
+  List<Bucket> search(String text);
 }

@@ -48,7 +48,7 @@ public class RecentSearch extends BaseEntity implements Persistable<Long> {
 
   public static RecentSearch create(long userId, String query) {
     return RecentSearch.builder()
-        .user(User.builder().id(userId).build())
+        .userId(userId)
         .query(query)
         .isNew(true)
         .build();
