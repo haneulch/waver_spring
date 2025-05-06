@@ -11,4 +11,6 @@ public interface BucketRepositoryCustom {
   List<Bucket> findFeed();
 
   List<Bucket> search(String text);
+
+  void commit();
 }
