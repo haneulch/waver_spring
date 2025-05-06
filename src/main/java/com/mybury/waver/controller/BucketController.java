@@ -38,8 +38,7 @@ public class BucketController {
   @Operation(summary = "버킷리스트 등록")
   @PostMapping(consumes = MediaType.MULTIPART_FORM_DATA_VALUE)
   public BucketDetailResponse bucketCreate(@Parameter(hidden = true) @UserId Long userId, @Valid @ModelAttribute BucketCreateRequest request) {
-    bucketService.create(userId, request);
-    return null;
+    return bucketService.create(userId, request);
   }
 
   @Operation(summary = "버킷리스트 목록")
@@ -50,9 +49,9 @@ public class BucketController {
   }
 
   @Operation(summary = "버킷리스트 수정")
-  @PostMapping("{id}")
-  public BucketDetailResponse bucketUpdate(@Parameter(hidden = true) @UserId Long userId, @PathVariable Long id, @Valid @RequestBody BucketUpdateRequest request) {
-    return null;
+  @PostMapping(value = "{id}", consumes = MediaType.MULTIPART_FORM_DATA_VALUE)
+  public BucketDetailResponse bucketUpdate(@Parameter(hidden = true) @UserId Long userId, @PathVariable Long id, @Valid @ModelAttribute BucketUpdateRequest request) {
+    return bucketService.update(id, userId, request);
   }
 
   @Operation(summary = "버킷리스트 상세")
@@ -64,25 +63,30 @@ public class BucketController {
   @Operation(summary = "버킷리스트 삭제")
   @DeleteMapping("{id}")
   public void bucketDelete(@Parameter(hidden = true) @UserId Long userId, @PathVariable Long id) {
+    bucketService.delete(id, userId);
   }
 
   @Operation(summary = "버킷리스트 달성")
   @GetMapping("{id}/achieve")
   public void bucketAchieve(@Parameter(hidden = true) @UserId Long userId, @PathVariable Long id) {
+    bucketService.achieve(id, userId);
   }
 
   @Operation(summary = "버킷리스트 달성취소")
   @GetMapping("{id}/achieve/cancel")
   public void bucketAchieveCancel(@Parameter(hidden = true) @UserId Long userId, @PathVariable Long id) {
+    bucketService.achieveCancel(id, userId);
   }
 
   @Operation(summary = "버킷리스트 다시 도전하기")
   @GetMapping("{id}/reset")
   public void bucketReset(@Parameter(hidden = true) @UserId Long userId, @PathVariable Long id) {
+    bucketService.reset(id, userId);
   }
 
   @Operation(summary = "버킷리스트 달성횟수 수정")
   @PatchMapping("{id}/goalCount")
   public void bucketGoalCountPatch(@Parameter(hidden = true) @UserId Long userId, @PathVariable Long id, @Valid @RequestBody BucketGoalCountRequest request) {
+    bucketService.patchGoalCount(id, userId, request.goalCount());
   }
 }

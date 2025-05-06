@@ -1,6 +1,7 @@
 package com.mybury.waver.repository;
 
 import com.mybury.waver.domain.Follow;
+import com.mybury.waver.domain.vo.FollowCount;
 import jakarta.transaction.Transactional;
 import org.springframework.data.jpa.repository.JpaRepository;
 import org.springframework.data.jpa.repository.Modifying;
@@ -26,4 +27,6 @@ public interface FollowRepository extends JpaRepository<Follow, Long> {
   List<Follow> findByUserIdOrFollowUserId(Long userId, Long followUserId);
 
   boolean existsByUserIdAndFollowUserId(Long userId, Long followUserId);
+
+  List<FollowCount> findCountByUserIdOrFollowUserId(long userId, long followUserId);
 }

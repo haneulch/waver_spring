@@ -1,30 +1,26 @@
 package com.mybury.waver.dto.my;
 
 import com.mybury.waver.common.code.BucketStatus;
-import com.mybury.waver.common.code.ContentType;
-import com.mybury.waver.common.code.ExposureStatus;
+import com.mybury.waver.domain.Badge;
+import com.mybury.waver.domain.Bucket;
+import com.mybury.waver.domain.User;
+import com.mybury.waver.dto.bucket.BucketElement;
+
 import java.util.List;
 
-record Bucket(
-    int id,
-    ContentType bucketType,
-    String title,
-    ExposureStatus exposureStatus,
-    BucketStatus status,
-    int dDay,
-    int userCount,
-    int goalCount
-) {
-
-}
 
 record BucketInfo(
-    List<Bucket> bucketlist,
+    List<BucketElement> bucketlist,
     int totalCount,
     int completedCount,
     int progressCount
 ) {
-
+  public static BucketInfo of(List<Bucket> buckets) {
+    List<BucketElement> bucketlist = buckets.stream().map(BucketElement::new).toList();
+    int totalCount = bucketlist.size();
+    int completedCount = (int) bucketlist.stream().filter(bucket -> bucket.status() == BucketStatus.COMPLETE).count();
+    return new BucketInfo(bucketlist, totalCount, completedCount, totalCount - completedCount);
+  }
 }
 
 public record MyResponse(
@@ -36,5 +32,8 @@ public record MyResponse(
     int followerCount,
     BucketInfo bucketInfo
 ) {
+  public MyResponse(User user, Badge selected, int followingCount, int followerCount) {
+    this(user.getImgUrl(), user.getName(), user.getBio(), selected.getBadgeType().getTitle(), followingCount, followerCount, BucketInfo.of(user.getBucketlist()));
+  }
 
 }
