@@ -118,4 +118,10 @@ public class BucketRepositoryImpl implements BucketRepositoryCustom {
 
     return em.createQuery(query).getResultList();
   }
+
+  @Override
+  public void commit() {
+    em.flush();
+    em.clear();
+  }
 }

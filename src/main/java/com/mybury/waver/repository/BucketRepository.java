@@ -19,6 +19,7 @@ public interface BucketRepository extends JpaRepository<Bucket, Long>, BucketRep
   @Query(value = "UPDATE Bucket SET likeCount = likeCount + :count WHERE id = :id")
   void updateLike(long id, int count);
 
+  @Query("SELECT bucket FROM Bucket bucket LEFT JOIN FETCH bucket.category WHERE bucket.id = :id AND bucket.deleted = :deleted")
   Bucket findByIdAndDeleted(Long id, YesNo deleted);
 
   @Modifying

@@ -47,6 +47,7 @@ public class BucketService {
           .map(id -> KeywordConnector.builder().bucketId(saved.getId()).keywordId(Integer.parseInt(id)).userId(userId).build()).toList();
       keywordConnectorRepository.saveAll(keywordConnectors);
     }
+    bucketRepository.commit();
     return bucketDetail(bucket.getId(), userId);
   }
 
@@ -66,6 +67,7 @@ public class BucketService {
       keywordConnectorRepository.saveAll(keywordConnectors);
     }
     bucketRepository.save(bucket);
+    bucketRepository.commit();
     return bucketDetail(id, userId);
   }
 
