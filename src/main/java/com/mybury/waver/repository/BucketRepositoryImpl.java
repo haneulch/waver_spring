@@ -95,4 +95,27 @@ public class BucketRepositoryImpl implements BucketRepositoryCustom {
 
     return em.createQuery(query).getResultList();
   }
+
+  @Override
+  public List<Bucket> search(String text) {
+    CriteriaBuilder cb = em.getCriteriaBuilder();
+    CriteriaQuery<Bucket> query = cb.createQuery(Bucket.class);
+    Root<Bucket> root = query.from(Bucket.class);
+
+    List<Predicate> predicates = new ArrayList<>();
+
+
+    String likePattern = "%" + text + "%";
+    predicates.add(cb.like(root.get("title"), likePattern));
+    predicates.add(cb.equal(root.get("deleted"), YesNo.N));
+    predicates.add(cb.equal(root.get("exposureStatus"), ExposureStatus.PUBLIC));
+
+    query.select(root).where(cb.and(predicates.toArray(new Predicate[0])));
+
+    List<Order> orders = new ArrayList<>();
+    orders.add(cb.desc(root.get("createdAt")));
+    query.orderBy(orders);
+
+    return em.createQuery(query).getResultList();
+  }
 }

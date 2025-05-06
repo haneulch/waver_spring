@@ -44,6 +44,6 @@ public class Category extends BaseEntity {
   private User user;
 
   public static Category createDefaultCategoryFor(User user) {
-    return Category.builder().name(DEFAULT_CATEGORY).defaultYn(YesNo.Y).user(user).build();
+    return Category.builder().name(DEFAULT_CATEGORY).defaultYn(YesNo.Y).userId(user.getId()).build();
   }
 }

@@ -4,6 +4,7 @@ import com.mybury.waver.annotation.UserId;
 import com.mybury.waver.dto.explore.KeywordResponse;
 import com.mybury.waver.service.ExploreService;
 import io.swagger.v3.oas.annotations.Operation;
+import io.swagger.v3.oas.annotations.Parameter;
 import io.swagger.v3.oas.annotations.tags.Tag;
 import lombok.RequiredArgsConstructor;
 import org.springframework.web.bind.annotation.DeleteMapping;
@@ -24,7 +25,7 @@ public class ExploreController {
 
   @Operation(summary = "검색")
   @GetMapping
-  public void explore(@UserId Long userId, @RequestParam String query) {
+  public void explore(@Parameter(hidden = true) @UserId Long userId, @RequestParam String query) {
     exploreService.search(userId, query);
   }
 
@@ -36,18 +37,18 @@ public class ExploreController {
 
   @Operation(summary = "최근 검색어 & 추천 키워드 조회")
   @GetMapping("searchOptions")
-  public void searchOptions() {
+  public void searchOptions(@Parameter(hidden = true) @UserId Long userId) {
   }
 
   @Operation(summary = "최근 검색어 전체 삭제")
   @DeleteMapping("recentSearch/all")
-  public void recentSearchAll(@UserId Long userId) {
+  public void recentSearchAll(@Parameter(hidden = true) @UserId Long userId) {
     exploreService.deleteAllSearchData(userId);
   }
 
   @Operation(summary = "최근 검색어 삭제")
   @DeleteMapping("recentSearch/{keyword}")
-  public void recentSearch(@UserId Long userId, @PathVariable String keyword) {
+  public void recentSearch(@Parameter(hidden = true) @UserId Long userId, @PathVariable String keyword) {
     exploreService.deleteSearchData(userId, keyword);
   }
 }
