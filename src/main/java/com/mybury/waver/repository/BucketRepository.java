@@ -52,4 +52,6 @@ public interface BucketRepository extends JpaRepository<Bucket, Long>, BucketRep
   void updateGoalCount(long id, long userId, int goalCount);
 
   Optional<BucketGoalCount> findByIdAndUserId(long id, long userId);
+
+  int countByUserIdAndDeleted(long userId, YesNo deleted);
 }

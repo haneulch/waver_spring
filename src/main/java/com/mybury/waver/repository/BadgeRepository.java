@@ -11,4 +11,6 @@ public interface BadgeRepository extends JpaRepository<Badge, Long> {
   Optional<Badge> findByUserIdAndSelectYn(Long userId, YesNo selectYn);
 
   List<Badge> findByUserId(Long userId);
+
+  int countByUserId(Long userId);
 }
