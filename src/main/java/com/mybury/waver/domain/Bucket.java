@@ -100,6 +100,8 @@ public class Bucket extends BaseEntity {
   @Column(nullable = false)
   private Integer likeCount = 0;
 
+  private String keywords;
+
   @Builder.Default
   @Enumerated(value = EnumType.STRING)
   @Column(length = 1, nullable = false)

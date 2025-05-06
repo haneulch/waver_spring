@@ -3,6 +3,11 @@ package com.mybury.waver.common.code;
 import lombok.AllArgsConstructor;
 import lombok.Getter;
 
+import java.util.Arrays;
+import java.util.Map;
+import java.util.function.Function;
+import java.util.stream.Collectors;
+
 @Getter
 @AllArgsConstructor
 public enum FixedKeyword {
@@ -34,4 +39,10 @@ public enum FixedKeyword {
 
   private final String code;
   private final String name;
+
+  private static final Map<String, FixedKeyword> map = Arrays.stream(values()).collect(Collectors.toMap(FixedKeyword::getCode, Function.identity()));
+
+  public static FixedKeyword get(String code) {
+    return map.get(code);
+  }
 }

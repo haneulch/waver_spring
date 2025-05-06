@@ -30,8 +30,8 @@ public record BucketCreateRequest(
     @Schema(description = "메모")
     String memo,
 
-    @Schema(description = "키워드 목록(최대 5) ','로 구분")
-    String keywordIds,
+    @Schema(description = "키워드 목록(최대 5) ','로 구분", example = "beauty,career")
+    String keywords,
 
     @Schema(description = "함께할 친구 ID / ','로 구분 - 함께하기인 경우 최소 1명 필수(최대 5))")
     String friendUserIds,
@@ -64,6 +64,7 @@ public record BucketCreateRequest(
         .type(bucketType)
         .exposureStatus(exposureStatus)
         .scrapYn(scrapYn)
+        .keywords(keywords)
         .targetDate(targetDate)
         .goalCount(goalCount)
         .build();
