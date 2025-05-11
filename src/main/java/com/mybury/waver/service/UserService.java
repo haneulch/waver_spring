@@ -1,11 +1,12 @@
 package com.mybury.waver.service;
 
+import com.mybury.waver.common.code.PremiumStatus;
 import com.mybury.waver.common.code.ResultCode;
 import com.mybury.waver.common.code.YesNo;
 import com.mybury.waver.domain.Badge;
 import com.mybury.waver.domain.Category;
 import com.mybury.waver.domain.User;
-import com.mybury.waver.domain.vo.IdProjection;
+import com.mybury.waver.domain.vo.LoginProjection;
 import com.mybury.waver.dto.user.ProfileResponse;
 import com.mybury.waver.dto.user.UserCreateRequest;
 import com.mybury.waver.exception.WaverException;
@@ -30,16 +31,21 @@ public class UserService {
   private final BadgeRepository badgeRepository;
   private final FollowRepository followRepository;
 
-  public Long getUserIdByEmail(String email) {
-    IdProjection id = userRepository.findIdByEmail(email);
-    if (id == null || id.getId() == null) {
+  public LoginProjection getUserIdByEmail(String email) {
+    LoginProjection login = userRepository.findIdByEmail(email);
+    if (login == null || login.getId() == null) {
       throw new WaverException(ResultCode.NOT_FOUND);
     }
-    return id.getId();
+    return login;
   }
 
   @Transactional
   public void create(UserCreateRequest request) {
+    boolean exists = userRepository.existsByEmailOrName(request.email(), request.name());
+    if (exists) {
+      throw new WaverException(ResultCode.EMAIL_OR_NAME_CANNOT_DUPLICATE);
+    }
+
     User user = request.user();
     if (request.profileImage() != null) {
       String uploadPath = fileUploadUtils.uploadFile(request.profileImage());
@@ -74,5 +80,16 @@ public class UserService {
 
   private Badge getUserById(Long userId) {
     return badgeRepository.findByUserIdAndSelectYn(userId, YesNo.Y).orElseThrow(() -> new WaverException(ResultCode.NOT_FOUND));
+  }
+
+  public void checkUsernameAvailability(String name) {
+    boolean exists = userRepository.existsByName(name);
+    if (exists) {
+      throw new WaverException(ResultCode.EMAIL_OR_NAME_CANNOT_DUPLICATE);
+    }
+  }
+
+  public PremiumStatus checkWaverPlusLimit(long userId) {
+    return null;
   }
 }

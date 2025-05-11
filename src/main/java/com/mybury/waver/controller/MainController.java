@@ -1,6 +1,7 @@
 package com.mybury.waver.controller;
 
 import com.mybury.waver.annotation.Public;
+import com.mybury.waver.domain.vo.LoginProjection;
 import com.mybury.waver.dto.main.LoginRequest;
 import com.mybury.waver.dto.main.LoginResponse;
 import com.mybury.waver.security.JwtTokenProvider;
@@ -19,15 +20,14 @@ import org.springframework.web.bind.annotation.RestController;
 @RequiredArgsConstructor
 public class MainController {
 
-    private final JwtTokenProvider jwtTokenProvider;
-    private final UserService userService;
+  private final JwtTokenProvider jwtTokenProvider;
+  private final UserService userService;
 
-    @Public
-    @PostMapping("login")
-    public LoginResponse login(@Valid @RequestBody LoginRequest request) {
-        Long id = userService.getUserIdByEmail(request.email());
-        String token = jwtTokenProvider.generateToken(id);
-        return new LoginResponse(token);
-    }
-
+  @Public
+  @PostMapping("login")
+  public LoginResponse login(@Valid @RequestBody LoginRequest request) {
+    LoginProjection login = userService.getUserIdByEmail(request.email());
+    String token = jwtTokenProvider.generateToken(login.getId());
+    return new LoginResponse(token, login.getPremiumStatus());
+  }
 }

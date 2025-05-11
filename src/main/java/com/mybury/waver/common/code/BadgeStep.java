@@ -1,6 +1,7 @@
 package com.mybury.waver.common.code;
 
 import com.mybury.waver.domain.BadgeType;
+import com.mybury.waver.util.FileImageUtils;
 import lombok.AllArgsConstructor;
 import lombok.Getter;
 
@@ -26,10 +27,10 @@ public enum BadgeStep {
 
   public static String getImgUrl(BadgeStep step, BadgeType badgeType) {
     return switch (step) {
-      case STEP0 -> badgeType.getImgUrl1();
-      case STEP1 -> badgeType.getImgUrl2();
-      case STEP2 -> badgeType.getImgUrl3();
-      case STEP3 -> badgeType.getImgUrl4();
+      case STEP0 -> FileImageUtils.staticPath(badgeType.getImgUrl1());
+      case STEP1 -> FileImageUtils.staticPath(badgeType.getImgUrl2());
+      case STEP2 -> FileImageUtils.staticPath(badgeType.getImgUrl3());
+      case STEP3 -> FileImageUtils.staticPath(badgeType.getImgUrl4());
     };
   }
 }
