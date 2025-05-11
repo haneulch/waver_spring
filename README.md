@@ -1,3 +1,11 @@
+## 🌊 Waver
+
+### 📦 구성 정보
+
+- **Java**: 21
+- **Spring Boot**: 3.3.3
+- **JPA**
+
 ## 🐬 MySQL 테스트 환경 (Docker Compose)
 
 이 프로젝트는 로컬 개발 및 테스트를 위해 Docker Compose 기반의 MySQL 8.0.36 환경을 제공합니다.
