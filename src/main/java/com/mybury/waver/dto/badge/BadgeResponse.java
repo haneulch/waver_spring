@@ -3,6 +3,7 @@ package com.mybury.waver.dto.badge;
 import com.mybury.waver.common.code.BadgeStep;
 import com.mybury.waver.domain.Badge;
 import com.mybury.waver.domain.BadgeType;
+import com.mybury.waver.util.FileImageUtils;
 import io.swagger.v3.oas.annotations.media.Schema;
 
 import java.util.List;
@@ -25,7 +26,7 @@ public record BadgeResponse(
         String imgUrl = BadgeStep.getImgUrl(step, type);
         return new BadgeResponse(type.getTitle(), imgUrl, step);
       }
-      return new BadgeResponse(type.getTitle(), type.getImgUrl1(), BadgeStep.STEP0);
+      return new BadgeResponse(type.getTitle(), FileImageUtils.staticPath(type.getImgUrl1()), BadgeStep.STEP0);
     }).toList();
   }
 }

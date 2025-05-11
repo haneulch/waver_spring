@@ -4,6 +4,7 @@ import com.mybury.waver.common.code.PremiumStatus;
 import com.mybury.waver.common.code.YesNo;
 import com.mybury.waver.domain.Badge;
 import com.mybury.waver.domain.User;
+import com.mybury.waver.util.FileImageUtils;
 
 public record ProfileResponse(
     String email,
@@ -18,6 +19,6 @@ public record ProfileResponse(
     Long followerCount
 ) {
   public ProfileResponse(User user, Badge badge, YesNo followYn, long followingCount, long followerCount) {
-    this(user.getEmail(), user.getName(), user.getImgUrl(), user.getBio(), badge.getBadgeType().getTitle(), badge.getBadgeType().getImgUrl1(), user.getPremiumStatus(), followYn, followingCount, followerCount);
+    this(user.getEmail(), user.getName(), FileImageUtils.imagePath(user.getImgUrl()), user.getBio(), badge.getBadgeType().getTitle(), FileImageUtils.staticPath(badge.getBadgeType().getImgUrl1()), user.getPremiumStatus(), followYn, followingCount, followerCount);
   }
 }
