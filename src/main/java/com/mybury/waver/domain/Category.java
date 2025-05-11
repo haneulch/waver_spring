@@ -11,14 +11,19 @@ import jakarta.persistence.GenerationType;
 import jakarta.persistence.Id;
 import jakarta.persistence.JoinColumn;
 import jakarta.persistence.ManyToOne;
+import jakarta.persistence.OneToMany;
 import lombok.AccessLevel;
 import lombok.AllArgsConstructor;
 import lombok.Builder;
 import lombok.Getter;
 import lombok.NoArgsConstructor;
+import lombok.Setter;
+
+import java.util.List;
 
 import static com.mybury.waver.common.Constants.DEFAULT_CATEGORY;
 
+@Setter
 @Getter
 @Entity
 @NoArgsConstructor(access = AccessLevel.PROTECTED)
@@ -34,6 +39,13 @@ public class Category extends BaseEntity {
 
   private Long userId;
 
+  private int seq;
+
+  @Builder.Default
+  @Enumerated(value = EnumType.STRING)
+  @Column(length = 1, nullable = false)
+  private YesNo deleted = YesNo.N;
+
   @Builder.Default
   @Enumerated(value = EnumType.STRING)
   @Column(length = 1, nullable = false)
@@ -43,7 +55,10 @@ public class Category extends BaseEntity {
   @JoinColumn(name = "userId", insertable = false, updatable = false)
   private User user;
 
-  public static Category createDefaultCategoryFor(User user) {
-    return Category.builder().name(DEFAULT_CATEGORY).defaultYn(YesNo.Y).userId(user.getId()).build();
+  @OneToMany(fetch = FetchType.LAZY, mappedBy = "category")
+  private List<Bucket> buckets;
+
+  public static Category createDefaultCategoryFor(long userId) {
+    return Category.builder().name(DEFAULT_CATEGORY).defaultYn(YesNo.Y).userId(userId).build();
   }
 }

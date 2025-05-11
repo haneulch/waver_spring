@@ -46,7 +46,7 @@ public class UserService {
       user.setImgUrl(uploadPath);
     }
     User newUser = userRepository.save(user);
-    Category defaultCategory = createDefaultCategoryFor(newUser);
+    Category defaultCategory = createDefaultCategoryFor(newUser.getId());
     categoryRepository.save(defaultCategory);
 
     Badge badge = Badge.createDefaultBadgeFor(newUser);
