@@ -11,50 +11,55 @@ import jakarta.persistence.GenerationType;
 import jakarta.persistence.Id;
 import jakarta.persistence.JoinColumn;
 import jakarta.persistence.ManyToOne;
-import jakarta.persistence.OneToOne;
 import lombok.AccessLevel;
 import lombok.AllArgsConstructor;
 import lombok.Builder;
+import lombok.Getter;
 import lombok.NoArgsConstructor;
 
+@Getter
 @Entity
 @NoArgsConstructor(access = AccessLevel.PROTECTED)
 @AllArgsConstructor(access = AccessLevel.PRIVATE)
 @Builder
 public class Badge extends BaseEntity {
 
-    @Id
-    @GeneratedValue(strategy = GenerationType.IDENTITY)
-    private Long id;
+  @Id
+  @GeneratedValue(strategy = GenerationType.IDENTITY)
+  private Long id;
 
-    @Builder.Default
-    @Column(nullable = false)
-    private Integer achieveCount = 0;
+  private Long userId;
 
-    @Builder.Default
-    @Enumerated(value = EnumType.STRING)
-    @Column(length = 1, nullable = false)
-    private YesNo selectYn = YesNo.N;
+  private Long badgeTypeId;
 
-    @Builder.Default
-    @Enumerated(value = EnumType.STRING)
-    @Column(length = 1, nullable = false)
-    private YesNo achieveYn = YesNo.N;
+  @Builder.Default
+  @Column(nullable = false)
+  private Integer achieveCount = 0;
 
-    @OneToOne(fetch = FetchType.LAZY)
-    @JoinColumn(name = "user_id")
-    private User user;
+  @Builder.Default
+  @Enumerated(value = EnumType.STRING)
+  @Column(length = 1, nullable = false)
+  private YesNo selectYn = YesNo.N;
 
-    @ManyToOne(fetch = FetchType.LAZY)
-    @JoinColumn(name = "badge_type_id")
-    private BadgeType badgeType;
+  @Builder.Default
+  @Enumerated(value = EnumType.STRING)
+  @Column(length = 1, nullable = false)
+  private YesNo achieveYn = YesNo.N;
 
-    public static Badge createDefaultBadgeFor(User user) {
-        return Badge.builder()
-            .achieveYn(YesNo.Y)
-            .selectYn(YesNo.Y)
-            .user(user)
-            .badgeType(BadgeType.builder().id(1L).build())
-            .build();
-    }
+  @ManyToOne(fetch = FetchType.LAZY)
+  @JoinColumn(name = "userId", insertable = false, updatable = false)
+  private User user;
+
+  @ManyToOne(fetch = FetchType.LAZY)
+  @JoinColumn(name = "badgeTypeId", insertable = false, updatable = false)
+  private BadgeType badgeType;
+
+  public static Badge createDefaultBadgeFor(User user) {
+    return Badge.builder()
+        .achieveYn(YesNo.Y)
+        .selectYn(YesNo.Y)
+        .userId(user.getId())
+        .badgeTypeId(1L)
+        .build();
+  }
 }

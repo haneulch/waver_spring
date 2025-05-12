@@ -27,8 +27,10 @@ public class RecentSearch extends BaseEntity implements Persistable<Long> {
   @Column(nullable = false)
   private String query;
 
+  private Long userId;
+
   @ManyToOne(fetch = FetchType.LAZY)
-  @JoinColumn(name = "user_id")
+  @JoinColumn(name = "userId", insertable = false, updatable = false)
   private User user;
 
   @Transient
@@ -46,7 +48,7 @@ public class RecentSearch extends BaseEntity implements Persistable<Long> {
 
   public static RecentSearch create(long userId, String query) {
     return RecentSearch.builder()
-        .user(User.builder().id(userId).build())
+        .userId(userId)
         .query(query)
         .isNew(true)
         .build();

@@ -14,38 +14,44 @@ import jakarta.persistence.ManyToOne;
 import lombok.AccessLevel;
 import lombok.AllArgsConstructor;
 import lombok.Builder;
+import lombok.Getter;
 import lombok.NoArgsConstructor;
 
+@Getter
 @Entity
 @NoArgsConstructor(access = AccessLevel.PROTECTED)
 @AllArgsConstructor(access = AccessLevel.PRIVATE)
 @Builder
 public class Comment extends BaseEntity {
 
-    @Id
-    @GeneratedValue(strategy = GenerationType.IDENTITY)
-    private Long id;
+  @Id
+  @GeneratedValue(strategy = GenerationType.IDENTITY)
+  private Long id;
 
-    @Column(nullable = false)
-    private String comment;
+  @Column(nullable = false)
+  private String comment;
 
-    private String mentionIds;
+  private String mentionIds;
 
-    @Builder.Default
-    @Enumerated(EnumType.STRING)
-    @Column(length = 1, nullable = false)
-    private YesNo isBlocked = YesNo.N;
+  private Long userId;
 
-    @Builder.Default
-    @Enumerated(EnumType.STRING)
-    @Column(length = 1, nullable = false)
-    private YesNo isHide = YesNo.N;
+  private Long bucketId;
 
-    @ManyToOne(fetch = FetchType.LAZY)
-    @JoinColumn(name = "user_id")
-    private User user;
+  @Builder.Default
+  @Enumerated(EnumType.STRING)
+  @Column(length = 1, nullable = false)
+  private YesNo isBlocked = YesNo.N;
 
-    @ManyToOne(fetch = FetchType.LAZY)
-    @JoinColumn(name = "bucket_id")
-    private Bucket bucket;
+  @Builder.Default
+  @Enumerated(EnumType.STRING)
+  @Column(length = 1, nullable = false)
+  private YesNo isHide = YesNo.N;
+
+  @ManyToOne(fetch = FetchType.LAZY)
+  @JoinColumn(name = "userId", insertable = false, updatable = false)
+  private User user;
+
+  @ManyToOne(fetch = FetchType.LAZY)
+  @JoinColumn(name = "bucketId", insertable = false, updatable = false)
+  private Bucket bucket;
 }

@@ -15,93 +15,113 @@ import jakarta.persistence.Id;
 import jakarta.persistence.JoinColumn;
 import jakarta.persistence.ManyToOne;
 import jakarta.persistence.OneToMany;
-import java.time.LocalDate;
-import java.time.LocalDateTime;
-import java.util.List;
+import jakarta.persistence.PostLoad;
+import jakarta.persistence.Transient;
 import lombok.AccessLevel;
 import lombok.AllArgsConstructor;
 import lombok.Builder;
+import lombok.Getter;
 import lombok.NoArgsConstructor;
+import lombok.Setter;
 
+import java.time.LocalDate;
+import java.time.LocalDateTime;
+import java.time.temporal.ChronoUnit;
+import java.util.List;
+
+@Getter
+@Setter
 @Entity
 @NoArgsConstructor(access = AccessLevel.PROTECTED)
 @AllArgsConstructor(access = AccessLevel.PRIVATE)
 @Builder
 public class Bucket extends BaseEntity {
 
-    @Id
-    @GeneratedValue(strategy = GenerationType.IDENTITY)
-    private Long id;
+  @Id
+  @GeneratedValue(strategy = GenerationType.IDENTITY)
+  private Long id;
 
-    @Column(nullable = false)
-    private String title;
+  @Column(nullable = false)
+  private String title;
 
-    private String memo;
+  private String memo;
 
-    @Builder.Default
-    @Enumerated(value = EnumType.STRING)
-    @Column(length = 10, nullable = false)
-    private ContentType type = ContentType.ORIGINAL;
+  private Long userId;
 
-    @Builder.Default
-    @Enumerated(value = EnumType.STRING)
-    @Column(length = 10, nullable = false)
-    private ExposureStatus exposureStatus = ExposureStatus.PRIVATE;
+  private Long categoryId;
 
-    @Builder.Default
-    @Enumerated(value = EnumType.STRING)
-    @Column(length = 1, nullable = false)
-    private YesNo pin = YesNo.N;
+  @Builder.Default
+  @Enumerated(value = EnumType.STRING)
+  @Column(length = 10, nullable = false)
+  private ContentType type = ContentType.ORIGINAL;
 
-    @Builder.Default
-    @Enumerated(value = EnumType.STRING)
-    @Column(length = 10, nullable = false)
-    private BucketStatus status = BucketStatus.PROGRESS;
+  @Builder.Default
+  @Enumerated(value = EnumType.STRING)
+  @Column(length = 10, nullable = false)
+  private ExposureStatus exposureStatus = ExposureStatus.PRIVATE;
 
-    @Builder.Default
-    @Enumerated(value = EnumType.STRING)
-    @Column(length = 1, nullable = false)
-    private YesNo scrapYn = YesNo.N;
+  @Builder.Default
+  @Enumerated(value = EnumType.STRING)
+  @Column(length = 1, nullable = false)
+  private YesNo pin = YesNo.N;
 
-    private LocalDate targetDate;
+  @Builder.Default
+  @Enumerated(value = EnumType.STRING)
+  @Column(length = 10, nullable = false)
+  private BucketStatus status = BucketStatus.PROGRESS;
 
-    @Builder.Default
-    @Column(nullable = false)
-    private Integer userCount = 0;
+  @Builder.Default
+  @Enumerated(value = EnumType.STRING)
+  @Column(length = 1, nullable = false)
+  private YesNo scrapYn = YesNo.N;
 
-    @Builder.Default
-    @Column(nullable = false)
-    private Integer goalCount = 0;
+  private LocalDate targetDate;
 
-    private LocalDateTime completedDate;
+  @Transient
+  private Integer dDay;
 
-    @Builder.Default
-    @Column(nullable = false)
-    private Integer seq = 0;
+  @Builder.Default
+  @Column(nullable = false)
+  private Integer userCount = 0;
 
-    private String imgUrl1;
+  @Builder.Default
+  @Column(nullable = false)
+  private Integer goalCount = 0;
 
-    private String imgUrl2;
+  private LocalDateTime completedDate;
 
-    private String imgUrl3;
+  @Builder.Default
+  @Column(nullable = false)
+  private Integer seq = 0;
 
-    @Builder.Default
-    @Column(nullable = false)
-    private Integer likeCount = 0;
+  private String imgUrl;
 
-    @Builder.Default
-    @Enumerated(value = EnumType.STRING)
-    @Column(length = 1, nullable = false)
-    private YesNo deleted = YesNo.N;
+  @Builder.Default
+  @Column(nullable = false)
+  private Integer likeCount = 0;
 
-    @ManyToOne(fetch = FetchType.LAZY)
-    @JoinColumn(name = "user_id")
-    private User user;
+  private String keywords;
 
-    @ManyToOne(fetch = FetchType.LAZY)
-    @JoinColumn(name = "category_id")
-    private Category category;
+  @Builder.Default
+  @Enumerated(value = EnumType.STRING)
+  @Column(length = 1, nullable = false)
+  private YesNo deleted = YesNo.N;
 
-    @OneToMany(fetch = FetchType.LAZY, mappedBy = "bucket")
-    private List<Comment> comments;
+  @ManyToOne(fetch = FetchType.LAZY)
+  @JoinColumn(name = "userId", insertable = false, updatable = false)
+  private User user;
+
+  @ManyToOne(fetch = FetchType.LAZY)
+  @JoinColumn(name = "categoryId", insertable = false, updatable = false)
+  private Category category;
+
+  @OneToMany(fetch = FetchType.LAZY, mappedBy = "bucket")
+  private List<Comment> comments;
+
+  @PostLoad
+  private void postLoad() {
+    if (this.targetDate != null) {
+      this.dDay = (int) ChronoUnit.DAYS.between(LocalDate.now(), targetDate);
+    }
+  }
 }
