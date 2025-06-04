@@ -33,6 +33,7 @@ waver:
     access-token-validity: 300d
   file:
     upload:
+      # 로컬 경로에 맞게 수정 필요
       path: /Users/temp/Desktop/workspace/waver_spring/upload
     images:
       path: http://localhost:8080/waver/image
