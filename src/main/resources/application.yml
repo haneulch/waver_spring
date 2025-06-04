@@ -31,8 +31,13 @@ waver:
     name: USER_ID
     key: "wH5pbJDmpvIKWy3k5CXHTIApJEb3M/EAT7EwSrBscJA="
     access-token-validity: 300d
-  upload:
-    path: /waver_spring/upload
+  file:
+    upload:
+      path: /Users/temp/Desktop/workspace/waver_spring/upload
+    images:
+      path: http://localhost:8080/waver/image
+    statics:
+      path: http://localhost:8080/images
 
 logging:
   level:
