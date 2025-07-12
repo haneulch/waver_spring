@@ -8,6 +8,7 @@ import com.mybury.waver.domain.User;
 import com.mybury.waver.domain.vo.FollowCount;
 import com.mybury.waver.dto.my.MyResponse;
 import com.mybury.waver.dto.my.MyWaveInfoResponse;
+import com.mybury.waver.dto.my.OtherMyResponse;
 import com.mybury.waver.exception.WaverException;
 import com.mybury.waver.repository.BadgeRepository;
 import com.mybury.waver.repository.BucketRepository;
@@ -47,5 +48,18 @@ public class MyService {
     String badgeImgUrl = badge == null ? null : BadgeStep.getImgUrl(BadgeStep.getStep(badge.getAchieveCount()), badge.getBadgeType());
 
     return new MyWaveInfoResponse(totalBadgeCount, totalLikeCount, totalBucketCount, badgeImgUrl);
+  }
+
+  public OtherMyResponse GetOther(long userId, long otherUserId) {
+    User user = userRepository.findById(otherUserId).orElseThrow(() -> new WaverException(ResultCode.BAD_REQUEST));
+    Badge selected = badgeRepository.findByUserIdAndSelectYn(otherUserId, YesNo.Y).orElseThrow(() -> new WaverException(ResultCode.BAD_REQUEST));
+
+    List<FollowCount> followCounts = followRepository.findCountByUserIdOrFollowUserId(otherUserId, otherUserId);
+    int followingCount = (int) followCounts.stream().filter(follow -> follow.getUserId() == otherUserId).count();
+    int followerCount = followCounts.size() - followingCount;
+
+    YesNo isFollowing = followCounts.stream().filter(follow -> follow.getUserId() == userId).findFirst().isPresent() ? YesNo.Y : YesNo.N;
+
+    return new OtherMyResponse(user, selected, followingCount, followerCount, isFollowing);
   }
 }
