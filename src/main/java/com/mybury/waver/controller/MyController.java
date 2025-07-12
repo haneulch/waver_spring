@@ -30,7 +30,7 @@ public class MyController {
   @Operation(summary = "타인 > 마이페이지 메인")
   @GetMapping("{otherUserId}")
   public MyResponse otherMy(@PathVariable Long otherUserId) {
-    return null;
+    return myService.my(otherUserId);
   }
 
   @Operation(summary = "푸시 목록")
