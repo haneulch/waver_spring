@@ -3,6 +3,7 @@ package com.mybury.waver.controller;
 import com.mybury.waver.annotation.UserId;
 import com.mybury.waver.dto.my.MyResponse;
 import com.mybury.waver.dto.my.MyWaveInfoResponse;
+import com.mybury.waver.dto.my.OtherMyResponse;
 import com.mybury.waver.service.MyService;
 import io.swagger.v3.oas.annotations.Operation;
 import io.swagger.v3.oas.annotations.Parameter;
@@ -29,8 +30,8 @@ public class MyController {
 
   @Operation(summary = "타인 > 마이페이지 메인")
   @GetMapping("{otherUserId}")
-  public MyResponse otherMy(@PathVariable Long otherUserId) {
-    return myService.my(otherUserId);
+  public OtherMyResponse otherMy(@PathVariable Long otherUserId, @Parameter(hidden = true) @UserId Long userId) {
+    return myService.GetOther(userId, otherUserId);
   }
 
   @Operation(summary = "푸시 목록")
