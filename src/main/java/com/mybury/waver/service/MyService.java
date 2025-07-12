@@ -54,10 +54,12 @@ public class MyService {
     User user = userRepository.findById(otherUserId).orElseThrow(() -> new WaverException(ResultCode.BAD_REQUEST));
     Badge selected = badgeRepository.findByUserIdAndSelectYn(otherUserId, YesNo.Y).orElseThrow(() -> new WaverException(ResultCode.BAD_REQUEST));
 
+    // 팔로잉 수, 팔로워 수
     List<FollowCount> followCounts = followRepository.findCountByUserIdOrFollowUserId(otherUserId, otherUserId);
     int followingCount = (int) followCounts.stream().filter(follow -> follow.getUserId() == otherUserId).count();
     int followerCount = followCounts.size() - followingCount;
 
+    // 내가 팔로우 하고 있는지 여부
     YesNo isFollowing = followCounts.stream().filter(follow -> follow.getUserId() == userId).findFirst().isPresent() ? YesNo.Y : YesNo.N;
 
     return new OtherMyResponse(user, selected, followingCount, followerCount, isFollowing);
