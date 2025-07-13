@@ -8,6 +8,7 @@ import com.mybury.waver.domain.User;
 import com.mybury.waver.dto.category.CategoryElement;
 import com.mybury.waver.dto.comment.CommentElement;
 
+import java.time.LocalDate;
 import java.time.LocalDateTime;
 import java.util.Arrays;
 import java.util.List;
@@ -37,6 +38,7 @@ public record BucketDetailResponse(
     int goalCount,
     int userCount,
     LocalDateTime completedDt,
+    LocalDate targetDate,
     List<KeywordElement> keywords,
     List<FriendElement> friendUsers,
     List<String> images,
@@ -63,6 +65,7 @@ public record BucketDetailResponse(
         bucket.getGoalCount(),
         bucket.getUserCount(),
         bucket.getCompletedDate(),
+        bucket.getTargetDate(),
         keywordList,
         friendUsers,
         images,
