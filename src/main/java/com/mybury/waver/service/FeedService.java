@@ -39,4 +39,9 @@ public class FeedService {
             .map(id -> UserKeyword.builder().userId(userId).keywordId(id).build()).toList();
         userKeywordRepository.saveAll(keywords);
     }
+
+    public long copy(long userId, long id) {
+        // TODO: copy bucket
+        return 0L;
+    }
 }

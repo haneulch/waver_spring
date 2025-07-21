@@ -5,6 +5,7 @@ import com.mybury.waver.domain.Bucket;
 import com.mybury.waver.event.message.FeedLikeEvent;
 import com.mybury.waver.service.FeedService;
 import com.mybury.waver.web.message.v1.common.ReportRequest;
+import com.mybury.waver.web.message.v1.feed.FeedCopyResponse;
 import com.mybury.waver.web.message.v1.feed.FeedResponse;
 import com.mybury.waver.web.message.v1.feed.KeywordRequest;
 import io.swagger.v3.oas.annotations.Operation;
@@ -49,9 +50,11 @@ public class FeedController {
         publisher.publishEvent(new FeedLikeEvent(id, userId));
     }
 
-    @Operation(summary = "피드 스크랩")
+    @Operation(summary = "피드 스크랩(복사)")
     @PostMapping("{id}/scrap")
-    public void scrap(@PathVariable Long id) {
+    public FeedCopyResponse copy(@PathVariable Long id, @Parameter(hidden = true) @UserId Long userId) {
+        long copiedId = feedService.copy(userId, id);
+        return new FeedCopyResponse(copiedId);
     }
 
     @Operation(summary = "피드 신고")

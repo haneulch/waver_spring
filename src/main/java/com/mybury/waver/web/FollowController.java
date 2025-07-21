@@ -45,8 +45,8 @@ public class FollowController {
     }
 
     @Operation(summary = "사용자 차단")
-    @PostMapping("block")
-    public void postBlock() {
+    @PostMapping("block/{otherUserId}")
+    public void postBlock(@Parameter(hidden = true) @UserId Long userId, ) {
     }
 
     @Operation(summary = "사용자 차단 해제")
