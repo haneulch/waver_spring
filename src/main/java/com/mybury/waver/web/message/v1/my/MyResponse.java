@@ -7,6 +7,8 @@ import com.mybury.waver.domain.User;
 import com.mybury.waver.web.message.v1.bucket.BucketElement;
 import java.util.List;
 
+import static com.mybury.waver.common.code.BadgeStep.getImgUrl;
+
 
 record BucketInfo(
     List<BucketElement> bucketlist,
@@ -31,6 +33,7 @@ public record MyResponse(
     String name,
     String bio,
     String badgeTitle,
+    String badgeImgUrl,
     int followingCount,
     int followerCount,
     BucketInfo bucketInfo
@@ -38,6 +41,7 @@ public record MyResponse(
 
     public MyResponse(User user, Badge selected, int followingCount, int followerCount) {
         this(user.getId(), user.getImgUrl(), user.getName(), user.getBio(), selected.getBadgeType().getTitle(),
-            followingCount, followerCount, BucketInfo.of(user.getBucketlist()));
+            getImgUrl(selected.getBadgeStep(), selected.getBadgeType()), followingCount, followerCount,
+            BucketInfo.of(user.getBucketlist()));
     }
 }
