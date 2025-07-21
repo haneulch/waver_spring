@@ -7,6 +7,7 @@ import com.mybury.waver.domain.Bucket;
 import com.mybury.waver.domain.User;
 import com.mybury.waver.web.message.v1.category.CategoryElement;
 import com.mybury.waver.web.message.v1.comment.CommentElement;
+import java.time.LocalDate;
 import java.time.LocalDateTime;
 import java.util.Arrays;
 import java.util.List;
@@ -37,20 +38,22 @@ public record BucketDetailResponse(
     int goalCount,
     int userCount,
     LocalDateTime completedDt,
+    LocalDate targetDate,
     List<KeywordElement> keywords,
     List<FriendElement> friendUsers,
     List<String> images,
     List<CommentElement> comment
 ) {
 
-    public static BucketDetailResponse of(Bucket bucket, long userId, List<KeywordElement> keywordList,
-        List<User> friendUserList) {
+    public static BucketDetailResponse of(Bucket bucket, long userId,
+        List<KeywordElement> keywordList, List<User> friendUserList) {
         CategoryElement category = new CategoryElement(bucket.getCategory());
-        List<FriendElement> friendUsers = friendUserList.stream().map(FriendElement::new).toList();
+        List<FriendElement> friendUsers = friendUserList.stream().map(
+            FriendElement::new).toList();
         List<String> images =
             bucket.getImgUrl() != null ? Arrays.stream(bucket.getImgUrl().split(",")).toList() : List.of();
-        List<CommentElement> comment = bucket.getComments().stream().map(item -> new CommentElement(item, userId))
-            .toList();
+        List<CommentElement> comment = bucket.getComments().stream()
+            .map(item -> new CommentElement(item, userId)).toList();
         return new BucketDetailResponse(
             bucket.getId(),
             bucket.getUserId(),
@@ -67,6 +70,7 @@ public record BucketDetailResponse(
             bucket.getGoalCount(),
             bucket.getUserCount(),
             bucket.getCompletedDate(),
+            bucket.getTargetDate(),
             keywordList,
             friendUsers,
             images,

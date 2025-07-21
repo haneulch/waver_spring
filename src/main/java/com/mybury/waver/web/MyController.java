@@ -1,9 +1,12 @@
 package com.mybury.waver.web;
 
 import com.mybury.waver.annotation.UserId;
+import com.mybury.waver.service.AlarmService;
 import com.mybury.waver.service.MyService;
+import com.mybury.waver.web.message.v1.alarm.AlarmResponse;
 import com.mybury.waver.web.message.v1.my.MyResponse;
 import com.mybury.waver.web.message.v1.my.MyWaveInfoResponse;
+import com.mybury.waver.web.message.v1.my.OtherMyResponse;
 import io.swagger.v3.oas.annotations.Operation;
 import io.swagger.v3.oas.annotations.Parameter;
 import io.swagger.v3.oas.annotations.tags.Tag;
@@ -20,6 +23,7 @@ import org.springframework.web.bind.annotation.RestController;
 public class MyController {
 
     private final MyService myService;
+    private final AlarmService alarmService;
 
     @Operation(summary = "마이페이지 메인")
     @GetMapping
@@ -29,13 +33,14 @@ public class MyController {
 
     @Operation(summary = "타인 > 마이페이지 메인")
     @GetMapping("{otherUserId}")
-    public MyResponse otherMy(@PathVariable Long otherUserId) {
-        return null;
+    public OtherMyResponse otherMy(@PathVariable Long otherUserId, @Parameter(hidden = true) @UserId Long userId) {
+        return myService.getOther(userId, otherUserId);
     }
 
     @Operation(summary = "푸시 목록")
     @GetMapping("push")
-    public void push() {
+    public AlarmResponse push(@Parameter(hidden = true) @UserId Long userId) {
+        return alarmService.getList(userId);
     }
 
     @Operation(summary = "푸시 메세지 테스트")

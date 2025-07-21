@@ -4,6 +4,7 @@ import com.mybury.waver.common.code.YesNo;
 import com.mybury.waver.domain.Comment;
 
 public record CommentElement(
+    long id,
     YesNo isMyComment,
     long userId,
     String imgUrl,
@@ -14,6 +15,7 @@ public record CommentElement(
 
     public CommentElement(Comment comment, long userId) {
         this(
+            comment.getId(),
             comment.getUserId().equals(userId) ? YesNo.Y : YesNo.N,
             comment.getUserId(),
             comment.getUser().getImgUrl(),

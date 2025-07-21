@@ -20,11 +20,13 @@ record BucketInfo(
         int totalCount = bucketlist.size();
         int completedCount = (int) bucketlist.stream().filter(bucket -> bucket.status() == BucketStatus.COMPLETE)
             .count();
-        return new BucketInfo(bucketlist, totalCount, completedCount, totalCount - completedCount);
+        return new BucketInfo(bucketlist, totalCount, completedCount,
+            totalCount - completedCount);
     }
 }
 
 public record MyResponse(
+    long id,
     String imgUrl,
     String name,
     String bio,
@@ -35,8 +37,7 @@ public record MyResponse(
 ) {
 
     public MyResponse(User user, Badge selected, int followingCount, int followerCount) {
-        this(user.getImgUrl(), user.getName(), user.getBio(), selected.getBadgeType().getTitle(), followingCount,
-            followerCount, BucketInfo.of(user.getBucketlist()));
+        this(user.getId(), user.getImgUrl(), user.getName(), user.getBio(), selected.getBadgeType().getTitle(),
+            followingCount, followerCount, BucketInfo.of(user.getBucketlist()));
     }
-
 }

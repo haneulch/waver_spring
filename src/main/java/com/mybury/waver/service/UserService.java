@@ -61,7 +61,7 @@ public class UserService {
     }
 
     public ProfileResponse getMyProfile(Long userId) {
-        Badge badge = getUserById(userId);
+        Badge badge = getUserWithBadgeById(userId);
 
         Long followCount = followRepository.countByUserId(userId);
         Long followerCount = followRepository.countByFollowUserId(userId);
@@ -70,7 +70,7 @@ public class UserService {
     }
 
     public ProfileResponse getUserProfile(Long userId, Long otherUserId) {
-        Badge badge = getUserById(otherUserId);
+        Badge badge = getUserWithBadgeById(otherUserId);
         boolean isFollowed = followRepository.existsByUserIdAndFollowUserId(userId, otherUserId);
 
         Long followCount = followRepository.countByUserId(otherUserId);
@@ -79,7 +79,7 @@ public class UserService {
         return new ProfileResponse(badge.getUser(), badge, isFollowed ? YesNo.Y : YesNo.N, followCount, followerCount);
     }
 
-    private Badge getUserById(Long userId) {
+    private Badge getUserWithBadgeById(Long userId) {
         return badgeRepository.findByUserIdAndSelectYn(userId, YesNo.Y)
             .orElseThrow(() -> new WaverException(ResultCode.NOT_FOUND));
     }
