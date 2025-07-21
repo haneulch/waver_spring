@@ -24,6 +24,7 @@ record BucketInfo(
 }
 
 public record MyResponse(
+    long id,
     String imgUrl,
     String name,
     String bio,
@@ -33,7 +34,7 @@ public record MyResponse(
     BucketInfo bucketInfo
 ) {
   public MyResponse(User user, Badge selected, int followingCount, int followerCount) {
-    this(user.getImgUrl(), user.getName(), user.getBio(), selected.getBadgeType().getTitle(), followingCount, followerCount, BucketInfo.of(user.getBucketlist()));
+    this(user.getId(), user.getImgUrl(), user.getName(), user.getBio(), selected.getBadgeType().getTitle(), followingCount, followerCount, BucketInfo.of(user.getBucketlist()));
   }
 
 }
