@@ -1,6 +1,6 @@
 package com.mybury.waver.event.message;
 
-import com.mybury.waver.common.code.AlarmMessageType;
+import com.mybury.waver.alarm.code.AlarmMessageType;
 import jakarta.validation.constraints.NotNull;
 import jakarta.validation.constraints.Positive;
 
@@ -10,7 +10,9 @@ public record AlarmMessageEvent(
     @Positive
     long userId,
     long otherUserId,
+    String otherUserName,
     long bucketId,
+    String bucketTitle,
     String message
 ) {
 
