@@ -1,16 +1,16 @@
 package com.mybury.waver.repository;
 
 import com.mybury.waver.domain.Bucket;
-import com.mybury.waver.dto.bucket.BucketRequest;
-
+import com.mybury.waver.web.message.v1.bucket.BucketRequest;
 import java.util.List;
 
 public interface BucketRepositoryCustom {
-  List<Bucket> findBucket(long userId, BucketRequest request);
 
-  List<Bucket> findFeed();
+    List<Bucket> findBucket(long userId, BucketRequest request);
 
-  List<Bucket> search(String text);
+    List<Bucket> findFeed();
 
-  void commit();
+    List<Bucket> search(String text);
+
+    void commit();
 }

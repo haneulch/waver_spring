@@ -5,15 +5,15 @@ import com.mybury.waver.common.code.ResultCode;
 import com.mybury.waver.common.code.YesNo;
 import com.mybury.waver.domain.Bucket;
 import com.mybury.waver.domain.vo.BucketGoalCount;
-import com.mybury.waver.dto.bucket.BucketCreateRequest;
-import com.mybury.waver.dto.bucket.BucketDetailResponse;
-import com.mybury.waver.dto.bucket.BucketRequest;
-import com.mybury.waver.dto.bucket.BucketUpdateRequest;
-import com.mybury.waver.dto.bucket.KeywordElement;
 import com.mybury.waver.event.message.BadgeCountEvent;
 import com.mybury.waver.exception.WaverException;
 import com.mybury.waver.repository.BucketRepository;
 import com.mybury.waver.util.FileUploadUtils;
+import com.mybury.waver.web.message.v1.bucket.BucketCreateRequest;
+import com.mybury.waver.web.message.v1.bucket.BucketDetailResponse;
+import com.mybury.waver.web.message.v1.bucket.BucketRequest;
+import com.mybury.waver.web.message.v1.bucket.BucketUpdateRequest;
+import com.mybury.waver.web.message.v1.bucket.KeywordElement;
 import jakarta.transaction.Transactional;
 import jakarta.validation.Valid;
 import java.util.ArrayList;
@@ -58,7 +58,7 @@ public class BucketService {
         List<String> keywords = Arrays.stream(joinedKeywords.split(","))
             .map(String::trim)
             .filter(StringUtils::hasText).toList();
-        
+
         publisher.publishEvent(new BadgeCountEvent(userId, keywords));
     }
 

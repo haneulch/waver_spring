@@ -1,0 +1,65 @@
+package com.mybury.waver.web;
+
+import com.mybury.waver.annotation.UserId;
+import com.mybury.waver.domain.Bucket;
+import com.mybury.waver.event.message.FeedLikeEvent;
+import com.mybury.waver.service.FeedService;
+import com.mybury.waver.web.message.v1.common.ReportRequest;
+import com.mybury.waver.web.message.v1.feed.FeedCopyResponse;
+import com.mybury.waver.web.message.v1.feed.FeedResponse;
+import com.mybury.waver.web.message.v1.feed.KeywordRequest;
+import io.swagger.v3.oas.annotations.Operation;
+import io.swagger.v3.oas.annotations.Parameter;
+import io.swagger.v3.oas.annotations.tags.Tag;
+import jakarta.validation.Valid;
+import java.util.List;
+import lombok.RequiredArgsConstructor;
+import org.springframework.context.ApplicationEventPublisher;
+import org.springframework.web.bind.annotation.GetMapping;
+import org.springframework.web.bind.annotation.PathVariable;
+import org.springframework.web.bind.annotation.PostMapping;
+import org.springframework.web.bind.annotation.RequestBody;
+import org.springframework.web.bind.annotation.RequestMapping;
+import org.springframework.web.bind.annotation.RestController;
+
+@Tag(name = "피드")
+@RestController
+@RequestMapping("waver/feeds")
+@RequiredArgsConstructor
+public class FeedController {
+
+    private final FeedService feedService;
+    private final ApplicationEventPublisher publisher;
+
+    @Operation(summary = "피드")
+    @GetMapping
+    public List<FeedResponse> feeds(@Parameter(hidden = true) @UserId Long userId) {
+        List<Bucket> buckets = feedService.feeds(userId);
+        return buckets.stream().map(FeedResponse::of).toList();
+    }
+
+    @Operation(summary = "관심 키워드 저장")
+    @PostMapping("keyword")
+    public void keyword(@Parameter(hidden = true) @UserId Long userId, @Valid @RequestBody KeywordRequest request) {
+        feedService.keyword(userId, request.keywordIds());
+    }
+
+    @Operation(summary = "피드 좋아요/취소")
+    @PostMapping("{id}/like")
+    public void like(@PathVariable Long id, @Parameter(hidden = true) @UserId Long userId) {
+        publisher.publishEvent(new FeedLikeEvent(id, userId));
+    }
+
+    @Operation(summary = "피드 스크랩(복사)")
+    @PostMapping("{id}/scrap")
+    public FeedCopyResponse copy(@PathVariable Long id, @Parameter(hidden = true) @UserId Long userId) {
+        long copiedId = feedService.copy(userId, id);
+        return new FeedCopyResponse(copiedId);
+    }
+
+    @Operation(summary = "피드 신고")
+    @PostMapping("{id}/report")
+    public void report(@PathVariable Long id, @RequestBody ReportRequest request) {
+        feedService.report(id, request.reason());
+    }
+}
