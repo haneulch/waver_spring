@@ -1,5 +1,6 @@
 package com.mybury.waver.domain;
 
+import com.mybury.waver.common.code.BadgeStep;
 import com.mybury.waver.common.code.YesNo;
 import jakarta.persistence.Column;
 import jakarta.persistence.Entity;
@@ -11,6 +12,7 @@ import jakarta.persistence.GenerationType;
 import jakarta.persistence.Id;
 import jakarta.persistence.JoinColumn;
 import jakarta.persistence.ManyToOne;
+import jakarta.persistence.Transient;
 import lombok.AccessLevel;
 import lombok.AllArgsConstructor;
 import lombok.Builder;
@@ -36,6 +38,9 @@ public class Badge extends BaseEntity {
     @Builder.Default
     @Column(nullable = false)
     private Integer achieveCount = 0;
+
+    @Transient
+    private BadgeStep badgeStep;
 
     @Builder.Default
     @Enumerated(value = EnumType.STRING)
@@ -67,5 +72,9 @@ public class Badge extends BaseEntity {
 
     public void incrementAchieveCount() {
         this.achieveCount++;
+    }
+
+    public BadgeStep getBadgeStep() {
+        return BadgeStep.getStep(this.achieveCount);
     }
 }
