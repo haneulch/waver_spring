@@ -40,11 +40,6 @@ public class AuthGuardAspect {
       return joinPoint.proceed();
     }
 
-    // for test
-    if (activeProfile.equals("local")) {
-      return joinPoint.proceed();
-    }
-
     Method method = ((MethodSignature) joinPoint.getSignature()).getMethod();
     Class<?> clazz = method.getDeclaringClass();
 
