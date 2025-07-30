@@ -12,11 +12,12 @@ import jakarta.persistence.criteria.Order;
 import jakarta.persistence.criteria.Path;
 import jakarta.persistence.criteria.Predicate;
 import jakarta.persistence.criteria.Root;
+import org.springframework.stereotype.Repository;
+import org.springframework.util.StringUtils;
+
 import java.time.LocalDate;
 import java.util.ArrayList;
 import java.util.List;
-import org.springframework.stereotype.Repository;
-import org.springframework.util.StringUtils;
 
 @Repository
 public class BucketRepositoryImpl implements BucketRepositoryCustom {
@@ -87,6 +88,8 @@ public class BucketRepositoryImpl implements BucketRepositoryCustom {
         predicates.add(cb.equal(root.get("exposureStatus"), ExposureStatus.PUBLIC));
 
         query.select(root).where(cb.and(predicates.toArray(new Predicate[0])));
+
+        // TODO: public이 아닌데 맞팔인 사람들 피드도 나와야함..
 
         List<Order> orders = new ArrayList<>();
         orders.add(cb.desc(root.get("createdAt")));

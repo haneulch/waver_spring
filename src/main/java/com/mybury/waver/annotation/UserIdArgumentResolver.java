@@ -28,11 +28,6 @@ public class UserIdArgumentResolver implements HandlerMethodArgumentResolver {
   public Object resolveArgument(MethodParameter parameter, ModelAndViewContainer mavContainer,
                                 NativeWebRequest webRequest, WebDataBinderFactory binderFactory) {
 
-    // for test
-    if (activeProfile.equals("local")) {
-      return 3L;
-    }
-
     String tokenHeaderValue = webRequest.getHeader("Authorization");
     String token = jwtTokenProvider.extractToken(tokenHeaderValue);
     return jwtTokenProvider.getUserIdFromToken(token);

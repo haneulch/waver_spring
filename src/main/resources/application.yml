@@ -14,17 +14,21 @@ spring:
   jpa:
     hibernate:
       ddl-auto: update
+    show-sql: true
+    properties:
+      hibernate:
+        format_sql: true
   web:
     resources:
       static-locations: classpath:/static/
 
 springdoc:
   api-docs:
-    path: /v3/api-docs        # OpenAPI JSON 경로
+    path: /v3/api-docs
   swagger-ui:
-    path: /swagger-ui         # Swagger UI 접속 경로
-    disable-swagger-default-url: true  # 🧨 Petstore 제거
-    url: /v3/api-docs         # 내 API 문서 명시
+    path: /swagger-ui
+    url: /v3/api-docs
+    disable-swagger-default-url: true
 
 waver:
   secret:

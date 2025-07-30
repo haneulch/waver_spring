@@ -3,6 +3,7 @@ package com.mybury.waver.advice;
 import com.mybury.waver.common.code.ResultCode;
 import com.mybury.waver.common.dto.BaseResponse;
 import com.mybury.waver.exception.WaverException;
+import io.swagger.v3.oas.annotations.Hidden;
 import org.springframework.http.ResponseEntity;
 import org.springframework.http.converter.HttpMessageNotReadableException;
 import org.springframework.validation.FieldError;
@@ -10,6 +11,7 @@ import org.springframework.web.bind.MethodArgumentNotValidException;
 import org.springframework.web.bind.annotation.ExceptionHandler;
 import org.springframework.web.bind.annotation.RestControllerAdvice;
 
+@Hidden
 @RestControllerAdvice
 public class BaseControllerAdvice {
 
