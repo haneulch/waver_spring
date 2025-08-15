@@ -25,7 +25,7 @@ public record BucketUpdateRequest(
     String memo,
 
     @Schema(description = "키워드 목록(최대 5) ','로 구분")
-    String keywordIds,
+    String keywords,
 
     @Schema(description = "함께할 친구 ID / ','로 구분 - 함께하기인 경우 최소 1명 필수(최대 5))")
     String friendUserIds,
@@ -60,6 +60,7 @@ public record BucketUpdateRequest(
             .scrapYn(scrapYn)
             .targetDate(targetDate)
             .goalCount(goalCount)
+            .keywords(keywords)
             .build();
     }
 }
