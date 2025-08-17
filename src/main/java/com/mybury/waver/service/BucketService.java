@@ -8,6 +8,7 @@ import com.mybury.waver.domain.vo.BucketGoalCount;
 import com.mybury.waver.event.message.BadgeCountEvent;
 import com.mybury.waver.exception.WaverException;
 import com.mybury.waver.repository.BucketRepository;
+import com.mybury.waver.repository.LikeBucketRepository;
 import com.mybury.waver.util.FileUploadUtils;
 import com.mybury.waver.web.message.v1.bucket.BucketCreateRequest;
 import com.mybury.waver.web.message.v1.bucket.BucketDetailResponse;
@@ -32,6 +33,7 @@ public class BucketService {
 
     private final FileUploadUtils fileUploadUtils;
     private final BucketRepository bucketRepository;
+    private final LikeBucketRepository likeBucketRepository;
     private final ApplicationEventPublisher publisher;
 
     @Transactional
@@ -89,8 +91,10 @@ public class BucketService {
             Arrays.stream(selectedKeyword)
                 .forEach(item -> keywords.add(new KeywordElement(FixedKeyword.get(item))));
         }
+        boolean isLike = likeBucketRepository.existsByUserIdAndBucketId(userId, id);
+        
         // TODO: 함께하기 친구
-        return BucketDetailResponse.of(bucket, userId, keywords, List.of());
+        return BucketDetailResponse.of(bucket, userId, keywords, List.of(), isLike);
     }
 
     public void delete(long id, long userId) {
