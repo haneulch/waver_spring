@@ -7,6 +7,7 @@ import com.mybury.waver.repository.LikeBucketRepository;
 import lombok.RequiredArgsConstructor;
 import org.springframework.context.event.EventListener;
 import org.springframework.stereotype.Component;
+import org.springframework.transaction.annotation.Transactional;
 
 /**
  * 피드 좋아요 이벤트
@@ -18,6 +19,7 @@ public class FeedLikeEventListener {
     private final BucketRepository bucketRepository;
     private final LikeBucketRepository likeBucketRepository;
 
+    @Transactional
     @EventListener
     public void handle(FeedLikeEvent event) {
         long id = event.id();

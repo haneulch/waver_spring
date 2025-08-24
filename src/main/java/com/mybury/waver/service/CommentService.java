@@ -1,8 +1,13 @@
 package com.mybury.waver.service;
 
+import com.mybury.waver.common.code.ResultCode;
+import com.mybury.waver.common.code.YesNo;
 import com.mybury.waver.domain.Comment;
+import com.mybury.waver.exception.WaverException;
 import com.mybury.waver.repository.CommentRepository;
 import com.mybury.waver.web.message.v1.comment.CommentCreateRequest;
+import com.mybury.waver.web.message.v1.comment.CommentUpdateRequest;
+
 import jakarta.transaction.Transactional;
 import jakarta.validation.Valid;
 import lombok.RequiredArgsConstructor;
@@ -16,11 +21,38 @@ public class CommentService {
 
     @Transactional
     public void commentCreate(Long userId, @Valid CommentCreateRequest request) {
+        String mentionIds = request.mentionIds() != null ? String.join(",", request.mentionIds()) : null;
         Comment comment = Comment.builder()
             .userId(userId)
             .comment(request.content())
             .bucketId(request.bucketId())
-            .mentionIds(String.join(",", request.mentionIds())).build();
+            .mentionIds(mentionIds).build();
+        commentRepository.save(comment);
+    }
+
+    @Transactional
+    public void commentDelete(Long id, Long userId) {
+        Comment comment = commentRepository.findByIdAndUserId(id, userId).orElseThrow(() -> new WaverException(ResultCode.NOT_FOUND));
+        commentRepository.delete(comment);
+    }
+
+    @Transactional
+    public void commentUpdate(Long id, Long userId, @Valid CommentUpdateRequest request) {
+        Comment comment = commentRepository.findByIdAndUserId(id, userId).orElseThrow(() -> new WaverException(ResultCode.NOT_FOUND));
+
+        if(request.mentionIds() != null){
+            String mentionIds = String.join(",", request.mentionIds());
+            comment.setMentionIds(mentionIds);
+        }
+        comment.setComment(request.content());
+
+        commentRepository.save(comment);
+    }
+    
+    @Transactional
+    public void commentHide(Long id, Long userId) {
+        Comment comment = commentRepository.findByIdAndUserId(id, userId).orElseThrow(() -> new WaverException(ResultCode.NOT_FOUND));
+        comment.setIsHide(YesNo.Y);
         commentRepository.save(comment);
     }
 }

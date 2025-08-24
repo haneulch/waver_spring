@@ -46,7 +46,7 @@ public record BucketDetailResponse(
 ) {
 
     public static BucketDetailResponse of(Bucket bucket, long userId,
-        List<KeywordElement> keywordList, List<User> friendUserList) {
+        List<KeywordElement> keywordList, List<User> friendUserList, boolean isLike) {
         CategoryElement category = new CategoryElement(bucket.getCategory());
         List<FriendElement> friendUsers = friendUserList.stream().map(
             FriendElement::new).toList();
@@ -65,7 +65,7 @@ public record BucketDetailResponse(
             bucket.getCompletedDate() != null ? YesNo.Y : YesNo.N,
             bucket.getScrapYn(),
             bucket.getUserId().equals(userId) ? YesNo.Y : YesNo.N,
-            YesNo.N,
+            isLike ? YesNo.Y : YesNo.N,
             category,
             bucket.getGoalCount(),
             bucket.getUserCount(),
