@@ -20,13 +20,17 @@ public record FeedResponse(
 ) {
 
     public static FeedResponse of(Bucket bucket) {
+        return of(bucket, YesNo.N);
+    }
+    
+    public static FeedResponse of(Bucket bucket, YesNo likeYn) {
         UserElement user = UserElement.of(bucket.getUser());
         if (bucket.getImgUrl() != null) {
             List<String> images = Arrays.stream(bucket.getImgUrl().split(",")).toList();
             return new FeedResponse(bucket.getId(), bucket.getStatus(), bucket.getTitle(), images, user,
-                bucket.getLikeCount(), bucket.getComments().size(), YesNo.N, bucket.getScrapYn());
+                bucket.getLikeCount(), bucket.getComments().size(), likeYn, bucket.getScrapYn());
         }
         return new FeedResponse(bucket.getId(), bucket.getStatus(), bucket.getTitle(), null, user,
-            bucket.getLikeCount(), bucket.getComments().size(), YesNo.N, bucket.getScrapYn());
+            bucket.getLikeCount(), bucket.getComments().size(), likeYn, bucket.getScrapYn());
     }
 }

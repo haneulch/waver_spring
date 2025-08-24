@@ -1,7 +1,6 @@
 package com.mybury.waver.web;
 
 import com.mybury.waver.annotation.UserId;
-import com.mybury.waver.domain.Bucket;
 import com.mybury.waver.event.message.FeedLikeEvent;
 import com.mybury.waver.service.FeedService;
 import com.mybury.waver.web.message.v1.common.ReportRequest;
@@ -34,8 +33,7 @@ public class FeedController {
     @Operation(summary = "피드")
     @GetMapping
     public List<FeedResponse> feeds(@Parameter(hidden = true) @UserId Long userId) {
-        List<Bucket> buckets = feedService.feeds(userId);
-        return buckets.stream().map(FeedResponse::of).toList();
+        return feedService.feeds(userId);
     }
 
     @Operation(summary = "관심 키워드 저장")
