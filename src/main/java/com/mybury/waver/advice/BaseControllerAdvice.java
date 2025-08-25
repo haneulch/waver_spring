@@ -4,6 +4,7 @@ import com.mybury.waver.common.code.ResultCode;
 import com.mybury.waver.common.dto.BaseResponse;
 import com.mybury.waver.exception.WaverException;
 import io.swagger.v3.oas.annotations.Hidden;
+import lombok.extern.slf4j.Slf4j;
 import org.springframework.http.ResponseEntity;
 import org.springframework.http.converter.HttpMessageNotReadableException;
 import org.springframework.validation.FieldError;
@@ -11,6 +12,7 @@ import org.springframework.web.bind.MethodArgumentNotValidException;
 import org.springframework.web.bind.annotation.ExceptionHandler;
 import org.springframework.web.bind.annotation.RestControllerAdvice;
 
+@Slf4j
 @Hidden
 @RestControllerAdvice
 public class BaseControllerAdvice {
@@ -25,6 +27,7 @@ public class BaseControllerAdvice {
         if (e.getBindingResult().hasErrors()) {
             FieldError error = e.getBindingResult().getFieldErrors().get(0); // 첫 번째 에러만 응답
             String message = String.format("[%s] %s", error.getField(), error.getDefaultMessage());
+            log.error("Validation error: {}", message);
             return ResponseEntity.ok(BaseResponse.error(ResultCode.VALIDATION_FAILED, message));
         }
         return ResponseEntity.ok(BaseResponse.error(ResultCode.VALIDATION_FAILED, e.getMessage()));
@@ -33,6 +36,7 @@ public class BaseControllerAdvice {
     @ExceptionHandler(HttpMessageNotReadableException.class)
     public ResponseEntity<BaseResponse<String>> handleMissingBody(HttpMessageNotReadableException e) {
         String message = e.getMessage();
+        log.error("Missing body: {}", message);
         if (message.contains(":")) {
             return ResponseEntity.ok(BaseResponse.error(ResultCode.VALIDATION_FAILED, message.split(":")[0]));
         }
@@ -41,6 +45,7 @@ public class BaseControllerAdvice {
 
     @ExceptionHandler(Exception.class)
     public ResponseEntity<BaseResponse<String>> handleException(Exception e) {
+        log.error(e.getMessage(), e);
         return ResponseEntity.ok(BaseResponse.error(ResultCode.INTERNAL_SERVER_ERROR, e.getMessage()));
     }
 }
