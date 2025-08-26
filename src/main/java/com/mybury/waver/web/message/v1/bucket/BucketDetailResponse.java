@@ -5,6 +5,7 @@ import com.mybury.waver.common.code.ExposureStatus;
 import com.mybury.waver.common.code.YesNo;
 import com.mybury.waver.domain.Bucket;
 import com.mybury.waver.domain.User;
+import com.mybury.waver.util.FileImageUtils;
 import com.mybury.waver.web.message.v1.category.CategoryElement;
 import com.mybury.waver.web.message.v1.comment.CommentElement;
 import java.time.LocalDate;
@@ -51,7 +52,8 @@ public record BucketDetailResponse(
         List<FriendElement> friendUsers = friendUserList.stream().map(
             FriendElement::new).toList();
         List<String> images =
-            bucket.getImgUrl() != null ? Arrays.stream(bucket.getImgUrl().split(",")).toList() : List.of();
+            bucket.getImgUrl() != null ?
+                Arrays.stream(bucket.getImgUrl().split(",")).map(FileImageUtils::imagePath).toList() : List.of();
         List<CommentElement> comment = bucket.getComments().stream()
             .map(item -> new CommentElement(item, userId)).toList();
         return new BucketDetailResponse(
