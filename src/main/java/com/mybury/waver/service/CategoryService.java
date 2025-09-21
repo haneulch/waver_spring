@@ -18,7 +18,17 @@ public class CategoryService {
   private final CategoryRepository categoryRepository;
 
   public List<Category> getCategory(long userId, String query) {
-    return categoryRepository.findCategories(userId, query);
+
+    // 카테고리 조회
+    List<Category> categories = categoryRepository.findCategories(userId, query);
+
+    // 카테고리가 없는 경우 기본 카테고리 추가
+    if (categories.isEmpty()) {
+      categoryRepository.save(Category.createDefaultCategoryFor(userId));
+      categories = categoryRepository.findCategories(userId, query);
+    }
+
+    return categories;
   }
 
   public void postCategory(long userId, String name) {
