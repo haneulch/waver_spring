@@ -1,6 +1,5 @@
 package com.mybury.waver.repository;
 
-import com.mybury.waver.common.code.BadgeStep;
 import com.mybury.waver.common.code.YesNo;
 import com.mybury.waver.domain.Badge;
 import jakarta.transaction.Transactional;
@@ -20,7 +19,7 @@ public interface BadgeRepository extends JpaRepository<Badge, Long> {
 
   List<Badge> findByUserIdAndBadgeType_CodeIn(Long userId, List<String> badgeTypeCodes);
 
-  boolean existsByUserIdAndBadgeStepIsNotAndId(long userId, BadgeStep step, long id);
+  boolean existsByUserIdAndAchieveCountGreaterThanAndId(long userId, int count, long id);
 
   @Modifying
   @Transactional
