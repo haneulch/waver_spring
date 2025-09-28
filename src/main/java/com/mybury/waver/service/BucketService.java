@@ -80,7 +80,13 @@ public class BucketService {
     }
 
     public List<Bucket> bucketList(long userId, @Valid BucketRequest request) {
-        return bucketRepository.findBucket(userId, request);
+        Long targetUserId = null;
+        boolean hasMyBucket = request.hasMyBucket() == YesNo.Y;
+        if (hasMyBucket) {
+            targetUserId = userId;
+        }
+
+        return bucketRepository.findBucket(targetUserId, request);
     }
 
     public BucketDetailResponse bucketDetail(long id, long userId) {

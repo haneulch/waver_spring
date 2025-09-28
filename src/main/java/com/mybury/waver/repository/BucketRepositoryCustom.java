@@ -6,7 +6,7 @@ import java.util.List;
 
 public interface BucketRepositoryCustom {
 
-    List<Bucket> findBucket(long userId, BucketRequest request);
+    List<Bucket> findBucket(Long userId, BucketRequest request);
 
     List<Bucket> findFeed();
 
