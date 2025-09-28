@@ -1,5 +1,6 @@
 package com.mybury.waver.service;
 
+import com.mybury.waver.common.code.YesNo;
 import com.mybury.waver.domain.Bucket;
 import com.mybury.waver.domain.Follow;
 import com.mybury.waver.domain.RecentSearch;
@@ -23,43 +24,48 @@ import org.springframework.stereotype.Service;
 @RequiredArgsConstructor
 public class ExploreService {
 
-    private final RecentSearchRepository recentSearchRepository;
-    private final BucketRepository bucketRepository;
-    private final FollowRepository followRepository;
-    private final UserRepository userRepository;
+  private final RecentSearchRepository recentSearchRepository;
+  private final BucketRepository bucketRepository;
+  private final FollowRepository followRepository;
+  private final UserRepository userRepository;
 
-    @Transactional
-    public ExploreResponse search(long userId, String query) {
-        addRecentSearch(userId, query);
+  @Transactional
+  public ExploreResponse search(long userId, String query) {
+    addRecentSearch(userId, query);
 
-        List<Bucket> buckets = bucketRepository.search(query);
-        List<User> users = userRepository.findByNameLike(query);
-        List<Follow> follows = followRepository.findByUserIdOrFollowUserId(userId, userId);
+    List<Bucket> buckets = bucketRepository.search(query);
+    List<User> users = userRepository.findByNameLike(query);
+    List<Follow> follows = followRepository.findByUserIdOrFollowUserId(userId, userId);
 
-        Set<Long> followIds = follows.stream().map(Follow::getFollowUserId).collect(Collectors.toSet());
-        Set<Long> followerIds = follows.stream().map(Follow::getUserId).collect(Collectors.toSet());
-        Set<Long> mutualIds = new HashSet<>(followIds);
-        mutualIds.retainAll(followerIds);
+    Set<Long> followIds = follows.stream()
+        .filter(v -> v.getFollowUser().getDeleteYn() == YesNo.N)
+        .map(Follow::getFollowUserId).collect(Collectors.toSet());
+    Set<Long> followerIds = follows.stream()
+        .filter(v -> v.getFollowUser().getDeleteYn() == YesNo.N)
+        .map(Follow::getUserId).collect(Collectors.toSet());
+    
+    Set<Long> mutualIds = new HashSet<>(followIds);
+    mutualIds.retainAll(followerIds);
 
-        return new ExploreResponse(buckets, users, mutualIds);
-    }
+    return new ExploreResponse(buckets, users, mutualIds);
+  }
 
-    public void deleteAllSearchData(long userId) {
-        recentSearchRepository.deleteRecentSearchByUserId(userId);
-    }
+  public void deleteAllSearchData(long userId) {
+    recentSearchRepository.deleteRecentSearchByUserId(userId);
+  }
 
-    public void deleteSearchData(long userId, String keyword) {
-        recentSearchRepository.deleteRecentSearchByUserIdAndQuery(userId, keyword);
-    }
+  public void deleteSearchData(long userId, String keyword) {
+    recentSearchRepository.deleteRecentSearchByUserIdAndQuery(userId, keyword);
+  }
 
-    @Async
-    public void addRecentSearch(long userId, String keyword) {
-        recentSearchRepository.save(RecentSearch.create(userId, keyword));
-    }
+  @Async
+  public void addRecentSearch(long userId, String keyword) {
+    recentSearchRepository.save(RecentSearch.create(userId, keyword));
+  }
 
-    public SearchOptionResponse searchOptions(Long userId) {
-        List<String> recentSearch = recentSearchRepository.findQueryByUserId(userId);
-        List<SearchOptionResponse.KeywordElement> recommendedKeywords = SearchOptionResponse.KeywordElement.getAllKeywords();
-        return new SearchOptionResponse(recentSearch, null, recommendedKeywords);
-    }
+  public SearchOptionResponse searchOptions(Long userId) {
+    List<String> recentSearch = recentSearchRepository.findQueryByUserId(userId);
+    List<SearchOptionResponse.KeywordElement> recommendedKeywords = SearchOptionResponse.KeywordElement.getAllKeywords();
+    return new SearchOptionResponse(recentSearch, null, recommendedKeywords);
+  }
 }

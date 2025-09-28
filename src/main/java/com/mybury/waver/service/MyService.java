@@ -55,8 +55,8 @@ public class MyService {
         return new MyWaveInfoResponse(totalBadgeCount, totalLikeCount, totalBucketCount, badgeImgUrl);
     }
 
-    public OtherMyResponse getOther(long userId, long otherUserId) {
-        Badge selected = getUserWithBadgeById(userId);
+    public OtherMyResponse getOther(long otherUserId) {
+        Badge selected = getUserWithBadgeById(otherUserId);
         User user = selected.getUser();
 
         // 팔로잉 수, 팔로워 수
@@ -66,7 +66,7 @@ public class MyService {
 
         // 내가 팔로우 하고 있는지 여부
         YesNo isFollowing =
-            followCounts.stream().anyMatch(follow -> follow.getUserId() == userId) ? YesNo.Y : YesNo.N;
+            followCounts.stream().anyMatch(follow -> follow.getUserId() == otherUserId) ? YesNo.Y : YesNo.N;
 
         return new OtherMyResponse(user, selected, followingCount, followerCount, isFollowing);
     }

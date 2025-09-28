@@ -3,10 +3,12 @@ package com.mybury.waver.domain;
 import com.mybury.waver.common.code.BadgeStep;
 import com.mybury.waver.common.code.YesNo;
 import jakarta.persistence.Column;
+import jakarta.persistence.ConstraintMode;
 import jakarta.persistence.Entity;
 import jakarta.persistence.EnumType;
 import jakarta.persistence.Enumerated;
 import jakarta.persistence.FetchType;
+import jakarta.persistence.ForeignKey;
 import jakarta.persistence.GeneratedValue;
 import jakarta.persistence.GenerationType;
 import jakarta.persistence.Id;
@@ -54,11 +56,11 @@ public class Badge extends BaseEntity {
     private YesNo achieveYn = YesNo.N;
 
     @ManyToOne(fetch = FetchType.LAZY)
-    @JoinColumn(name = "userId", insertable = false, updatable = false)
+    @JoinColumn(name = "userId", insertable = false, updatable = false, foreignKey = @ForeignKey(ConstraintMode.NO_CONSTRAINT))
     private User user;
 
     @ManyToOne(fetch = FetchType.LAZY)
-    @JoinColumn(name = "badgeTypeId", insertable = false, updatable = false)
+    @JoinColumn(name = "badgeTypeId", insertable = false, updatable = false, foreignKey = @ForeignKey(ConstraintMode.NO_CONSTRAINT))
     private BadgeType badgeType;
 
     public static Badge createDefaultBadgeFor(User user) {
