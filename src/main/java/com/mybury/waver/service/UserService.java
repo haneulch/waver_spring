@@ -5,6 +5,7 @@ import com.mybury.waver.common.code.ResultCode;
 import com.mybury.waver.common.code.YesNo;
 import com.mybury.waver.domain.Badge;
 import com.mybury.waver.domain.Category;
+import com.mybury.waver.domain.FreeTier;
 import com.mybury.waver.domain.User;
 import com.mybury.waver.domain.vo.LoginProjection;
 import com.mybury.waver.exception.WaverException;
@@ -30,6 +31,7 @@ public class UserService {
   private final BadgeRepository badgeRepository;
   private final FollowRepository followRepository;
   private final BucketRepository bucketRepository;
+  private final FreeTierRepository freeTierRepository;
 
   public LoginProjection getUserIdByUid(String uid) {
     LoginProjection login = userRepository.findIdByUidAndDeleteYn(uid, YesNo.N);
@@ -57,6 +59,9 @@ public class UserService {
 
     Badge badge = Badge.createDefaultBadgeFor(newUser);
     badgeRepository.save(badge);
+
+    FreeTier freeTier = FreeTier.createDefaultFreeTier(user.getId());
+    freeTierRepository.save(freeTier);
   }
 
   public ProfileResponse getMyProfile(Long userId) {
