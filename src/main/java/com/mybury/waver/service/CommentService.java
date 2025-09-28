@@ -4,6 +4,7 @@ import com.mybury.waver.common.code.ResultCode;
 import com.mybury.waver.common.code.YesNo;
 import com.mybury.waver.domain.Comment;
 import com.mybury.waver.exception.WaverException;
+import com.mybury.waver.repository.BucketRepository;
 import com.mybury.waver.repository.CommentRepository;
 import com.mybury.waver.web.message.v1.comment.CommentCreateRequest;
 import com.mybury.waver.web.message.v1.comment.CommentUpdateRequest;
@@ -11,6 +12,7 @@ import com.mybury.waver.web.message.v1.comment.CommentUpdateRequest;
 import jakarta.transaction.Transactional;
 import jakarta.validation.Valid;
 import lombok.RequiredArgsConstructor;
+
 import org.springframework.stereotype.Service;
 
 @Service
@@ -18,9 +20,14 @@ import org.springframework.stereotype.Service;
 public class CommentService {
 
     private final CommentRepository commentRepository;
+    private final BucketRepository bucketRepository;
 
     @Transactional
     public void commentCreate(Long userId, @Valid CommentCreateRequest request) {
+        // 버킷 존재 확인
+        bucketRepository.findById(request.bucketId()).orElseThrow(() -> new WaverException(ResultCode.NOT_FOUND));
+        
+        // 코멘트 생성
         String mentionIds = request.mentionIds() != null ? String.join(",", request.mentionIds()) : null;
         Comment comment = Comment.builder()
             .userId(userId)
