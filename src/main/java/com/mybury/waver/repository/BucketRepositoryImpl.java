@@ -39,12 +39,12 @@ public class BucketRepositoryImpl implements BucketRepositoryCustom {
             predicates.add(cb.equal(root.get("userId"), userId));
         }
 
-        if (request.dDayBucketOnly() != null) {
+        if (request.dDayBucketOnly() == YesNo.Y) {
             Path<LocalDate> targetDate = root.get("targetDate");
             predicates.add(cb.isNotNull(targetDate));
         }
 
-        if (request.isPassed() != null) {
+        if (request.isPassed()  == YesNo.Y) {
             Path<LocalDate> targetDate = root.get("targetDate");
             predicates.add(cb.isNotNull(targetDate));
             predicates.add(cb.lessThan(targetDate, LocalDate.now()));

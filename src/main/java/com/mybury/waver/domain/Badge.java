@@ -29,54 +29,55 @@ import lombok.Setter;
 @Builder
 public class Badge extends BaseEntity {
 
-    @Id
-    @GeneratedValue(strategy = GenerationType.IDENTITY)
-    private Long id;
+  @Id
+  @GeneratedValue(strategy = GenerationType.IDENTITY)
+  private Long id;
 
-    private Long userId;
+  private Long userId;
 
-    private Long badgeTypeId;
+  private Long badgeTypeId;
 
-    @Builder.Default
-    @Column(nullable = false)
-    private Integer achieveCount = 0;
+  @Builder.Default
+  @Column(nullable = false)
+  private Integer achieveCount = 0;
 
-    @Transient
-    private BadgeStep badgeStep;
+  @Transient
+  private BadgeStep badgeStep;
 
-    @Builder.Default
-    @Enumerated(value = EnumType.STRING)
-    @Column(length = 1, nullable = false)
-    private YesNo selectYn = YesNo.N;
+  @Builder.Default
+  @Enumerated(value = EnumType.STRING)
+  @Column(length = 1, nullable = false)
+  private YesNo selectYn = YesNo.N;
 
-    @Setter
-    @Builder.Default
-    @Enumerated(value = EnumType.STRING)
-    @Column(length = 1, nullable = false)
-    private YesNo achieveYn = YesNo.N;
+  @Setter
+  @Builder.Default
+  @Enumerated(value = EnumType.STRING)
+  @Column(length = 1, nullable = false)
+  private YesNo achieveYn = YesNo.N;
 
-    @ManyToOne(fetch = FetchType.LAZY)
-    @JoinColumn(name = "userId", insertable = false, updatable = false, foreignKey = @ForeignKey(ConstraintMode.NO_CONSTRAINT))
-    private User user;
+  @ManyToOne(fetch = FetchType.LAZY)
+  @JoinColumn(name = "userId", insertable = false, updatable = false, foreignKey = @ForeignKey(ConstraintMode.NO_CONSTRAINT))
+  private User user;
 
-    @ManyToOne(fetch = FetchType.LAZY)
-    @JoinColumn(name = "badgeTypeId", insertable = false, updatable = false, foreignKey = @ForeignKey(ConstraintMode.NO_CONSTRAINT))
-    private BadgeType badgeType;
+  @ManyToOne(fetch = FetchType.LAZY)
+  @JoinColumn(name = "badgeTypeId", insertable = false, updatable = false, foreignKey = @ForeignKey(ConstraintMode.NO_CONSTRAINT))
+  private BadgeType badgeType;
 
-    public static Badge createDefaultBadgeFor(User user) {
-        return Badge.builder()
-            .achieveYn(YesNo.Y)
-            .selectYn(YesNo.Y)
-            .userId(user.getId())
-            .badgeTypeId(1L)
-            .build();
-    }
+  public static Badge createDefaultBadgeFor(User user) {
+    return Badge.builder()
+        .achieveCount(30)
+        .achieveYn(YesNo.Y)
+        .selectYn(YesNo.Y)
+        .userId(user.getId())
+        .badgeTypeId(1L)
+        .build();
+  }
 
-    public void incrementAchieveCount() {
-        this.achieveCount++;
-    }
+  public void incrementAchieveCount() {
+    this.achieveCount++;
+  }
 
-    public BadgeStep getBadgeStep() {
-        return BadgeStep.getStep(this.achieveCount);
-    }
+  public BadgeStep getBadgeStep() {
+    return BadgeStep.getStep(this.achieveCount);
+  }
 }

@@ -3,7 +3,9 @@ package com.mybury.waver.web;
 import com.mybury.waver.annotation.Public;
 import com.mybury.waver.annotation.UserId;
 import com.mybury.waver.common.code.PremiumStatus;
+import com.mybury.waver.security.JwtTokenProvider;
 import com.mybury.waver.service.UserService;
+import com.mybury.waver.web.message.v1.main.LoginResponse;
 import com.mybury.waver.web.message.v1.user.ProfileResponse;
 import com.mybury.waver.web.message.v1.user.UserCreateRequest;
 import com.mybury.waver.web.message.v1.user.UserUpdateRequest;
@@ -12,11 +14,16 @@ import io.swagger.v3.oas.annotations.Operation;
 import io.swagger.v3.oas.annotations.Parameter;
 import io.swagger.v3.oas.annotations.tags.Tag;
 import jakarta.validation.Valid;
+import java.util.Locale;
 import lombok.RequiredArgsConstructor;
 import org.springframework.http.MediaType;
-import org.springframework.web.bind.annotation.*;
-
-import java.util.Locale;
+import org.springframework.web.bind.annotation.GetMapping;
+import org.springframework.web.bind.annotation.ModelAttribute;
+import org.springframework.web.bind.annotation.PatchMapping;
+import org.springframework.web.bind.annotation.PostMapping;
+import org.springframework.web.bind.annotation.RequestMapping;
+import org.springframework.web.bind.annotation.RequestParam;
+import org.springframework.web.bind.annotation.RestController;
 
 @Tag(name = "유저")
 @RestController
@@ -24,19 +31,22 @@ import java.util.Locale;
 @RequiredArgsConstructor
 public class UserController {
 
+  private final JwtTokenProvider jwtTokenProvider;
   private final UserService userService;
 
   @Public
   @Operation(summary = "회원가입")
   @PostMapping(value = "join", consumes = MediaType.MULTIPART_FORM_DATA_VALUE)
-  public void createUser(@Valid @ModelAttribute UserCreateRequest request, Locale locale) {
-    userService.create(request, locale);
+  public LoginResponse createUser(@Valid @ModelAttribute UserCreateRequest request, Locale locale) {
+    long userId = userService.create(request, locale);
+    String token = jwtTokenProvider.generateToken(userId);
+    return new LoginResponse(token, PremiumStatus.NONE);
   }
 
   @Operation(summary = "프로필 조회")
   @GetMapping("profile")
   public ProfileResponse getUserProfile(@Parameter(hidden = true) @UserId Long userId,
-                                        @RequestParam(required = false) Long otherUserId) {
+      @RequestParam(required = false) Long otherUserId) {
     if (otherUserId == null) {
       return userService.getMyProfile(userId);
     }

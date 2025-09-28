@@ -9,6 +9,7 @@ import com.mybury.waver.web.message.v1.bucket.BucketGoalCountRequest;
 import com.mybury.waver.web.message.v1.bucket.BucketRequest;
 import com.mybury.waver.web.message.v1.bucket.BucketResponse;
 import com.mybury.waver.web.message.v1.bucket.BucketUpdateRequest;
+import com.mybury.waver.web.message.v1.bucket.GetPopularBucketResponse;
 import io.swagger.v3.oas.annotations.Operation;
 import io.swagger.v3.oas.annotations.Parameter;
 import io.swagger.v3.oas.annotations.tags.Tag;
@@ -48,6 +49,12 @@ public class BucketController {
         @Valid @ParameterObject BucketRequest request) {
         List<Bucket> bucketList = bucketService.bucketList(userId, request);
         return BucketResponse.of(bucketList);
+    }
+
+    @Operation(summary = "인기 버킷리스트 조회")
+    @GetMapping("popular")
+    public GetPopularBucketResponse popularBucket() {
+        return bucketService.popularBucket();
     }
 
     @Operation(summary = "버킷리스트 수정")

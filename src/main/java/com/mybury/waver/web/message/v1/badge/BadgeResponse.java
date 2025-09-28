@@ -8,6 +8,9 @@ import io.swagger.v3.oas.annotations.media.Schema;
 import java.util.List;
 
 public record BadgeResponse(
+    @Schema(description = "배지 ID")
+    Long id,
+
     @Schema(description = "배지명")
     String title,
 
@@ -18,16 +21,19 @@ public record BadgeResponse(
     BadgeStep step
 ) {
 
-    public static List<BadgeResponse> of(List<BadgeType> badgeTypes, List<Badge> badges) {
-        return badgeTypes.stream().map(type -> {
-            Badge badge = badges.stream().filter(item -> item.getBadgeTypeId().equals(type.getId())).findFirst()
-                .orElse(null);
-            if (badge != null) {
-                BadgeStep step = BadgeStep.getStep(badge.getAchieveCount());
-                String imgUrl = BadgeStep.getImgUrl(step, type);
-                return new BadgeResponse(type.getTitle(), imgUrl, step);
-            }
-            return new BadgeResponse(type.getTitle(), FileImageUtils.staticPath(type.getImgUrl1()), BadgeStep.STEP0);
-        }).toList();
-    }
+  public static List<BadgeResponse> of(List<BadgeType> badgeTypes, List<Badge> badges) {
+    return badgeTypes.stream().map(type -> {
+      Badge badge = badges.stream()
+          .filter(item -> item.getBadgeTypeId().equals(type.getId()))
+          .findFirst()
+          .orElse(null);
+
+      if (badge != null) {
+        BadgeStep step = BadgeStep.getStep(badge.getAchieveCount());
+        String imgUrl = BadgeStep.getImgUrl(step, type);
+        return new BadgeResponse(badge.getId(), type.getTitle(), imgUrl, step);
+      }
+      return new BadgeResponse(null, type.getTitle(), FileImageUtils.staticPath(type.getImgUrl1()), BadgeStep.STEP0);
+    }).toList();
+  }
 }

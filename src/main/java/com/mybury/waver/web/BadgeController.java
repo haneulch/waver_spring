@@ -9,6 +9,8 @@ import io.swagger.v3.oas.annotations.tags.Tag;
 import java.util.List;
 import lombok.RequiredArgsConstructor;
 import org.springframework.web.bind.annotation.GetMapping;
+import org.springframework.web.bind.annotation.PathVariable;
+import org.springframework.web.bind.annotation.PostMapping;
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RestController;
 
@@ -18,11 +20,17 @@ import org.springframework.web.bind.annotation.RestController;
 @RequiredArgsConstructor
 public class BadgeController {
 
-    private final BadgeService badgeService;
+  private final BadgeService badgeService;
 
-    @Operation(summary = "배지 목록 조회")
-    @GetMapping
-    public List<BadgeResponse> getBadge(@Parameter(hidden = true) @UserId Long userId) {
-        return badgeService.getBadge(userId);
-    }
+  @Operation(summary = "배지 목록 조회")
+  @GetMapping
+  public List<BadgeResponse> getBadge(@Parameter(hidden = true) @UserId Long userId) {
+    return badgeService.getBadge(userId);
+  }
+
+  @Operation(summary = "배지 선택")
+  @PostMapping("{badgeId}")
+  public void selectBadge(@Parameter(hidden = true) @UserId Long userId, @PathVariable long badgeId) {
+    badgeService.selectBadge(userId, badgeId);
+  }
 }
