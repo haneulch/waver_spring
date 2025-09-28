@@ -8,13 +8,14 @@ import java.util.Set;
 
 record BucketElement(
     long id,
+    long userId,
     String title,
     YesNo scrapYn
 ) {
 
-    public BucketElement(Bucket bucket) {
-        this(bucket.getId(), bucket.getTitle(), bucket.getScrapYn());
-    }
+  public BucketElement(Bucket bucket) {
+    this(bucket.getId(), bucket.getUserId(), bucket.getTitle(), bucket.getScrapYn());
+  }
 }
 
 record UserElement(
@@ -24,9 +25,9 @@ record UserElement(
     YesNo followYn
 ) {
 
-    public UserElement(User user, Set<Long> followedIds) {
-        this(user.getId(), user.getName(), user.getImgUrl(), followedIds.contains(user.getId()) ? YesNo.Y : YesNo.N);
-    }
+  public UserElement(User user, Set<Long> followedIds) {
+    this(user.getId(), user.getName(), user.getImgUrl(), followedIds.contains(user.getId()) ? YesNo.Y : YesNo.N);
+  }
 }
 
 public record ExploreResponse(
@@ -34,10 +35,10 @@ public record ExploreResponse(
     List<UserElement> users
 ) {
 
-    public ExploreResponse(List<Bucket> buckets, List<User> users, Set<Long> followedIds) {
-        this(
-            buckets.stream().map(BucketElement::new).toList(),
-            users.stream().map(user -> new UserElement(user, followedIds)).toList()
-        );
-    }
+  public ExploreResponse(List<Bucket> buckets, List<User> users, Set<Long> followedIds) {
+    this(
+        buckets.stream().map(BucketElement::new).toList(),
+        users.stream().map(user -> new UserElement(user, followedIds)).toList()
+    );
+  }
 }
