@@ -3,6 +3,7 @@ package com.mybury.waver.web.message.v1.user;
 import com.mybury.waver.common.code.AccountType;
 import com.mybury.waver.domain.User;
 import io.swagger.v3.oas.annotations.media.Schema;
+import jakarta.validation.constraints.NotBlank;
 import jakarta.validation.constraints.NotEmpty;
 import jakarta.validation.constraints.NotNull;
 import java.util.Locale;
@@ -12,6 +13,8 @@ public record UserCreateRequest(
     @NotEmpty
     @Schema(description = "이메일")
     String email,
+    @NotBlank
+    String uid,
     @NotNull
     @Schema(description = "기기유형", implementation = AccountType.class)
     AccountType accountType,
@@ -24,13 +27,14 @@ public record UserCreateRequest(
     MultipartFile profileImage
 ) {
 
-    public User user(Locale locale) {
-        return User.builder()
-            .email(email)
-            .accountType(accountType)
-            .name(name)
-            .bio(bio)
-            .locale(locale)
-            .build();
-    }
+  public User user(Locale locale) {
+    return User.builder()
+        .uid(uid)
+        .email(email)
+        .accountType(accountType)
+        .name(name)
+        .bio(bio)
+        .locale(locale)
+        .build();
+  }
 }
