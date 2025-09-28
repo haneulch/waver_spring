@@ -11,6 +11,6 @@ public record CategoryResponse(
 ) {
 
     public CategoryResponse(Category category) {
-        this(category.getId(), category.getName(), category.getDefaultYn(), category.getBuckets().size());
+        this(category.getId(), category.getName(), category.getDefaultYn(), category.getBuckets() == null ? 0 : category.getBuckets().size());
     }
 }
