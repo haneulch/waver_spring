@@ -3,13 +3,13 @@ package com.mybury.waver.repository;
 import com.mybury.waver.domain.Follow;
 import com.mybury.waver.domain.vo.FollowCount;
 import jakarta.transaction.Transactional;
+import java.util.List;
 import org.springframework.data.jpa.repository.JpaRepository;
 import org.springframework.data.jpa.repository.Modifying;
 import org.springframework.data.jpa.repository.Query;
 
-import java.util.List;
-
 public interface FollowRepository extends JpaRepository<Follow, Long> {
+
   @Modifying
   @Transactional
   @Query(value = "INSERT INTO follow (user_id, follow_user_id) VALUES (:userId, :followUserId)", nativeQuery = true)
