@@ -60,4 +60,6 @@ public interface BucketRepository extends JpaRepository<Bucket, Long>, BucketRep
     @Transactional
     @Query(value = "UPDATE Bucket SET deleted = 'Y' WHERE userId = :userId")
     void deleteBucketForWithdraw(long userId);
+
+    List<Bucket> findByUserIdAndImgUrlIsNotNull(long userId);
 }

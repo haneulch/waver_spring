@@ -26,6 +26,9 @@ public enum ResultCode {
   // 선택할 수 없는 뱃지 오류
   BADGE_CANNOT_SELECT("7000", "BADGE_CANNOT_SELECT"),
 
+  // 웨이버 플러스 오류
+  NEED_WAVER_PLUS("8000", "NEED_WAVER_PLUS"),
+
   UNKNOWN("9999", "UNKNOWN"),
   ;
 

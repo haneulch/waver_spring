@@ -38,12 +38,19 @@ public class BucketService {
   private final BucketRepository bucketRepository;
   private final LikeBucketRepository likeBucketRepository;
   private final ApplicationEventPublisher publisher;
+  private final WaverPlusPolicyService waverPlusPolicyService;
 
   @Transactional
   public BucketDetailResponse create(long userId, BucketCreateRequest request) {
     Bucket bucket = request.toBucket(userId);
 
     if (!ObjectUtils.isEmpty(request.images())) {
+      // 이미지 업로드 가능 수 정책 확인
+      int maxImageCount = waverPlusPolicyService.getBuckitImageCount(userId);
+      if(request.images().size() > maxImageCount){
+          throw new WaverException(ResultCode.NEED_WAVER_PLUS);
+      }
+
       String imageUrl = request.images().stream().map(fileUploadUtils::uploadFile)
           .collect(Collectors.joining(","));
       bucket.setImgUrl(imageUrl);
