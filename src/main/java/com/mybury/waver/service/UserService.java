@@ -42,7 +42,7 @@ public class UserService {
   }
 
   @Transactional
-  public void create(UserCreateRequest request, Locale locale) {
+  public long create(UserCreateRequest request, Locale locale) {
     boolean exists = userRepository.existsByEmailOrName(request.email(), request.name());
     if (exists) {
       throw new WaverException(ResultCode.EMAIL_OR_NAME_CANNOT_DUPLICATE);
@@ -62,6 +62,7 @@ public class UserService {
 
     FreeTier freeTier = FreeTier.createDefaultFreeTier(user.getId());
     freeTierRepository.save(freeTier);
+    return user.getId();
   }
 
   public ProfileResponse getMyProfile(Long userId) {
