@@ -70,6 +70,7 @@ public class BucketRepositoryImpl implements BucketRepositoryCustom {
                 case UPDATED -> orders.add(cb.asc(root.get("updatedAt")));
                 case CREATED_DESC -> orders.add(cb.desc(root.get("createdAt")));
                 case UPDATED_DESC -> orders.add(cb.desc(root.get("updatedAt")));
+                case LIKE_COUNT_DESC -> orders.add(cb.desc(root.get("likeCount")));
             }
         }
 
