@@ -6,11 +6,11 @@ import java.util.List;
 
 public interface BucketRepositoryCustom {
 
-    List<Bucket> findBucket(Long userId, BucketRequest request);
+  List<Bucket> findBucket(Long userId, BucketRequest request);
 
-    List<Bucket> findFeed();
+  List<Bucket> findFeed(List<String> keywords);
 
-    List<Bucket> search(String text);
+  List<Bucket> search(String text);
 
-    void commit();
+  void commit();
 }
