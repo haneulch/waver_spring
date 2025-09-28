@@ -8,7 +8,10 @@ public record LoginRequest(
     @Email
     @NotBlank
     @Schema(description = "이메일")
-    String email
+    String email,
+
+    @NotBlank
+    String uid
 ) {
 
 }
