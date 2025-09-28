@@ -1,12 +1,11 @@
 package com.mybury.waver.common.code;
 
-import lombok.AllArgsConstructor;
-import lombok.Getter;
-
 import java.util.Arrays;
 import java.util.Map;
 import java.util.function.Function;
 import java.util.stream.Collectors;
+import lombok.AllArgsConstructor;
+import lombok.Getter;
 
 @Getter
 @AllArgsConstructor
@@ -23,6 +22,9 @@ public enum ResultCode {
 
   CATEGORY_CANNOT_DUPLICATE("6000", "CATEGORY_CANNOT_DUPLICATE"),
   EMAIL_OR_NAME_CANNOT_DUPLICATE("6001", "EMAIL_OR_NAME_CANNOT_DUPLICATE"),
+
+  // 선택할 수 없는 뱃지 오류
+  BADGE_CANNOT_SELECT("7000", "BADGE_CANNOT_SELECT"),
 
   UNKNOWN("9999", "UNKNOWN"),
   ;
