@@ -11,7 +11,7 @@ import java.util.List;
 
 public interface UserRepository extends JpaRepository<User, Long> {
 
-  LoginProjection findIdByEmailAndUidAndDeleteYn(String email, String uid, YesNo deleteYn);
+  LoginProjection findIdByUidAndDeleteYn(String uid, YesNo deleteYn);
 
   List<User> findByNameLike(String name);
 

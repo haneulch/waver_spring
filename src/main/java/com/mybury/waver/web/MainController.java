@@ -26,7 +26,7 @@ public class MainController {
   @Public
   @PostMapping("login")
   public LoginResponse login(@Valid @RequestBody LoginRequest request) {
-    LoginProjection login = userService.getUserIdByEmail(request.email(), request.uid());
+    LoginProjection login = userService.getUserIdByUid(request.uid());
     String token = jwtTokenProvider.generateToken(login.getId());
     return new LoginResponse(token, login.getPremiumStatus());
   }
