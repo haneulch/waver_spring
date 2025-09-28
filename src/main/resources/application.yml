@@ -13,7 +13,7 @@ spring:
     default-property-inclusion: non_null
   jpa:
     hibernate:
-      ddl-auto: update
+      ddl-auto: validate
     show-sql: true
     properties:
       hibernate:
@@ -38,9 +38,9 @@ waver:
   file:
     upload:
       # 로컬 경로에 맞게 수정 필요
-      path: /Users/temp/Desktop/workspace/waver_spring/upload
+      path: /Users/a1000369/Desktop/workspace/waver_spring/upload
     images:
-      path: http://localhost:8080/waver/image
+      path: /waver/image
     statics:
       path: http://localhost:8080/images
 
