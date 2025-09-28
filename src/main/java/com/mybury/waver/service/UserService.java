@@ -9,6 +9,7 @@ import com.mybury.waver.domain.User;
 import com.mybury.waver.domain.vo.LoginProjection;
 import com.mybury.waver.exception.WaverException;
 import com.mybury.waver.repository.BadgeRepository;
+import com.mybury.waver.repository.BucketRepository;
 import com.mybury.waver.repository.CategoryRepository;
 import com.mybury.waver.repository.FollowRepository;
 import com.mybury.waver.repository.UserRepository;
@@ -31,6 +32,7 @@ public class UserService {
     private final CategoryRepository categoryRepository;
     private final BadgeRepository badgeRepository;
     private final FollowRepository followRepository;
+    private final BucketRepository bucketRepository;
 
     public LoginProjection getUserIdByEmail(String email) {
         LoginProjection login = userRepository.findIdByEmail(email);
@@ -97,5 +99,11 @@ public class UserService {
 
     public User getUserOnlyById(Long userId) {
         return userRepository.findById(userId).orElse(null);
+    }
+
+    @Transactional
+    public void withdraw(long userId) {
+        userRepository.withdraw(userId);
+        bucketRepository.deleteBucketForWithdraw(userId);
     }
 }
