@@ -2,6 +2,7 @@ package com.mybury.waver.web;
 
 import com.mybury.waver.annotation.UserId;
 import com.mybury.waver.service.ExploreService;
+import com.mybury.waver.web.message.v1.explore.ExploreResponse;
 import com.mybury.waver.web.message.v1.explore.KeywordResponse;
 import com.mybury.waver.web.message.v1.explore.SearchOptionResponse;
 import io.swagger.v3.oas.annotations.Operation;
@@ -26,8 +27,8 @@ public class ExploreController {
 
     @Operation(summary = "검색")
     @GetMapping
-    public void explore(@Parameter(hidden = true) @UserId Long userId, @RequestParam String query) {
-        exploreService.search(userId, query);
+    public ExploreResponse explore(@Parameter(hidden = true) @UserId Long userId, @RequestParam String query) {
+        return exploreService.search(userId, query);
     }
 
     @Operation(summary = "키워드 전체 목록 조회")
