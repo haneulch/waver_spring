@@ -31,8 +31,8 @@ public class UserService {
   private final FollowRepository followRepository;
   private final BucketRepository bucketRepository;
 
-  public LoginProjection getUserIdByEmail(String email) {
-    LoginProjection login = userRepository.findIdByEmailAndDeleteYn(email, YesNo.N);
+  public LoginProjection getUserIdByEmail(String email, String uid) {
+    LoginProjection login = userRepository.findIdByEmailAndUidAndDeleteYn(email, uid, YesNo.N);
     if (login == null || login.getId() == null) {
       throw new WaverException(ResultCode.NOT_FOUND);
     }
