@@ -1,6 +1,5 @@
 package com.mybury.waver.service;
 
-import com.mybury.waver.common.code.BadgeStep;
 import com.mybury.waver.common.code.ResultCode;
 import com.mybury.waver.common.code.YesNo;
 import com.mybury.waver.domain.Badge;
@@ -29,7 +28,7 @@ public class BadgeService {
 
   @Transactional
   public void selectBadge(long userId, long badgeId) {
-    boolean isBadgeExists = badgeRepository.existsByUserIdAndBadgeStepIsNotAndId(userId, BadgeStep.STEP0, badgeId);
+    boolean isBadgeExists = badgeRepository.existsByUserIdAndAchieveCountGreaterThanAndId(userId, 0, badgeId);
     if (!isBadgeExists) {
       throw new WaverException(ResultCode.BADGE_CANNOT_SELECT);
     }
