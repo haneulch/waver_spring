@@ -16,6 +16,7 @@ import org.springframework.stereotype.Repository;
 import org.springframework.util.StringUtils;
 
 import java.time.LocalDate;
+import java.time.LocalDateTime;
 import java.util.ArrayList;
 import java.util.List;
 
@@ -26,14 +27,17 @@ public class BucketRepositoryImpl implements BucketRepositoryCustom {
     private EntityManager em;
 
     @Override
-    public List<Bucket> findBucket(long userId, BucketRequest request) {
+    public List<Bucket> findBucket(Long userId, BucketRequest request) {
         CriteriaBuilder cb = em.getCriteriaBuilder();
         CriteriaQuery<Bucket> query = cb.createQuery(Bucket.class);
         Root<Bucket> root = query.from(Bucket.class);
 
         List<Predicate> predicates = new ArrayList<>();
-        predicates.add(cb.equal(root.get("userId"), userId));
         predicates.add(cb.equal(root.get("deleted"), YesNo.N));
+        
+        if (userId != null){
+            predicates.add(cb.equal(root.get("userId"), userId));
+        }
 
         if (request.dDayBucketOnly() != null) {
             Path<LocalDate> targetDate = root.get("targetDate");
@@ -59,6 +63,16 @@ public class BucketRepositoryImpl implements BucketRepositoryCustom {
             predicates.add(cb.equal(root.get("categoryId"), request.categoryId()));
         }
 
+        if (request.createdFrom() != null) {
+            LocalDateTime from = request.createdFrom().atStartOfDay();
+            predicates.add(cb.greaterThanOrEqualTo(root.get("createdAt"), from));
+        }
+
+        if (request.createdTo() != null) {
+            LocalDateTime to = request.createdTo().plusDays(1).atStartOfDay();
+            predicates.add(cb.lessThan(root.get("createdAt"), to));
+        }
+
         query.select(root).where(cb.and(predicates.toArray(new Predicate[0])));
 
         List<Order> orders = new ArrayList<>();
@@ -70,6 +84,7 @@ public class BucketRepositoryImpl implements BucketRepositoryCustom {
                 case UPDATED -> orders.add(cb.asc(root.get("updatedAt")));
                 case CREATED_DESC -> orders.add(cb.desc(root.get("createdAt")));
                 case UPDATED_DESC -> orders.add(cb.desc(root.get("updatedAt")));
+                case LIKE_COUNT_DESC -> orders.add(cb.desc(root.get("likeCount")));
             }
         }
 
