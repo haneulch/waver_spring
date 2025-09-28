@@ -1,8 +1,10 @@
 package com.mybury.waver.domain;
 
 import jakarta.persistence.Column;
+import jakarta.persistence.ConstraintMode;
 import jakarta.persistence.Entity;
 import jakarta.persistence.FetchType;
+import jakarta.persistence.ForeignKey;
 import jakarta.persistence.GeneratedValue;
 import jakarta.persistence.GenerationType;
 import jakarta.persistence.Id;
@@ -20,37 +22,38 @@ import org.springframework.data.domain.Persistable;
 @AllArgsConstructor(access = AccessLevel.PRIVATE)
 @Builder
 public class RecentSearch extends BaseEntity implements Persistable<Long> {
-  @Id
-  @GeneratedValue(strategy = GenerationType.IDENTITY)
-  private Long id;
 
-  @Column(nullable = false)
-  private String query;
+    @Id
+    @GeneratedValue(strategy = GenerationType.IDENTITY)
+    private Long id;
 
-  private Long userId;
+    @Column(nullable = false)
+    private String query;
 
-  @ManyToOne(fetch = FetchType.LAZY)
-  @JoinColumn(name = "userId", insertable = false, updatable = false)
-  private User user;
+    private Long userId;
 
-  @Transient
-  private boolean isNew = false;
+    @ManyToOne(fetch = FetchType.LAZY)
+    @JoinColumn(name = "userId", insertable = false, updatable = false, foreignKey = @ForeignKey(ConstraintMode.NO_CONSTRAINT))
+    private User user;
 
-  @Override
-  public Long getId() {
-    return id;
-  }
+    @Transient
+    private boolean isNew = false;
 
-  @Override
-  public boolean isNew() {
-    return isNew;
-  }
+    @Override
+    public Long getId() {
+        return id;
+    }
 
-  public static RecentSearch create(long userId, String query) {
-    return RecentSearch.builder()
-        .userId(userId)
-        .query(query)
-        .isNew(true)
-        .build();
-  }
+    @Override
+    public boolean isNew() {
+        return isNew;
+    }
+
+    public static RecentSearch create(long userId, String query) {
+        return RecentSearch.builder()
+            .userId(userId)
+            .query(query)
+            .isNew(true)
+            .build();
+    }
 }

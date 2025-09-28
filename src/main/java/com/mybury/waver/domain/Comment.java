@@ -2,10 +2,12 @@ package com.mybury.waver.domain;
 
 import com.mybury.waver.common.code.YesNo;
 import jakarta.persistence.Column;
+import jakarta.persistence.ConstraintMode;
 import jakarta.persistence.Entity;
 import jakarta.persistence.EnumType;
 import jakarta.persistence.Enumerated;
 import jakarta.persistence.FetchType;
+import jakarta.persistence.ForeignKey;
 import jakarta.persistence.GeneratedValue;
 import jakarta.persistence.GenerationType;
 import jakarta.persistence.Id;
@@ -26,34 +28,34 @@ import lombok.Setter;
 @Builder
 public class Comment extends BaseEntity {
 
-  @Id
-  @GeneratedValue(strategy = GenerationType.IDENTITY)
-  private Long id;
+    @Id
+    @GeneratedValue(strategy = GenerationType.IDENTITY)
+    private Long id;
 
-  @Column(nullable = false)
-  private String comment;
+    @Column(nullable = false)
+    private String comment;
 
-  private String mentionIds;
+    private String mentionIds;
 
-  private Long userId;
+    private Long userId;
 
-  private Long bucketId;
+    private Long bucketId;
 
-  @Builder.Default
-  @Enumerated(EnumType.STRING)
-  @Column(length = 1, nullable = false)
-  private YesNo isBlocked = YesNo.N;
+    @Builder.Default
+    @Enumerated(EnumType.STRING)
+    @Column(length = 1, nullable = false)
+    private YesNo isBlocked = YesNo.N;
 
-  @Builder.Default
-  @Enumerated(EnumType.STRING)
-  @Column(length = 1, nullable = false)
-  private YesNo isHide = YesNo.N;
+    @Builder.Default
+    @Enumerated(EnumType.STRING)
+    @Column(length = 1, nullable = false)
+    private YesNo isHide = YesNo.N;
 
-  @ManyToOne(fetch = FetchType.LAZY)
-  @JoinColumn(name = "userId", insertable = false, updatable = false)
-  private User user;
+    @ManyToOne(fetch = FetchType.LAZY)
+    @JoinColumn(name = "userId", insertable = false, updatable = false, foreignKey = @ForeignKey(ConstraintMode.NO_CONSTRAINT))
+    private User user;
 
-  @ManyToOne(fetch = FetchType.LAZY)
-  @JoinColumn(name = "bucketId", insertable = false, updatable = false)
-  private Bucket bucket;
+    @ManyToOne(fetch = FetchType.LAZY)
+    @JoinColumn(name = "bucketId", insertable = false, updatable = false, foreignKey = @ForeignKey(ConstraintMode.NO_CONSTRAINT))
+    private Bucket bucket;
 }
