@@ -2,6 +2,7 @@ package com.mybury.waver.service;
 
 import com.mybury.waver.common.code.FixedKeyword;
 import com.mybury.waver.common.code.ResultCode;
+import com.mybury.waver.common.code.SortType;
 import com.mybury.waver.common.code.YesNo;
 import com.mybury.waver.domain.Bucket;
 import com.mybury.waver.domain.vo.BucketGoalCount;
@@ -14,9 +15,11 @@ import com.mybury.waver.web.message.v1.bucket.BucketCreateRequest;
 import com.mybury.waver.web.message.v1.bucket.BucketDetailResponse;
 import com.mybury.waver.web.message.v1.bucket.BucketRequest;
 import com.mybury.waver.web.message.v1.bucket.BucketUpdateRequest;
+import com.mybury.waver.web.message.v1.bucket.GetPopularBucketResponse;
 import com.mybury.waver.web.message.v1.bucket.KeywordElement;
 import jakarta.transaction.Transactional;
 import jakarta.validation.Valid;
+import java.time.LocalDate;
 import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.List;
@@ -87,6 +90,43 @@ public class BucketService {
         }
 
         return bucketRepository.findBucket(targetUserId, request);
+    }
+
+    public GetPopularBucketResponse popularBucket() {
+        //  bucketRepository.findBucket 를 두번 요청
+        // popularElements 의 경우 추천순으로 최근 한달 것 조회
+        // recommendElements 의 경우 최신순으로 최근 한달 것 조회
+        LocalDate now = LocalDate.now();
+        LocalDate from = now.minusMonths(1);
+
+        BucketRequest popularRequest = new BucketRequest(
+            null,
+            null,
+            null,
+            SortType.LIKE_COUNT_DESC,
+            null,
+            null,
+            YesNo.N,
+            from,
+            now
+        );
+
+        BucketRequest recommendRequest = new BucketRequest(
+            null,
+            null,
+            null,
+            SortType.CREATED_DESC,
+            null,
+            null,
+            YesNo.N,
+            from,
+            now
+        );
+
+        List<Bucket> popularBucketList = bucketRepository.findBucket(null, popularRequest);
+        List<Bucket> recommendBucketList = bucketRepository.findBucket(null, recommendRequest);
+
+        return GetPopularBucketResponse.of(popularBucketList, recommendBucketList);
     }
 
     public BucketDetailResponse bucketDetail(long id, long userId) {
