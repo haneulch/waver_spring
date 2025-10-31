@@ -7,7 +7,7 @@ import java.util.List;
 public record KeywordRequest(
     @Size(min = 1)
     @NotNull
-    List<Integer> keywordIds
+    List<String> keywordCodes
 ) {
 
 }

@@ -9,15 +9,21 @@ import com.mybury.waver.domain.FreeTier;
 import com.mybury.waver.domain.User;
 import com.mybury.waver.domain.vo.LoginProjection;
 import com.mybury.waver.exception.WaverException;
-import com.mybury.waver.repository.*;
+import com.mybury.waver.repository.BadgeRepository;
+import com.mybury.waver.repository.BucketRepository;
+import com.mybury.waver.repository.CategoryRepository;
+import com.mybury.waver.repository.FollowRepository;
+import com.mybury.waver.repository.FreeTierRepository;
+import com.mybury.waver.repository.UserRepository;
 import com.mybury.waver.util.FileUploadUtils;
 import com.mybury.waver.web.message.v1.user.ProfileResponse;
 import com.mybury.waver.web.message.v1.user.UserCreateRequest;
 import jakarta.transaction.Transactional;
+import java.util.Locale;
 import lombok.RequiredArgsConstructor;
 import org.springframework.stereotype.Service;
-
-import java.util.Locale;
+import org.springframework.util.StringUtils;
+import org.springframework.web.multipart.MultipartFile;
 
 import static com.mybury.waver.domain.Category.createDefaultCategoryFor;
 
@@ -86,7 +92,7 @@ public class UserService {
 
   private Badge getUserWithBadgeById(Long userId) {
     return badgeRepository.findByUserIdAndSelectYn(userId, YesNo.Y)
-      .orElseThrow(() -> new WaverException(ResultCode.NOT_FOUND));
+        .orElseThrow(() -> new WaverException(ResultCode.NOT_FOUND));
   }
 
   public void checkUsernameAvailability(String name) {
@@ -108,5 +114,24 @@ public class UserService {
   public void withdraw(long userId) {
     userRepository.withdraw(userId);
     bucketRepository.deleteBucketForWithdraw(userId);
+  }
+
+  @Transactional
+  public void modify(long userId, MultipartFile profileImg, String name, String bio) {
+    User user = userRepository.findById(userId).orElse(null);
+    if (user == null) {
+      throw new WaverException(ResultCode.NOT_FOUND);
+    }
+
+    if (!profileImg.isEmpty()) {
+      String uploadPath = fileUploadUtils.uploadFile(profileImg);
+      user.setImgUrl(uploadPath);
+    }
+    if (StringUtils.hasText(name)) {
+      user.setName(name);
+    }
+    if (bio != null) {
+      user.setBio(bio);
+    }
   }
 }

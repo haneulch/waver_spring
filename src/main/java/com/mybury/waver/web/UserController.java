@@ -55,7 +55,9 @@ public class UserController {
 
   @Operation(summary = "프로필 수정")
   @PatchMapping(value = "profile", consumes = MediaType.MULTIPART_FORM_DATA_VALUE)
-  public void patchUserProfile(@Valid @ModelAttribute UserUpdateRequest request) {
+  public void patchUserProfile(@Parameter(hidden = true) @UserId Long userId,
+      @Valid @ModelAttribute UserUpdateRequest request) {
+    userService.modify(userId, request.profileImage(), request.name(), request.bio());
   }
 
   @Public

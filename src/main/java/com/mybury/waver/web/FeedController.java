@@ -9,6 +9,7 @@ import com.mybury.waver.web.message.v1.feed.FeedResponse;
 import com.mybury.waver.web.message.v1.feed.KeywordRequest;
 import io.swagger.v3.oas.annotations.Operation;
 import io.swagger.v3.oas.annotations.Parameter;
+import io.swagger.v3.oas.annotations.responses.ApiResponse;
 import io.swagger.v3.oas.annotations.tags.Tag;
 import jakarta.validation.Valid;
 import java.util.List;
@@ -27,37 +28,38 @@ import org.springframework.web.bind.annotation.RestController;
 @RequiredArgsConstructor
 public class FeedController {
 
-    private final FeedService feedService;
-    private final ApplicationEventPublisher publisher;
+  private final FeedService feedService;
+  private final ApplicationEventPublisher publisher;
 
-    @Operation(summary = "피드")
-    @GetMapping
-    public List<FeedResponse> feeds(@Parameter(hidden = true) @UserId Long userId) {
-        return feedService.feeds(userId);
-    }
+  @Operation(summary = "피드")
+  @ApiResponse(responseCode = "8000", description = "저장된 관심 키워드 없음")
+  @GetMapping
+  public List<FeedResponse> feeds(@Parameter(hidden = true) @UserId Long userId) {
+    return feedService.feeds(userId);
+  }
 
-    @Operation(summary = "관심 키워드 저장")
-    @PostMapping("keyword")
-    public void keyword(@Parameter(hidden = true) @UserId Long userId, @Valid @RequestBody KeywordRequest request) {
-        feedService.keyword(userId, request.keywordIds());
-    }
+  @Operation(summary = "관심 키워드 저장")
+  @PostMapping("keyword")
+  public void keyword(@Parameter(hidden = true) @UserId Long userId, @Valid @RequestBody KeywordRequest request) {
+    feedService.keyword(userId, request.keywordCodes());
+  }
 
-    @Operation(summary = "피드 좋아요/취소")
-    @PostMapping("{id}/like")
-    public void like(@PathVariable Long id, @Parameter(hidden = true) @UserId Long userId) {
-        publisher.publishEvent(new FeedLikeEvent(id, userId));
-    }
+  @Operation(summary = "피드 좋아요/취소")
+  @PostMapping("{id}/like")
+  public void like(@PathVariable Long id, @Parameter(hidden = true) @UserId Long userId) {
+    publisher.publishEvent(new FeedLikeEvent(id, userId));
+  }
 
-    @Operation(summary = "피드 스크랩(복사)")
-    @PostMapping("{id}/scrap")
-    public FeedCopyResponse copy(@PathVariable Long id, @Parameter(hidden = true) @UserId Long userId) {
-        long copiedId = feedService.copy(userId, id);
-        return new FeedCopyResponse(copiedId);
-    }
+  @Operation(summary = "피드 스크랩(복사)")
+  @PostMapping("{id}/scrap")
+  public FeedCopyResponse copy(@PathVariable Long id, @Parameter(hidden = true) @UserId Long userId) {
+    long copiedId = feedService.copy(userId, id);
+    return new FeedCopyResponse(copiedId);
+  }
 
-    @Operation(summary = "피드 신고")
-    @PostMapping("{id}/report")
-    public void report(@PathVariable Long id, @RequestBody ReportRequest request) {
-        feedService.report(id, request.reason());
-    }
+  @Operation(summary = "피드 신고")
+  @PostMapping("{id}/report")
+  public void report(@PathVariable Long id, @RequestBody ReportRequest request) {
+    feedService.report(id, request.reason());
+  }
 }
