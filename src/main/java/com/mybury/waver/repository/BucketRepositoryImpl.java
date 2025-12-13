@@ -75,6 +75,10 @@ public class BucketRepositoryImpl implements BucketRepositoryCustom {
       predicates.add(cb.equal(root.get("categoryId"), request.categoryId()));
     }
 
+    if (request.hasImage() != null && request.hasImage() == YesNo.Y) {
+      predicates.add(cb.isNotNull(root.get("imgUrl")));
+    }
+
     if (request.createdFrom() != null) {
       LocalDateTime from = request.createdFrom().atStartOfDay();
       predicates.add(cb.greaterThanOrEqualTo(root.get("createdAt"), from));
@@ -101,7 +105,7 @@ public class BucketRepositoryImpl implements BucketRepositoryCustom {
     }
 
     query.orderBy(orders);
-    return em.createQuery(query).getResultList();
+    return em.createQuery(query).setMaxResults(request.limit()).getResultList();
   }
 
   @Override
@@ -123,7 +127,8 @@ public class BucketRepositoryImpl implements BucketRepositoryCustom {
     orders.add(cb.desc(root.get("createdAt")));
     query.orderBy(orders);
 
-    return em.createQuery(query).getResultList();
+    // TODO: 더보기 대음!!!!!
+    return em.createQuery(query).setMaxResults(100).getResultList();
   }
 
   @Override

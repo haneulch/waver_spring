@@ -117,7 +117,9 @@ public class BucketService {
         null,
         YesNo.N,
         from,
-        now
+        now,
+        4,
+        null
     );
 
     BucketRequest recommendRequest = new BucketRequest(
@@ -129,7 +131,9 @@ public class BucketService {
         null,
         YesNo.N,
         from,
-        now
+        now,
+        4,
+        YesNo.Y
     );
 
     List<Bucket> popularBucketList = bucketRepository.findBucket(null, popularRequest);
