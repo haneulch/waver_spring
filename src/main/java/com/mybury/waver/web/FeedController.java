@@ -10,6 +10,7 @@ import com.mybury.waver.web.message.v1.feed.KeywordRequest;
 import io.swagger.v3.oas.annotations.Operation;
 import io.swagger.v3.oas.annotations.Parameter;
 import io.swagger.v3.oas.annotations.responses.ApiResponse;
+import io.swagger.v3.oas.annotations.responses.ApiResponses;
 import io.swagger.v3.oas.annotations.tags.Tag;
 import jakarta.validation.Valid;
 import java.util.List;
@@ -58,6 +59,10 @@ public class FeedController {
   }
 
   @Operation(summary = "피드 신고")
+  @ApiResponses({
+      @ApiResponse(responseCode = "4040", description = "- NOT_FOUND : 버킷을 찾을 수 없음"),
+      @ApiResponse(responseCode = "4030", description = "- FORBIDDEN : 자기 버킷 신고 불가")
+  })
   @PostMapping("{id}/report")
   public void report(@PathVariable Long id, @RequestBody ReportRequest request,
       @Parameter(hidden = true) @UserId Long userId) {

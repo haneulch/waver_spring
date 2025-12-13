@@ -16,6 +16,11 @@ public interface BucketRepository extends JpaRepository<Bucket, Long>, BucketRep
 
   @Modifying
   @Transactional
+  @Query(value = "UPDATE Bucket SET deleted = 'Y' WHERE id = :id AND deleted = 'N'")
+  void markDeletedById(long id);
+
+  @Modifying
+  @Transactional
   @Query(value = "UPDATE Bucket SET likeCount = likeCount + :count WHERE id = :id")
   void updateLike(long id, int count);
 

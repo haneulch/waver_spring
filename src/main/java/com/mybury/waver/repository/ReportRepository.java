@@ -9,6 +9,11 @@ import org.springframework.data.repository.query.Param;
 
 public interface ReportRepository extends JpaRepository<Report, Long> {
 
+  long countByBucketlistIdAndReportType(Long bucketlistId, ReportType reportType);
+
+  boolean existsByReportUserIdAndBucketlistIdAndReportType(Long reportUserId, Long bucketlistId,
+      ReportType reportType);
+
   @Query("""
       SELECT r.bucketlistId
       FROM Report r

@@ -6,6 +6,7 @@ import com.mybury.waver.common.code.YesNo;
 import com.mybury.waver.domain.Bucket;
 import com.mybury.waver.domain.LikeBucket;
 import com.mybury.waver.domain.Report;
+import com.mybury.waver.event.message.BucketReportedEvent;
 import com.mybury.waver.domain.UserKeyword;
 import com.mybury.waver.exception.WaverException;
 import com.mybury.waver.repository.BucketRepository;
@@ -19,6 +20,7 @@ import java.util.List;
 import java.util.Set;
 import java.util.stream.Collectors;
 import lombok.RequiredArgsConstructor;
+import org.springframework.context.ApplicationEventPublisher;
 import org.springframework.stereotype.Service;
 import org.springframework.util.CollectionUtils;
 
@@ -31,8 +33,24 @@ public class FeedService {
   private final UserKeywordRepository userKeywordRepository;
   private final LikeBucketRepository likeBucketRepository;
   private final CategoryRepository categoryRepository;
+  private final ApplicationEventPublisher publisher;
 
+  @Transactional
   public void report(long id, String reason, long userId) {
+    Bucket bucket = bucketRepository.findByIdAndDeleted(id, YesNo.N);
+    if (bucket == null) {
+      throw new WaverException(ResultCode.NOT_FOUND);
+    }
+    if (bucket.getUserId() != null && bucket.getUserId().equals(userId)) {
+      throw new WaverException(ResultCode.FORBIDDEN);
+    }
+
+    boolean isDuplicated = reportRepository.existsByReportUserIdAndBucketlistIdAndReportType(userId, id,
+        ReportType.BUCKET);
+    if (isDuplicated) {
+      return;
+    }
+
     Report report = Report.builder()
         .reportType(ReportType.BUCKET)
         .bucketlistId(id)
@@ -40,6 +58,8 @@ public class FeedService {
         .reportUserId(userId)
         .build();
     reportRepository.save(report);
+
+    publisher.publishEvent(new BucketReportedEvent(id));
   }
 
   public List<FeedResponse> feeds(Long userId) {
