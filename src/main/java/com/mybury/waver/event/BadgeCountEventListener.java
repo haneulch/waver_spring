@@ -6,6 +6,7 @@ import com.mybury.waver.event.message.BadgeCountEvent;
 import com.mybury.waver.repository.BadgeRepository;
 import java.util.List;
 import lombok.RequiredArgsConstructor;
+import lombok.extern.slf4j.Slf4j;
 import org.springframework.context.event.EventListener;
 import org.springframework.stereotype.Component;
 import org.springframework.transaction.annotation.Transactional;
@@ -13,25 +14,29 @@ import org.springframework.transaction.annotation.Transactional;
 /**
  * 배지용 키워드 이벤트
  */
+@Slf4j
 @Component
 @RequiredArgsConstructor
 public class BadgeCountEventListener {
 
-    private final BadgeRepository badgeRepository;
+  private final BadgeRepository badgeRepository;
 
-    @Transactional
-    @EventListener
-    public void handle(BadgeCountEvent event) {
-        long userId = event.userId();
-        List<String> keywords = event.keywords();
+  @Transactional
+  @EventListener
+  public void handle(BadgeCountEvent event) {
 
-        List<Badge> badges = badgeRepository.findByUserIdAndBadgeType_CodeIn(userId, keywords);
+    log.info("Received BadgeCountEvent {}", event);
 
-        for (Badge badge : badges) {
-            badge.incrementAchieveCount();
-            if (badge.getAchieveCount() >= 30) {
-                badge.setAchieveYn(YesNo.Y);
-            }
-        }
+    long userId = event.userId();
+    List<String> keywords = event.keywords();
+
+    List<Badge> badges = badgeRepository.findByUserIdAndBadgeType_CodeIn(userId, keywords);
+
+    for (Badge badge : badges) {
+      badge.incrementAchieveCount();
+      if (badge.getAchieveCount() >= 30) {
+        badge.setAchieveYn(YesNo.Y);
+      }
     }
+  }
 }
