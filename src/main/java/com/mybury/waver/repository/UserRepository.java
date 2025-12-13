@@ -1,17 +1,15 @@
 package com.mybury.waver.repository;
 
-import com.mybury.waver.common.code.YesNo;
 import com.mybury.waver.domain.User;
 import com.mybury.waver.domain.vo.LoginProjection;
+import java.util.List;
 import org.springframework.data.jpa.repository.JpaRepository;
 import org.springframework.data.jpa.repository.Modifying;
 import org.springframework.data.jpa.repository.Query;
 
-import java.util.List;
-
 public interface UserRepository extends JpaRepository<User, Long> {
 
-  LoginProjection findIdByUidAndDeleteYn(String uid, YesNo deleteYn);
+  LoginProjection findIdByUid(String uid);
 
   List<User> findByNameLike(String name);
 

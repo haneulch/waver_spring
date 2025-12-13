@@ -6,6 +6,8 @@ import com.mybury.waver.security.JwtTokenProvider;
 import com.mybury.waver.service.UserService;
 import com.mybury.waver.web.message.v1.main.LoginRequest;
 import com.mybury.waver.web.message.v1.main.LoginResponse;
+import io.swagger.v3.oas.annotations.Operation;
+import io.swagger.v3.oas.annotations.responses.ApiResponse;
 import io.swagger.v3.oas.annotations.tags.Tag;
 import jakarta.validation.Valid;
 import lombok.RequiredArgsConstructor;
@@ -24,6 +26,7 @@ public class MainController {
   private final UserService userService;
 
   @Public
+  @Operation(summary = "로그인", responses = @ApiResponse(responseCode = "9000", description = "WITHDRAWAL_USER"))
   @PostMapping("login")
   public LoginResponse login(@Valid @RequestBody LoginRequest request) {
     LoginProjection login = userService.getUserIdByUid(request.uid());

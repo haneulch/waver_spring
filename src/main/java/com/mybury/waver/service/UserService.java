@@ -40,9 +40,12 @@ public class UserService {
   private final FreeTierRepository freeTierRepository;
 
   public LoginProjection getUserIdByUid(String uid) {
-    LoginProjection login = userRepository.findIdByUidAndDeleteYn(uid, YesNo.N);
-    if (login == null || login.getId() == null) {
+    LoginProjection login = userRepository.findIdByUid(uid);
+    if (login == null) {
       throw new WaverException(ResultCode.NOT_FOUND);
+    }
+    if (login.getDeleteYn() == YesNo.Y) {
+      throw new WaverException(ResultCode.WITHDRAWAL_USER);
     }
     return login;
   }
