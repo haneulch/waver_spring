@@ -27,6 +27,15 @@ public class BucketRepositoryImpl implements BucketRepositoryCustom {
 
   @Override
   public List<Bucket> findBucket(Long userId, BucketRequest request) {
+    return findBucketInternal(userId, request, null);
+  }
+
+  @Override
+  public List<Bucket> findBucketExcludingIds(Long userId, BucketRequest request, List<Long> excludedBucketIds) {
+    return findBucketInternal(userId, request, excludedBucketIds);
+  }
+
+  private List<Bucket> findBucketInternal(Long userId, BucketRequest request, List<Long> excludedBucketIds) {
     CriteriaBuilder cb = em.getCriteriaBuilder();
     CriteriaQuery<Bucket> query = cb.createQuery(Bucket.class);
     Root<Bucket> root = query.from(Bucket.class);
@@ -36,6 +45,10 @@ public class BucketRepositoryImpl implements BucketRepositoryCustom {
 
     if (userId != null) {
       predicates.add(cb.equal(root.get("userId"), userId));
+    }
+
+    if (excludedBucketIds != null && !excludedBucketIds.isEmpty()) {
+      predicates.add(cb.not(root.get("id").in(excludedBucketIds)));
     }
 
     if (request.dDayBucketOnly() == YesNo.Y) {

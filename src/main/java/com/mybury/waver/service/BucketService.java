@@ -1,6 +1,7 @@
 package com.mybury.waver.service;
 
 import com.mybury.waver.common.code.FixedKeyword;
+import com.mybury.waver.common.code.ReportType;
 import com.mybury.waver.common.code.ResultCode;
 import com.mybury.waver.common.code.SortType;
 import com.mybury.waver.common.code.YesNo;
@@ -10,6 +11,7 @@ import com.mybury.waver.event.message.BadgeCountEvent;
 import com.mybury.waver.exception.WaverException;
 import com.mybury.waver.repository.BucketRepository;
 import com.mybury.waver.repository.LikeBucketRepository;
+import com.mybury.waver.repository.ReportRepository;
 import com.mybury.waver.util.FileUploadUtils;
 import com.mybury.waver.web.message.v1.bucket.BucketCreateRequest;
 import com.mybury.waver.web.message.v1.bucket.BucketDetailResponse;
@@ -37,6 +39,7 @@ public class BucketService {
   private final FileUploadUtils fileUploadUtils;
   private final BucketRepository bucketRepository;
   private final LikeBucketRepository likeBucketRepository;
+  private final ReportRepository reportRepository;
   private final ApplicationEventPublisher publisher;
 
   @Transactional
@@ -89,7 +92,13 @@ public class BucketService {
       targetUserId = userId;
     }
 
-    return bucketRepository.findBucket(targetUserId, request);
+    List<Long> reportedBucketIds =
+        reportRepository.findBucketlistIdsByReportUserIdAndReportType(userId, ReportType.BUCKET);
+    if (reportedBucketIds == null || reportedBucketIds.isEmpty()) {
+      return bucketRepository.findBucket(targetUserId, request);
+    }
+
+    return bucketRepository.findBucketExcludingIds(targetUserId, request, reportedBucketIds);
   }
 
   public GetPopularBucketResponse popularBucket() {

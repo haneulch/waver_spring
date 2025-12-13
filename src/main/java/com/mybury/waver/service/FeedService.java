@@ -32,11 +32,12 @@ public class FeedService {
   private final LikeBucketRepository likeBucketRepository;
   private final CategoryRepository categoryRepository;
 
-  public void report(long id, String reason) {
+  public void report(long id, String reason, long userId) {
     Report report = Report.builder()
         .reportType(ReportType.BUCKET)
         .bucketlistId(id)
         .reason(reason)
+        .reportUserId(userId)
         .build();
     reportRepository.save(report);
   }
