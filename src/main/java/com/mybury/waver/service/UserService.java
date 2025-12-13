@@ -128,7 +128,7 @@ public class UserService {
       throw new WaverException(ResultCode.NOT_FOUND);
     }
 
-    if (!profileImg.isEmpty()) {
+    if (profileImg != null && !profileImg.isEmpty()) {
       String uploadPath = fileUploadUtils.uploadFile(profileImg);
       user.setImgUrl(uploadPath);
     }
