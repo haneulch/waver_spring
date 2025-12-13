@@ -9,6 +9,7 @@ import com.mybury.waver.domain.Report;
 import com.mybury.waver.domain.UserKeyword;
 import com.mybury.waver.exception.WaverException;
 import com.mybury.waver.repository.BucketRepository;
+import com.mybury.waver.repository.CategoryRepository;
 import com.mybury.waver.repository.LikeBucketRepository;
 import com.mybury.waver.repository.ReportRepository;
 import com.mybury.waver.repository.UserKeywordRepository;
@@ -29,6 +30,7 @@ public class FeedService {
   private final ReportRepository reportRepository;
   private final UserKeywordRepository userKeywordRepository;
   private final LikeBucketRepository likeBucketRepository;
+  private final CategoryRepository categoryRepository;
 
   public void report(long id, String reason) {
     Report report = Report.builder()
@@ -51,7 +53,7 @@ public class FeedService {
         .map(UserKeyword::getCode)
         .toList();
 
-    List<Bucket> buckets = bucketRepository.findFeed(keywordCodes);
+    List<Bucket> buckets = bucketRepository.findFeed(keywordCodes, userId);
 
     // 사용자가 좋아요한 버킷 ID들을 한 번에 조회
     Set<Long> likedBucketIds = buckets.stream()
@@ -79,7 +81,16 @@ public class FeedService {
   }
 
   public long copy(long userId, long id) {
-    // TODO: copy bucket
-    return 0L;
+    Bucket bucket = bucketRepository.findByIdAndDeletedAndScrapYn(id, YesNo.N, YesNo.Y);
+    if (bucket == null) {
+      throw new WaverException(ResultCode.NOT_FOUND);
+    }
+
+    Long categoryId = categoryRepository.findIdByUserIdAndDefaultYn(userId, YesNo.Y);
+    bucket.setUserId(userId);
+    bucket.setCategoryId(categoryId);
+
+    Bucket scraped = bucketRepository.save(Bucket.copy(bucket, userId, categoryId));
+    return scraped.getId();
   }
 }

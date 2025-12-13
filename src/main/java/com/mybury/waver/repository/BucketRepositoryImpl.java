@@ -92,12 +92,13 @@ public class BucketRepositoryImpl implements BucketRepositoryCustom {
   }
 
   @Override
-  public List<Bucket> findFeed(List<String> keywords) {
+  public List<Bucket> findFeed(List<String> keywords, Long myUserId) {
     CriteriaBuilder cb = em.getCriteriaBuilder();
     CriteriaQuery<Bucket> query = cb.createQuery(Bucket.class);
     Root<Bucket> root = query.from(Bucket.class);
 
     List<Predicate> predicates = new ArrayList<>();
+    predicates.add(cb.notEqual(root.get("userId"), myUserId));
     predicates.add(cb.equal(root.get("deleted"), YesNo.N));
     predicates.add(cb.equal(root.get("exposureStatus"), ExposureStatus.PUBLIC));
 
