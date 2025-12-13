@@ -5,7 +5,6 @@ import jakarta.persistence.Entity;
 import jakarta.persistence.GeneratedValue;
 import jakarta.persistence.GenerationType;
 import jakarta.persistence.Id;
-import java.time.LocalDateTime;
 import lombok.AccessLevel;
 import lombok.AllArgsConstructor;
 import lombok.Builder;
@@ -21,9 +20,14 @@ public class Subscribe extends BaseEntity {
   @GeneratedValue(strategy = GenerationType.IDENTITY)
   private Long id;
 
-  @Column
-  private LocalDateTime startAt;
+  private Long userId;
 
-  @Column
-  private LocalDateTime endAt;
+  @Column(nullable = false)
+  private String subscribeId;
+
+//  @Column
+//  private LocalDateTime startAt;
+//
+//  @Column
+//  private LocalDateTime endAt;
 }
