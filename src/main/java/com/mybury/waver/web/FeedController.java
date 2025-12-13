@@ -32,7 +32,7 @@ public class FeedController {
   private final ApplicationEventPublisher publisher;
 
   @Operation(summary = "피드")
-  @ApiResponse(responseCode = "8000", description = "저장된 관심 키워드 없음")
+  @ApiResponse(responseCode = "8000", description = "[KEYWORD_NOT_FOUND] 저장된 관심 키워드 없음")
   @GetMapping
   public List<FeedResponse> feeds(@Parameter(hidden = true) @UserId Long userId) {
     return feedService.feeds(userId);

@@ -87,8 +87,6 @@ public class FeedService {
     }
 
     Long categoryId = categoryRepository.findIdByUserIdAndDefaultYn(userId, YesNo.Y);
-    bucket.setUserId(userId);
-    bucket.setCategoryId(categoryId);
 
     Bucket scraped = bucketRepository.save(Bucket.copy(bucket, userId, categoryId));
     return scraped.getId();
