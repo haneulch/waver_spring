@@ -55,18 +55,18 @@ public record BucketCreateRequest(
     List<MultipartFile> images
 ) {
 
-    public Bucket toBucket(long userId) {
-        return Bucket.builder()
-            .title(title)
-            .memo(memo)
-            .userId(userId)
-            .categoryId(categoryId)
-            .type(bucketType)
-            .exposureStatus(exposureStatus)
-            .scrapYn(scrapYn)
-            .keywords(keywords)
-            .targetDate(targetDate)
-            .goalCount(goalCount)
-            .build();
-    }
+  public Bucket toBucket(long userId) {
+    return Bucket.builder()
+        .title(title)
+        .memo(memo)
+        .userId(userId)
+        .categoryId(categoryId)
+        .type(bucketType)
+        .exposureStatus(exposureStatus)
+        .scrapYn(scrapYn == null ? YesNo.N : scrapYn)
+        .keywords(keywords)
+        .targetDate(targetDate)
+        .goalCount(goalCount)
+        .build();
+  }
 }
