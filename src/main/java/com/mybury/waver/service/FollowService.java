@@ -61,7 +61,7 @@ public class FollowService {
       if (Objects.equals(follow.getUserId(), userId) && follow.getFollowUser().getDeleteYn() == YesNo.N) {
         follows.add(follow);
       }
-      if (Objects.equals(follow.getFollowUserId(), userId) && follow.getFollowUser().getDeleteYn() == YesNo.N) {
+      if (Objects.equals(follow.getFollowUserId(), userId) && follow.getUser().getDeleteYn() == YesNo.N) {
         followers.add(follow);
       }
     }
@@ -83,6 +83,6 @@ public class FollowService {
     Set<Long> mutualIds = new HashSet<>();
     followInfo(userId, follows, followers, mutualIds);
 
-    return follows.stream().filter(item -> mutualIds.contains(item.getUserId())).toList();
+    return follows.stream().filter(item -> mutualIds.contains(item.getFollowUserId())).toList();
   }
 }
