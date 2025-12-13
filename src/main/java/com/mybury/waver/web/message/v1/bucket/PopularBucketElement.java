@@ -6,6 +6,7 @@ import com.mybury.waver.common.code.ExposureStatus;
 import com.mybury.waver.common.code.FixedKeyword;
 import com.mybury.waver.common.code.YesNo;
 import com.mybury.waver.domain.Bucket;
+import com.mybury.waver.util.FileImageUtils;
 import java.util.Arrays;
 import java.util.List;
 
@@ -31,7 +32,8 @@ public record PopularBucketElement(
         bucket.getUserId(),
         bucket.getType(),
         bucket.getTitle(),
-        bucket.getImgUrl(),
+        bucket.getImgUrl() != null ?
+            Arrays.stream(bucket.getImgUrl().split(",")).findFirst().map(FileImageUtils::imagePath).orElse(null) : null,
         bucket.getExposureStatus(),
         bucket.getStatus(),
         bucket.getDDay(),
@@ -43,7 +45,8 @@ public record PopularBucketElement(
             ? List.of()
             : Arrays.stream(bucket.getKeywords().split(","))
                 .map(item -> new KeywordElement(FixedKeyword.get(item)))
-                .toList());
+                .toList()
+    );
   }
 }
 
