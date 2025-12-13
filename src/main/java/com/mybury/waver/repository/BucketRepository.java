@@ -29,6 +29,9 @@ public interface BucketRepository extends JpaRepository<Bucket, Long>, BucketRep
 
   Bucket findByIdAndDeletedAndScrapYn(Long id, YesNo deleted, YesNo scrapYn);
 
+  @Query("SELECT userId FROM Bucket WHERE id = :id")
+  Long findUserIdById(long id);
+
   @Modifying
   @Transactional
   @Query(value = "UPDATE Bucket SET deleted = 'Y' WHERE id = :id AND userId = :userId")

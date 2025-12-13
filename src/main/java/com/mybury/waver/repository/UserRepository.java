@@ -22,6 +22,9 @@ public interface UserRepository extends JpaRepository<User, Long> {
 
   boolean existsByIdAndDeleteYn(long userId, YesNo deleteYn);
 
+  @Query(value = "SELECT name FROM User where id = :id")
+  String findNameById(long id);
+
   @Modifying
   @Query("UPDATE User u SET u.deleteYn = 'Y' WHERE u.id = :userId")
   void withdraw(long userId);

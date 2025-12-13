@@ -115,6 +115,10 @@ public class UserService {
     return userRepository.findById(userId).orElse(null);
   }
 
+  public String getUserNameById(Long userId) {
+    return userRepository.findNameById(userId);
+  }
+
   @Transactional
   public void withdraw(long userId) {
     userRepository.withdraw(userId);

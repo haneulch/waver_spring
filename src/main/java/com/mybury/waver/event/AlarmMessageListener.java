@@ -22,48 +22,55 @@ import org.springframework.util.StringUtils;
 @RequiredArgsConstructor
 public class AlarmMessageListener {
 
-    private final UserService userService;
-    private final AlarmService alarmService;
-    private final AlarmMessageParser alarmMessageParser;
+  private final UserService userService;
+  private final AlarmService alarmService;
+  private final AlarmMessageParser alarmMessageParser;
 
-    @EventListener
-    public void handle(AlarmMessageEvent event) {
-        long userId = event.userId();
-        AlarmMessageType type = event.type();
+  @EventListener
+  public void handle(AlarmMessageEvent event) {
+    long userId = event.userId();
+    AlarmMessageType type = event.type();
 
-        User user = userService.getUserOnlyById(userId);
-        Locale locale = user.getLocale();
-
-        String message = switch (type) {
-            case NOTICE -> alarmMessageParser.parse(type, locale);
-            case FEED_COMMENT -> {
-                if (StringUtils.hasText(event.otherUserName())) {
-                    yield alarmMessageParser.parse(type, locale, event.otherUserName());
-                }
-                log.warn("Other user is null for event: {}", event);
-                yield null;
-            }
-            // OOO님이 회원님의 버킷리스트를 좋아합니다.
-            case FEED_LIKE -> {
-                if (StringUtils.hasText(event.otherUserName())) {
-                    yield alarmMessageParser.parse(type, locale, event.otherUserName());
-                }
-                log.warn("Other user is null for event: {}", event);
-                yield null;
-            }
-            // 디데이가 7일 남은 버킷리스트가 있습니다.\n:버킷리스트제목
-            case D_DAY_7 -> {
-                if (StringUtils.hasText(event.bucketTitle())) {
-                    yield alarmMessageParser.parse(type, locale, event.bucketTitle());
-                }
-                log.warn("Bucket title is null for event: {}", event);
-                yield null;
-            }
-        };
-
-        if (StringUtils.hasText(message)) {
-            Alarm alarm = Alarm.builder().userId(userId).message(message).build();
-            alarmService.create(alarm);
-        }
+    if (event.otherUserId() != null && userId == event.otherUserId()) {
+      return;
     }
+
+    User user = userService.getUserOnlyById(userId);
+    Locale locale = user.getLocale();
+
+    String otherUserName = event.otherUserId() != null
+        ? userService.getUserNameById(event.otherUserId()) : null;
+
+    String message = switch (type) {
+      case NOTICE -> alarmMessageParser.parse(type, locale);
+      case FEED_COMMENT -> {
+        if (StringUtils.hasText(otherUserName)) {
+          yield alarmMessageParser.parse(type, locale, otherUserName);
+        }
+        log.warn("Other user is null for event: {}", event);
+        yield null;
+      }
+      // OOO님이 회원님의 버킷리스트를 좋아합니다.
+      case FEED_LIKE -> {
+        if (StringUtils.hasText(otherUserName)) {
+          yield alarmMessageParser.parse(type, locale, otherUserName);
+        }
+        log.warn("Other user is null for event: {}", event);
+        yield null;
+      }
+      // 디데이가 7일 남은 버킷리스트가 있습니다.\n:버킷리스트제목
+      case D_DAY_7 -> {
+        if (StringUtils.hasText(event.bucketTitle())) {
+          yield alarmMessageParser.parse(type, locale, event.bucketTitle());
+        }
+        log.warn("Bucket title is null for event: {}", event);
+        yield null;
+      }
+    };
+
+    if (StringUtils.hasText(message)) {
+      Alarm alarm = Alarm.builder().userId(userId).message(message).build();
+      alarmService.create(alarm);
+    }
+  }
 }

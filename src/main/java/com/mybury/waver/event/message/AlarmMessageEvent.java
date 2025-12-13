@@ -9,11 +9,25 @@ public record AlarmMessageEvent(
     AlarmMessageType type,
     @Positive
     long userId,
-    long otherUserId,
-    String otherUserName,
-    long bucketId,
+    Long otherUserId,
+    Long bucketId,
     String bucketTitle,
     String message
 ) {
 
+  public static AlarmMessageEvent notice(long userId) {
+    return new AlarmMessageEvent(AlarmMessageType.NOTICE, userId, null, null, null, null);
+  }
+
+  public static AlarmMessageEvent feedLike(long userId, long likedUserId) {
+    return new AlarmMessageEvent(AlarmMessageType.FEED_LIKE, userId, likedUserId, null, null, null);
+  }
+
+  public static AlarmMessageEvent feedComment(long userId, long commentUserId) {
+    return new AlarmMessageEvent(AlarmMessageType.FEED_COMMENT, userId, commentUserId, null, null, null);
+  }
+
+  public static AlarmMessageEvent dday(long userId, String bucketTitle) {
+    return new AlarmMessageEvent(AlarmMessageType.D_DAY_7, userId, null, null, bucketTitle, null);
+  }
 }
