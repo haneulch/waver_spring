@@ -106,7 +106,9 @@ public class UserService {
   }
 
   public PremiumStatus checkWaverPlusLimit(long userId) {
-    return null;
+    User user = userRepository.findById(userId).orElseThrow(() -> new WaverException(ResultCode.NOT_FOUND));
+
+    return user.getPremiumStatus();
   }
 
   public User getUserOnlyById(Long userId) {
