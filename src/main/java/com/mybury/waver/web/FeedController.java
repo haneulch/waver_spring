@@ -59,7 +59,8 @@ public class FeedController {
 
   @Operation(summary = "피드 신고")
   @PostMapping("{id}/report")
-  public void report(@PathVariable Long id, @RequestBody ReportRequest request) {
-    feedService.report(id, request.reason());
+  public void report(@PathVariable Long id, @RequestBody ReportRequest request,
+      @Parameter(hidden = true) @UserId Long userId) {
+    feedService.report(id, request.reason(), userId);
   }
 }
