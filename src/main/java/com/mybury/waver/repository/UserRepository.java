@@ -1,5 +1,6 @@
 package com.mybury.waver.repository;
 
+import com.mybury.waver.common.code.YesNo;
 import com.mybury.waver.domain.User;
 import com.mybury.waver.domain.vo.LoginProjection;
 import java.util.List;
@@ -16,6 +17,8 @@ public interface UserRepository extends JpaRepository<User, Long> {
   boolean existsByEmailOrName(String email, String name);
 
   boolean existsByName(String name);
+
+  boolean existsByIdAndDeleteYn(long userId, YesNo deleteYn);
 
   @Modifying
   @Query("UPDATE User u SET u.deleteYn = 'Y' WHERE u.id = :userId")

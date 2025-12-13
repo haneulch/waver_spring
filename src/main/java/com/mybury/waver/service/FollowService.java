@@ -1,8 +1,11 @@
 package com.mybury.waver.service;
 
+import com.mybury.waver.common.code.ResultCode;
 import com.mybury.waver.common.code.YesNo;
 import com.mybury.waver.domain.Follow;
+import com.mybury.waver.exception.WaverException;
 import com.mybury.waver.repository.FollowRepository;
+import com.mybury.waver.repository.UserRepository;
 import com.mybury.waver.web.message.v1.follow.FollowElement;
 import com.mybury.waver.web.message.v1.follow.GetFollowersResponse;
 import jakarta.validation.constraints.NotNull;
@@ -20,8 +23,17 @@ import org.springframework.stereotype.Service;
 public class FollowService {
 
   private final FollowRepository followRepository;
+  private final UserRepository userRepository;
 
   public void follow(Long userId, Long targetUserId) {
+    if (!userRepository.existsByIdAndDeleteYn(targetUserId, YesNo.N)) {
+      return;
+    }
+
+    if (followRepository.existsByUserIdAndFollowUserId(userId, targetUserId)) {
+      return;
+    }
+
     followRepository.insertFollow(userId, targetUserId);
   }
 
