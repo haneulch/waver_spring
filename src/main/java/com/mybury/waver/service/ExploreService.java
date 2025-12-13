@@ -34,7 +34,7 @@ public class ExploreService {
     addRecentSearch(userId, query);
 
     List<Bucket> buckets = bucketRepository.search(query);
-    List<User> users = userRepository.findByNameLike(query);
+    List<User> users = userRepository.findByNameContaining(query);
     List<Follow> follows = followRepository.findByUserIdOrFollowUserId(userId, userId);
 
     Set<Long> followIds = follows.stream()
@@ -43,7 +43,7 @@ public class ExploreService {
     Set<Long> followerIds = follows.stream()
         .filter(v -> v.getFollowUser().getDeleteYn() == YesNo.N)
         .map(Follow::getUserId).collect(Collectors.toSet());
-    
+
     Set<Long> mutualIds = new HashSet<>(followIds);
     mutualIds.retainAll(followerIds);
 
@@ -65,7 +65,8 @@ public class ExploreService {
 
   public SearchOptionResponse searchOptions(Long userId) {
     List<String> recentSearch = recentSearchRepository.findQueryByUserId(userId);
-    List<SearchOptionResponse.KeywordElement> recommendedKeywords = SearchOptionResponse.KeywordElement.getAllKeywords();
+    List<SearchOptionResponse.KeywordElement> recommendedKeywords = SearchOptionResponse.KeywordElement
+        .getAllKeywords();
     return new SearchOptionResponse(recentSearch, null, recommendedKeywords);
   }
 }
