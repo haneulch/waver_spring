@@ -13,7 +13,6 @@ import io.swagger.v3.oas.annotations.responses.ApiResponse;
 import io.swagger.v3.oas.annotations.responses.ApiResponses;
 import io.swagger.v3.oas.annotations.tags.Tag;
 import jakarta.validation.Valid;
-import java.util.List;
 import lombok.RequiredArgsConstructor;
 import org.springframework.context.ApplicationEventPublisher;
 import org.springframework.web.bind.annotation.GetMapping;
@@ -21,7 +20,10 @@ import org.springframework.web.bind.annotation.PathVariable;
 import org.springframework.web.bind.annotation.PostMapping;
 import org.springframework.web.bind.annotation.RequestBody;
 import org.springframework.web.bind.annotation.RequestMapping;
+import org.springframework.web.bind.annotation.RequestParam;
 import org.springframework.web.bind.annotation.RestController;
+
+import java.util.List;
 
 @Tag(name = "피드")
 @RestController
@@ -35,8 +37,11 @@ public class FeedController {
   @Operation(summary = "피드")
   @ApiResponse(responseCode = "8000", description = "[KEYWORD_NOT_FOUND] 저장된 관심 키워드 없음")
   @GetMapping
-  public List<FeedResponse> feeds(@Parameter(hidden = true) @UserId Long userId) {
-    return feedService.feeds(userId);
+  public FeedResponse feeds(
+    @Parameter(hidden = true) @UserId Long userId,
+    @RequestParam(required = false) Long nextKey) {
+    List<FeedResponse.FeedElement> feeds = feedService.feeds(userId, nextKey);
+    return FeedResponse.of(feeds);
   }
 
   @Operation(summary = "관심 키워드 저장")
@@ -60,12 +65,12 @@ public class FeedController {
 
   @Operation(summary = "피드 신고")
   @ApiResponses({
-      @ApiResponse(responseCode = "4040", description = "- NOT_FOUND : 버킷을 찾을 수 없음"),
-      @ApiResponse(responseCode = "4030", description = "- FORBIDDEN : 자기 버킷 신고 불가")
+    @ApiResponse(responseCode = "4040", description = "- NOT_FOUND : 버킷을 찾을 수 없음"),
+    @ApiResponse(responseCode = "4030", description = "- FORBIDDEN : 자기 버킷 신고 불가")
   })
   @PostMapping("{id}/report")
   public void report(@PathVariable Long id, @RequestBody ReportRequest request,
-      @Parameter(hidden = true) @UserId Long userId) {
+                     @Parameter(hidden = true) @UserId Long userId) {
     feedService.report(id, request.reason(), userId);
   }
 }

@@ -12,12 +12,13 @@ import jakarta.persistence.criteria.Order;
 import jakarta.persistence.criteria.Path;
 import jakarta.persistence.criteria.Predicate;
 import jakarta.persistence.criteria.Root;
+import org.springframework.stereotype.Repository;
+import org.springframework.util.StringUtils;
+
 import java.time.LocalDate;
 import java.time.LocalDateTime;
 import java.util.ArrayList;
 import java.util.List;
-import org.springframework.stereotype.Repository;
-import org.springframework.util.StringUtils;
 
 @Repository
 public class BucketRepositoryImpl implements BucketRepositoryCustom {
@@ -109,7 +110,7 @@ public class BucketRepositoryImpl implements BucketRepositoryCustom {
   }
 
   @Override
-  public List<Bucket> findFeed(List<String> keywords, Long myUserId) {
+  public List<Bucket> findFeed(List<String> keywords, Long myUserId, Long nextKey) {
     CriteriaBuilder cb = em.getCriteriaBuilder();
     CriteriaQuery<Bucket> query = cb.createQuery(Bucket.class);
     Root<Bucket> root = query.from(Bucket.class);
@@ -121,14 +122,17 @@ public class BucketRepositoryImpl implements BucketRepositoryCustom {
 
     query.select(root).where(cb.and(predicates.toArray(new Predicate[0])));
 
+    if (nextKey != null) {
+      query.where(cb.lessThanOrEqualTo(root.get("id"), nextKey));
+    }
+
     // TODO: public이 아닌데 맞팔인 사람들 피드도 나와야함..
 
     List<Order> orders = new ArrayList<>();
-    orders.add(cb.desc(root.get("createdAt")));
+    orders.add(cb.desc(root.get("id")));
     query.orderBy(orders);
 
-    // TODO: 더보기 대음!!!!!
-    return em.createQuery(query).setMaxResults(100).getResultList();
+    return em.createQuery(query).setMaxResults(21).getResultList();
   }
 
   @Override

@@ -2,6 +2,7 @@ package com.mybury.waver.repository;
 
 import com.mybury.waver.domain.Bucket;
 import com.mybury.waver.web.message.v1.bucket.BucketRequest;
+
 import java.util.List;
 
 public interface BucketRepositoryCustom {
@@ -10,7 +11,7 @@ public interface BucketRepositoryCustom {
 
   List<Bucket> findBucketExcludingIds(Long userId, BucketRequest request, List<Long> excludedBucketIds);
 
-  List<Bucket> findFeed(List<String> keywords, Long myUserId);
+  List<Bucket> findFeed(List<String> keywords, Long myUserId, Long nextKey);
 
   List<Bucket> search(String text);
 
