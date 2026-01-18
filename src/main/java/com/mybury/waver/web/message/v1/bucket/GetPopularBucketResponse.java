@@ -7,14 +7,14 @@ import java.util.Set;
 
 public record GetPopularBucketResponse(
     List<String> popularKeyword,
-    List<BucketElement> popularList,
+    List<PopularBucketElement> popularList,
     List<String> recommendKeyword,
-    List<BucketElement> recommendList
+    List<PopularBucketElement> recommendList
 ){
 
     public static GetPopularBucketResponse of(List<Bucket> popularBucketList,List<Bucket> recommendBucketList){
-        List<BucketElement> popularElements = popularBucketList.stream().limit(4).map(BucketElement::new).toList();
-        List<BucketElement> recommendElements = recommendBucketList.stream().limit(4).map(BucketElement::new).toList();
+        List<PopularBucketElement> popularElements = popularBucketList.stream().limit(4).map(PopularBucketElement::new).toList();
+        List<PopularBucketElement> recommendElements = recommendBucketList.stream().limit(4).map(PopularBucketElement::new).toList();
 
         List<String> popularKeywords = extractKeywordNames(popularElements);
         List<String> recommendKeywords = extractKeywordNames(recommendElements);
@@ -22,7 +22,7 @@ public record GetPopularBucketResponse(
         return new GetPopularBucketResponse(popularKeywords, popularElements, recommendKeywords, recommendElements);
     }
 
-    private static List<String> extractKeywordNames(List<BucketElement> elements) {
+    private static List<String> extractKeywordNames(List<PopularBucketElement> elements) {
         if (elements == null || elements.isEmpty()) {
             return List.of();
         }

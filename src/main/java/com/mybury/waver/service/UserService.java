@@ -40,9 +40,12 @@ public class UserService {
   private final FreeTierRepository freeTierRepository;
 
   public LoginProjection getUserIdByUid(String uid) {
-    LoginProjection login = userRepository.findIdByUidAndDeleteYn(uid, YesNo.N);
-    if (login == null || login.getId() == null) {
+    LoginProjection login = userRepository.findIdByUid(uid);
+    if (login == null) {
       throw new WaverException(ResultCode.NOT_FOUND);
+    }
+    if (login.getDeleteYn() == YesNo.Y) {
+      throw new WaverException(ResultCode.WITHDRAWAL_USER);
     }
     return login;
   }
@@ -103,11 +106,17 @@ public class UserService {
   }
 
   public PremiumStatus checkWaverPlusLimit(long userId) {
-    return null;
+    User user = userRepository.findById(userId).orElseThrow(() -> new WaverException(ResultCode.NOT_FOUND));
+
+    return user.getPremiumStatus();
   }
 
   public User getUserOnlyById(Long userId) {
     return userRepository.findById(userId).orElse(null);
+  }
+
+  public String getUserNameById(Long userId) {
+    return userRepository.findNameById(userId);
   }
 
   @Transactional
@@ -123,7 +132,7 @@ public class UserService {
       throw new WaverException(ResultCode.NOT_FOUND);
     }
 
-    if (!profileImg.isEmpty()) {
+    if (profileImg != null && !profileImg.isEmpty()) {
       String uploadPath = fileUploadUtils.uploadFile(profileImg);
       user.setImgUrl(uploadPath);
     }

@@ -8,7 +8,9 @@ public interface BucketRepositoryCustom {
 
   List<Bucket> findBucket(Long userId, BucketRequest request);
 
-  List<Bucket> findFeed(List<String> keywords);
+  List<Bucket> findBucketExcludingIds(Long userId, BucketRequest request, List<Long> excludedBucketIds);
+
+  List<Bucket> findFeed(List<String> keywords, Long myUserId);
 
   List<Bucket> search(String text);
 

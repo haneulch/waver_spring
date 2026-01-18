@@ -1,8 +1,11 @@
 package com.mybury.waver.service;
 
+import com.mybury.waver.common.code.ResultCode;
 import com.mybury.waver.common.code.YesNo;
 import com.mybury.waver.domain.Follow;
+import com.mybury.waver.exception.WaverException;
 import com.mybury.waver.repository.FollowRepository;
+import com.mybury.waver.repository.UserRepository;
 import com.mybury.waver.web.message.v1.follow.FollowElement;
 import com.mybury.waver.web.message.v1.follow.GetFollowersResponse;
 import jakarta.validation.constraints.NotNull;
@@ -20,8 +23,17 @@ import org.springframework.stereotype.Service;
 public class FollowService {
 
   private final FollowRepository followRepository;
+  private final UserRepository userRepository;
 
   public void follow(Long userId, Long targetUserId) {
+    if (!userRepository.existsByIdAndDeleteYn(targetUserId, YesNo.N)) {
+      return;
+    }
+
+    if (followRepository.existsByUserIdAndFollowUserId(userId, targetUserId)) {
+      return;
+    }
+
     followRepository.insertFollow(userId, targetUserId);
   }
 
@@ -49,7 +61,7 @@ public class FollowService {
       if (Objects.equals(follow.getUserId(), userId) && follow.getFollowUser().getDeleteYn() == YesNo.N) {
         follows.add(follow);
       }
-      if (Objects.equals(follow.getFollowUserId(), userId) && follow.getFollowUser().getDeleteYn() == YesNo.N) {
+      if (Objects.equals(follow.getFollowUserId(), userId) && follow.getUser().getDeleteYn() == YesNo.N) {
         followers.add(follow);
       }
     }
@@ -71,6 +83,6 @@ public class FollowService {
     Set<Long> mutualIds = new HashSet<>();
     followInfo(userId, follows, followers, mutualIds);
 
-    return follows.stream().filter(item -> mutualIds.contains(item.getUserId())).toList();
+    return follows.stream().filter(item -> mutualIds.contains(item.getFollowUserId())).toList();
   }
 }

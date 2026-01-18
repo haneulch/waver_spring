@@ -27,6 +27,15 @@ public class BucketRepositoryImpl implements BucketRepositoryCustom {
 
   @Override
   public List<Bucket> findBucket(Long userId, BucketRequest request) {
+    return findBucketInternal(userId, request, null);
+  }
+
+  @Override
+  public List<Bucket> findBucketExcludingIds(Long userId, BucketRequest request, List<Long> excludedBucketIds) {
+    return findBucketInternal(userId, request, excludedBucketIds);
+  }
+
+  private List<Bucket> findBucketInternal(Long userId, BucketRequest request, List<Long> excludedBucketIds) {
     CriteriaBuilder cb = em.getCriteriaBuilder();
     CriteriaQuery<Bucket> query = cb.createQuery(Bucket.class);
     Root<Bucket> root = query.from(Bucket.class);
@@ -36,6 +45,10 @@ public class BucketRepositoryImpl implements BucketRepositoryCustom {
 
     if (userId != null) {
       predicates.add(cb.equal(root.get("userId"), userId));
+    }
+
+    if (excludedBucketIds != null && !excludedBucketIds.isEmpty()) {
+      predicates.add(cb.not(root.get("id").in(excludedBucketIds)));
     }
 
     if (request.dDayBucketOnly() == YesNo.Y) {
@@ -60,6 +73,10 @@ public class BucketRepositoryImpl implements BucketRepositoryCustom {
 
     if (request.categoryId() != null) {
       predicates.add(cb.equal(root.get("categoryId"), request.categoryId()));
+    }
+
+    if (request.hasImage() != null && request.hasImage() == YesNo.Y) {
+      predicates.add(cb.isNotNull(root.get("imgUrl")));
     }
 
     if (request.createdFrom() != null) {
@@ -88,16 +105,17 @@ public class BucketRepositoryImpl implements BucketRepositoryCustom {
     }
 
     query.orderBy(orders);
-    return em.createQuery(query).getResultList();
+    return em.createQuery(query).setMaxResults(request.limit()).getResultList();
   }
 
   @Override
-  public List<Bucket> findFeed(List<String> keywords) {
+  public List<Bucket> findFeed(List<String> keywords, Long myUserId) {
     CriteriaBuilder cb = em.getCriteriaBuilder();
     CriteriaQuery<Bucket> query = cb.createQuery(Bucket.class);
     Root<Bucket> root = query.from(Bucket.class);
 
     List<Predicate> predicates = new ArrayList<>();
+    predicates.add(cb.notEqual(root.get("userId"), myUserId));
     predicates.add(cb.equal(root.get("deleted"), YesNo.N));
     predicates.add(cb.equal(root.get("exposureStatus"), ExposureStatus.PUBLIC));
 
@@ -109,7 +127,8 @@ public class BucketRepositoryImpl implements BucketRepositoryCustom {
     orders.add(cb.desc(root.get("createdAt")));
     query.orderBy(orders);
 
-    return em.createQuery(query).getResultList();
+    // TODO: 더보기 대음!!!!!
+    return em.createQuery(query).setMaxResults(100).getResultList();
   }
 
   @Override

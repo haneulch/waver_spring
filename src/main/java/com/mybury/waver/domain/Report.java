@@ -34,4 +34,6 @@ public class Report extends BaseEntity {
     private Long bucketlistId;
 
     private Long commentId;
+
+    private Long reportUserId;
 }

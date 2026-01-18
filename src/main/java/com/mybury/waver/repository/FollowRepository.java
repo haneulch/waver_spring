@@ -12,7 +12,17 @@ public interface FollowRepository extends JpaRepository<Follow, Long> {
 
   @Modifying
   @Transactional
-  @Query(value = "INSERT INTO follow (user_id, follow_user_id) VALUES (:userId, :followUserId)", nativeQuery = true)
+  @Query(value = """
+      INSERT INTO follow (user_id, follow_user_id)
+      SELECT :userId, :followUserId
+      FROM DUAL
+      WHERE NOT EXISTS (
+        SELECT 1
+        FROM follow
+        WHERE user_id = :userId
+          AND follow_user_id = :followUserId
+      )
+      """, nativeQuery = true)
   void insertFollow(Long userId, Long followUserId);
 
   @Modifying

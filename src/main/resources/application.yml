@@ -21,6 +21,9 @@ spring:
   web:
     resources:
       static-locations: classpath:/static/
+  messages:
+    encoding: UTF-8
+    basename: messages
 
 springdoc:
   api-docs:

@@ -29,6 +29,9 @@ public enum ResultCode {
   // 저장된 관심 키워드 없음 오류
   KEYWORD_NOT_FOUND("8000", "KEYWORD_NOT_FOUND"),
 
+  // 탈퇴한 사용자
+  WITHDRAWAL_USER("9000", "WITHDRAWAL_USER"),
+
   UNKNOWN("9999", "UNKNOWN"),
   ;
 
