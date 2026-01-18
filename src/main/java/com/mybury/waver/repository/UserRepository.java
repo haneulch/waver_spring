@@ -32,4 +32,8 @@ public interface UserRepository extends JpaRepository<User, Long> {
   @Modifying
   @Query("UPDATE User u SET u.deleteYn = 'Y', u.status = 'WITHDRAWN', u.withdrawnAt = CURRENT_TIMESTAMP WHERE u.id = :userId")
   void withdraw(long userId);
+
+  @Modifying
+  @Query("UPDATE User u SET u.lastLoginAt = CURRENT_TIMESTAMP WHERE u.id = :id")
+  void updateLastLoginAt(long id);
 }

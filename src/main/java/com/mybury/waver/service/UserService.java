@@ -41,6 +41,7 @@ public class UserService {
   private final BucketRepository bucketRepository;
   private final FreeTierRepository freeTierRepository;
 
+  @Transactional
   public LoginProjection getUserIdByUid(String uid) {
     LoginProjection login = userRepository.findIdByUid(uid);
     if (login == null) {
@@ -49,6 +50,9 @@ public class UserService {
     if (login.getDeleteYn() == YesNo.Y) {
       throw new WaverException(ResultCode.WITHDRAWAL_USER);
     }
+    
+    userRepository.updateLastLoginAt(login.getId());
+
     return login;
   }
 
