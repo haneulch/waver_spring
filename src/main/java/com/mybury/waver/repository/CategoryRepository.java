@@ -13,14 +13,14 @@ public interface CategoryRepository extends JpaRepository<Category, Long> {
 
   default List<Category> findCategories(long userId, String query) {
     if (StringUtils.hasText(query)) {
-      return findByUserIdAndNameContainsAndDeleted(userId, query, YesNo.N);
+      return findByUserIdAndNameContainsAndDeletedOrderBySeqAsc(userId, query, YesNo.N);
     }
-    return findByUserIdAndDeleted(userId, YesNo.N);
+    return findByUserIdAndDeletedOrderBySeqAsc(userId, YesNo.N);
   }
 
-  List<Category> findByUserIdAndDeleted(long userId, YesNo deleted);
+  List<Category> findByUserIdAndDeletedOrderBySeqAsc(long userId, YesNo deleted);
 
-  List<Category> findByUserIdAndNameContainsAndDeleted(long userId, String query, YesNo deleted);
+  List<Category> findByUserIdAndNameContainsAndDeletedOrderBySeqAsc(long userId, String query, YesNo deleted);
 
   @Query(value = "SELECT id FROM Category WHERE userId = :userId AND defaultYn = :defaultYn")
   Long findIdByUserIdAndDefaultYn(long userId, YesNo defaultYn);

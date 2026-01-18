@@ -2,9 +2,9 @@ package com.mybury.waver.service;
 
 import com.mybury.waver.domain.Category;
 import com.mybury.waver.repository.CategoryRepository;
-import jakarta.transaction.Transactional;
 import lombok.RequiredArgsConstructor;
 import org.springframework.stereotype.Service;
+import org.springframework.transaction.annotation.Transactional;
 
 import java.util.List;
 import java.util.Map;
