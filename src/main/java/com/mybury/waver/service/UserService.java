@@ -20,12 +20,11 @@ import com.mybury.waver.web.message.v1.user.ProfileResponse;
 import com.mybury.waver.web.message.v1.user.UserCreateRequest;
 import com.mybury.waver.web.message.v1.user.UserStatusResponse;
 import jakarta.transaction.Transactional;
+import java.util.Locale;
 import lombok.RequiredArgsConstructor;
 import org.springframework.stereotype.Service;
 import org.springframework.util.StringUtils;
 import org.springframework.web.multipart.MultipartFile;
-
-import java.util.Locale;
 
 import static com.mybury.waver.domain.Category.createDefaultCategoryFor;
 
@@ -50,7 +49,7 @@ public class UserService {
     if (login.getDeleteYn() == YesNo.Y) {
       throw new WaverException(ResultCode.WITHDRAWAL_USER);
     }
-    
+
     userRepository.updateLastLoginAt(login.getId());
 
     return login;
@@ -101,7 +100,7 @@ public class UserService {
 
   private Badge getUserWithBadgeById(Long userId) {
     return badgeRepository.findByUserIdAndSelectYn(userId, YesNo.Y)
-      .orElseThrow(() -> new WaverException(ResultCode.NOT_FOUND));
+        .orElseThrow(() -> new WaverException(ResultCode.NOT_FOUND));
   }
 
   public void checkUsernameAvailability(String name) {
@@ -152,8 +151,13 @@ public class UserService {
 
   public UserStatusResponse status(String email, String uid) {
     User user = userRepository.findByEmailAndUid(email, uid)
-      .orElseThrow(() -> new WaverException(ResultCode.NOT_FOUND));
+        .orElseThrow(() -> new WaverException(ResultCode.NOT_FOUND));
 
     return new UserStatusResponse(user.getStatus(), user.getLastLoginAt(), user.getWithdrawnAt());
+  }
+
+  @Transactional
+  public void updateFcmToken(Long userId, String fcmToken) {
+    userRepository.updateFcmToken(userId, fcmToken);
   }
 }

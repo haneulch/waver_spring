@@ -3,12 +3,11 @@ package com.mybury.waver.repository;
 import com.mybury.waver.common.code.YesNo;
 import com.mybury.waver.domain.User;
 import com.mybury.waver.domain.vo.LoginProjection;
+import java.util.List;
+import java.util.Optional;
 import org.springframework.data.jpa.repository.JpaRepository;
 import org.springframework.data.jpa.repository.Modifying;
 import org.springframework.data.jpa.repository.Query;
-
-import java.util.List;
-import java.util.Optional;
 
 public interface UserRepository extends JpaRepository<User, Long> {
 
@@ -36,4 +35,8 @@ public interface UserRepository extends JpaRepository<User, Long> {
   @Modifying
   @Query("UPDATE User u SET u.lastLoginAt = CURRENT_TIMESTAMP WHERE u.id = :id")
   void updateLastLoginAt(long id);
+
+  @Modifying
+  @Query("UPDATE User u SET u.fcmToken = :fcmToken WHERE u.id = :id")
+  void updateFcmToken(long id, String fcmToken);
 }

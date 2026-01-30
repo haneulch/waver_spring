@@ -13,17 +13,16 @@ import jakarta.persistence.GeneratedValue;
 import jakarta.persistence.GenerationType;
 import jakarta.persistence.Id;
 import jakarta.persistence.OneToMany;
+import java.time.LocalDateTime;
+import java.util.List;
+import java.util.Locale;
+import java.util.Optional;
 import lombok.AccessLevel;
 import lombok.AllArgsConstructor;
 import lombok.Builder;
 import lombok.Getter;
 import lombok.NoArgsConstructor;
 import lombok.Setter;
-
-import java.time.LocalDateTime;
-import java.util.List;
-import java.util.Locale;
-import java.util.Optional;
 
 @Getter
 @Setter
@@ -57,6 +56,8 @@ public class User extends BaseEntity {
   private String bio;
 
   private Locale locale;
+
+  private String fcmToken;
 
   @Builder.Default
   @Enumerated(EnumType.STRING)

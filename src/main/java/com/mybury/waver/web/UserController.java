@@ -16,6 +16,7 @@ import io.swagger.v3.oas.annotations.Operation;
 import io.swagger.v3.oas.annotations.Parameter;
 import io.swagger.v3.oas.annotations.tags.Tag;
 import jakarta.validation.Valid;
+import java.util.Locale;
 import lombok.RequiredArgsConstructor;
 import org.springframework.http.MediaType;
 import org.springframework.web.bind.annotation.GetMapping;
@@ -26,8 +27,6 @@ import org.springframework.web.bind.annotation.RequestBody;
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RequestParam;
 import org.springframework.web.bind.annotation.RestController;
-
-import java.util.Locale;
 
 @Tag(name = "유저")
 @RestController
@@ -50,7 +49,7 @@ public class UserController {
   @Operation(summary = "프로필 조회")
   @GetMapping("profile")
   public ProfileResponse getUserProfile(@Parameter(hidden = true) @UserId Long userId,
-                                        @RequestParam(required = false) Long otherUserId) {
+      @RequestParam(required = false) Long otherUserId) {
     if (otherUserId == null) {
       return userService.getMyProfile(userId);
     }
@@ -60,7 +59,7 @@ public class UserController {
   @Operation(summary = "프로필 수정")
   @PatchMapping(value = "profile", consumes = MediaType.MULTIPART_FORM_DATA_VALUE)
   public void patchUserProfile(@Parameter(hidden = true) @UserId Long userId,
-                               @Valid @ModelAttribute UserUpdateRequest request) {
+      @Valid @ModelAttribute UserUpdateRequest request) {
     userService.modify(userId, request.profileImage(), request.name(), request.bio());
   }
 
@@ -90,5 +89,11 @@ public class UserController {
   @PostMapping("status")
   public UserStatusResponse status(@Valid @RequestBody UserStatusRequest request) {
     return userService.status(request.email(), request.uid());
+  }
+
+  @Operation(summary = "FCM 토큰 업데이트")
+  @PostMapping("fcm-token")
+  public void updateFcmToken(@Parameter(hidden = true) @UserId Long userId, @RequestBody String fcmToken) {
+    userService.updateFcmToken(userId, fcmToken);
   }
 }
