@@ -1,21 +1,23 @@
-name: Deploy to OCI
+name: Deploy to Server
 
 on:
   push:
-    branches: [ develop ]
+    branches:
+      - develop
 
 jobs:
   deploy:
     runs-on: ubuntu-latest
-
+    
     steps:
-      - name: Deploy via SSH
-        uses: appleboy/ssh-action@v1
+      - name: Executing SSH commands to deploy
+        uses: appleboy/ssh-action@v1.0.3
         with:
-          host: ${{ secrets.OCI_HOST }}
-          username: ${{ secrets.OCI_USER }}
-          key: ${{ secrets.OCI_SSH_KEY }}
-          script_stop: true
-          command_timeout: 10m
+          host: ${{ secrets.SERVER_HOST }}
+          username: ${{ secrets.SERVER_USER }}
+          key: ${{ secrets.SSH_PRIVATE_KEY }}
           script: |
-            bash /home/opc/app/deploy.sh
+            cd /home/opc
+            
+            # 배포 스크립트 실행
+            ./deploy.sh
