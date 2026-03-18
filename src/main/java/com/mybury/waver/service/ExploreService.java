@@ -38,21 +38,14 @@ public class ExploreService {
     List<Follow> follows = followRepository.findByUserIdOrFollowUserId(userId, userId);
 
     Set<Long> followIds = new HashSet<>();
-    Set<Long> followerIds = new HashSet<>();
 
     for (Follow follow : follows) {
       if (java.util.Objects.equals(follow.getUserId(), userId) && follow.getFollowUser().getDeleteYn() == YesNo.N) {
         followIds.add(follow.getFollowUserId());
       }
-      if (java.util.Objects.equals(follow.getFollowUserId(), userId) && follow.getUser().getDeleteYn() == YesNo.N) {
-        followerIds.add(follow.getUserId());
-      }
     }
 
-    Set<Long> mutualIds = new HashSet<>(followIds);
-    mutualIds.retainAll(followerIds);
-
-    return new ExploreResponse(buckets, users, mutualIds);
+    return new ExploreResponse(buckets, users, followIds);
   }
 
   public void deleteAllSearchData(long userId) {
