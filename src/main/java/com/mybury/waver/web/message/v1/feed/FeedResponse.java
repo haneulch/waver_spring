@@ -21,7 +21,7 @@ public record FeedResponse(
       return new FeedResponse(false, null, null);
     }
     if (feeds.size() > 20) {
-      return new FeedResponse(true, feeds.getLast().id(), feeds.subList(0, 2));
+      return new FeedResponse(true, feeds.getLast().id(), feeds.subList(0, 20));
     }
     return new FeedResponse(false, null, feeds);
   }

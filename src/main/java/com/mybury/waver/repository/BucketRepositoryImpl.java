@@ -120,11 +120,11 @@ public class BucketRepositoryImpl implements BucketRepositoryCustom {
     predicates.add(cb.equal(root.get("deleted"), YesNo.N));
     predicates.add(cb.equal(root.get("exposureStatus"), ExposureStatus.PUBLIC));
 
-    query.select(root).where(cb.and(predicates.toArray(new Predicate[0])));
-
     if (nextKey != null) {
-      query.where(cb.lessThanOrEqualTo(root.get("id"), nextKey));
+      predicates.add(cb.lessThanOrEqualTo(root.get("id"), nextKey));
     }
+
+    query.select(root).where(cb.and(predicates.toArray(new Predicate[0])));
 
     // TODO: public이 아닌데 맞팔인 사람들 피드도 나와야함..
 
