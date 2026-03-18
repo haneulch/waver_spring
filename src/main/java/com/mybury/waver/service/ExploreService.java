@@ -37,12 +37,17 @@ public class ExploreService {
     List<User> users = userRepository.findByNameContaining(query);
     List<Follow> follows = followRepository.findByUserIdOrFollowUserId(userId, userId);
 
-    Set<Long> followIds = follows.stream()
-        .filter(v -> v.getFollowUser().getDeleteYn() == YesNo.N)
-        .map(Follow::getFollowUserId).collect(Collectors.toSet());
-    Set<Long> followerIds = follows.stream()
-        .filter(v -> v.getFollowUser().getDeleteYn() == YesNo.N)
-        .map(Follow::getUserId).collect(Collectors.toSet());
+    Set<Long> followIds = new HashSet<>();
+    Set<Long> followerIds = new HashSet<>();
+
+    for (Follow follow : follows) {
+      if (java.util.Objects.equals(follow.getUserId(), userId) && follow.getFollowUser().getDeleteYn() == YesNo.N) {
+        followIds.add(follow.getFollowUserId());
+      }
+      if (java.util.Objects.equals(follow.getFollowUserId(), userId) && follow.getUser().getDeleteYn() == YesNo.N) {
+        followerIds.add(follow.getUserId());
+      }
+    }
 
     Set<Long> mutualIds = new HashSet<>(followIds);
     mutualIds.retainAll(followerIds);

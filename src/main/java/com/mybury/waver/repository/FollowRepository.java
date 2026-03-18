@@ -30,13 +30,18 @@ public interface FollowRepository extends JpaRepository<Follow, Long> {
   @Query(value = "DELETE FROM Follow WHERE userId = :userId AND followUserId = :followUserId")
   void deleteFollow(long userId, long followUserId);
 
+  @Query("SELECT COUNT(f) FROM Follow f WHERE f.userId = :userId AND f.followUser.deleteYn = 'N'")
   Long countByUserId(Long userId);
 
+  @Query("SELECT COUNT(f) FROM Follow f WHERE f.followUserId = :followUserId AND f.user.deleteYn = 'N'")
   Long countByFollowUserId(Long followUserId);
 
   List<Follow> findByUserIdOrFollowUserId(Long userId, Long followUserId);
 
   boolean existsByUserIdAndFollowUserId(Long userId, Long followUserId);
 
+  @Query("SELECT f.userId AS userId, f.followUserId AS followUserId FROM Follow f " +
+         "WHERE (f.userId = :userId AND f.followUser.deleteYn = 'N') " +
+         "   OR (f.followUserId = :followUserId AND f.user.deleteYn = 'N')")
   List<FollowCount> findCountByUserIdOrFollowUserId(long userId, long followUserId);
 }
