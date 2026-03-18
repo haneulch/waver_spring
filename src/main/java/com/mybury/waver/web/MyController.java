@@ -34,7 +34,7 @@ public class MyController {
     @Operation(summary = "타인 > 마이페이지 메인")
     @GetMapping("{otherUserId}")
     public OtherMyResponse otherMy(@PathVariable Long otherUserId, @Parameter(hidden = true) @UserId Long userId) {
-        return myService.getOther(otherUserId);
+        return myService.getOther(otherUserId, userId);
     }
 
     @Operation(summary = "푸시 목록")
