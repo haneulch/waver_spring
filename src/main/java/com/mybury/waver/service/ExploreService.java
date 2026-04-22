@@ -1,5 +1,6 @@
 package com.mybury.waver.service;
 
+import com.mybury.waver.common.code.ReportType;
 import com.mybury.waver.common.code.YesNo;
 import com.mybury.waver.domain.Bucket;
 import com.mybury.waver.domain.Follow;
@@ -8,6 +9,7 @@ import com.mybury.waver.domain.User;
 import com.mybury.waver.repository.BucketRepository;
 import com.mybury.waver.repository.FollowRepository;
 import com.mybury.waver.repository.RecentSearchRepository;
+import com.mybury.waver.repository.ReportRepository;
 import com.mybury.waver.repository.UserRepository;
 import com.mybury.waver.web.message.v1.explore.ExploreResponse;
 import com.mybury.waver.web.message.v1.explore.SearchOptionResponse;
@@ -28,12 +30,16 @@ public class ExploreService {
   private final BucketRepository bucketRepository;
   private final FollowRepository followRepository;
   private final UserRepository userRepository;
+  private final ReportRepository reportRepository;
 
   @Transactional
   public ExploreResponse search(long userId, String query) {
     addRecentSearch(userId, query);
 
-    List<Bucket> buckets = bucketRepository.search(query);
+    List<Long> reportedBucketIds =
+        reportRepository.findBucketlistIdsByReportUserIdAndReportType(userId, ReportType.BUCKET);
+
+    List<Bucket> buckets = bucketRepository.search(query, reportedBucketIds);
     List<User> users = userRepository.findByNameContaining(query);
     List<Follow> follows = followRepository.findByUserIdOrFollowUserId(userId, userId);
 

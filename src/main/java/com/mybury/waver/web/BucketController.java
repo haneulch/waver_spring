@@ -53,8 +53,8 @@ public class BucketController {
 
     @Operation(summary = "인기 버킷리스트 조회")
     @GetMapping("popular")
-    public GetPopularBucketResponse popularBucket() {
-        return bucketService.popularBucket();
+    public GetPopularBucketResponse popularBucket(@Parameter(hidden = true) @UserId Long userId) {
+        return bucketService.popularBucket(userId);
     }
 
     @Operation(summary = "버킷리스트 수정")

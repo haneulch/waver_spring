@@ -110,7 +110,7 @@ public class BucketRepositoryImpl implements BucketRepositoryCustom {
   }
 
   @Override
-  public List<Bucket> findFeed(List<String> keywords, Long myUserId, Long nextKey) {
+  public List<Bucket> findFeed(List<String> keywords, Long myUserId, Long nextKey, List<Long> excludedBucketIds) {
     CriteriaBuilder cb = em.getCriteriaBuilder();
     CriteriaQuery<Bucket> query = cb.createQuery(Bucket.class);
     Root<Bucket> root = query.from(Bucket.class);
@@ -119,6 +119,10 @@ public class BucketRepositoryImpl implements BucketRepositoryCustom {
     predicates.add(cb.notEqual(root.get("userId"), myUserId));
     predicates.add(cb.equal(root.get("deleted"), YesNo.N));
     predicates.add(cb.equal(root.get("exposureStatus"), ExposureStatus.PUBLIC));
+
+    if (excludedBucketIds != null && !excludedBucketIds.isEmpty()) {
+      predicates.add(cb.not(root.get("id").in(excludedBucketIds)));
+    }
 
     if (nextKey != null) {
       predicates.add(cb.lessThanOrEqualTo(root.get("id"), nextKey));
@@ -136,7 +140,7 @@ public class BucketRepositoryImpl implements BucketRepositoryCustom {
   }
 
   @Override
-  public List<Bucket> search(String text) {
+  public List<Bucket> search(String text, List<Long> excludedBucketIds) {
     CriteriaBuilder cb = em.getCriteriaBuilder();
     CriteriaQuery<Bucket> query = cb.createQuery(Bucket.class);
     Root<Bucket> root = query.from(Bucket.class);
@@ -147,6 +151,10 @@ public class BucketRepositoryImpl implements BucketRepositoryCustom {
     predicates.add(cb.like(root.get("title"), likePattern));
     predicates.add(cb.equal(root.get("deleted"), YesNo.N));
     predicates.add(cb.equal(root.get("exposureStatus"), ExposureStatus.PUBLIC));
+
+    if (excludedBucketIds != null && !excludedBucketIds.isEmpty()) {
+      predicates.add(cb.not(root.get("id").in(excludedBucketIds)));
+    }
 
     query.select(root).where(cb.and(predicates.toArray(new Predicate[0])));
 

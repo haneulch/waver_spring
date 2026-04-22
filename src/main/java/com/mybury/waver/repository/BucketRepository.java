@@ -16,7 +16,7 @@ public interface BucketRepository extends JpaRepository<Bucket, Long>, BucketRep
 
   @Modifying
   @Transactional
-  @Query(value = "UPDATE Bucket SET deleted = 'Y' WHERE id = :id AND deleted = 'N'")
+  @Query(value = "UPDATE Bucket SET deleted = com.mybury.waver.common.code.YesNo.Y WHERE id = :id AND deleted = com.mybury.waver.common.code.YesNo.N")
   void markDeletedById(long id);
 
   @Modifying
@@ -34,7 +34,7 @@ public interface BucketRepository extends JpaRepository<Bucket, Long>, BucketRep
 
   @Modifying
   @Transactional
-  @Query(value = "UPDATE Bucket SET deleted = 'Y' WHERE id = :id AND userId = :userId")
+  @Query(value = "UPDATE Bucket SET deleted = com.mybury.waver.common.code.YesNo.Y WHERE id = :id AND userId = :userId")
   void deleteBucket(long id, long userId);
 
   @Modifying
@@ -68,6 +68,6 @@ public interface BucketRepository extends JpaRepository<Bucket, Long>, BucketRep
 
   @Modifying
   @Transactional
-  @Query(value = "UPDATE Bucket SET deleted = 'Y' WHERE userId = :userId")
+  @Query(value = "UPDATE Bucket SET deleted = com.mybury.waver.common.code.YesNo.Y WHERE userId = :userId")
   void deleteBucketForWithdraw(long userId);
 }

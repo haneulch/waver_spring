@@ -101,7 +101,7 @@ public class BucketService {
     return bucketRepository.findBucketExcludingIds(targetUserId, request, reportedBucketIds);
   }
 
-  public GetPopularBucketResponse popularBucket() {
+  public GetPopularBucketResponse popularBucket(Long userId) {
     //  bucketRepository.findBucket 를 두번 요청
     // popularElements 의 경우 추천순으로 최근 한달 것 조회
     // recommendElements 의 경우 최신순으로 최근 한달 것 조회
@@ -136,8 +136,21 @@ public class BucketService {
         YesNo.Y
     );
 
-    List<Bucket> popularBucketList = bucketRepository.findBucket(null, popularRequest);
-    List<Bucket> recommendBucketList = bucketRepository.findBucket(null, recommendRequest);
+    List<Long> reportedBucketIds = null;
+    if (userId != null) {
+      reportedBucketIds = reportRepository.findBucketlistIdsByReportUserIdAndReportType(userId, ReportType.BUCKET);
+    }
+
+    List<Bucket> popularBucketList;
+    List<Bucket> recommendBucketList;
+
+    if (reportedBucketIds == null || reportedBucketIds.isEmpty()) {
+      popularBucketList = bucketRepository.findBucket(null, popularRequest);
+      recommendBucketList = bucketRepository.findBucket(null, recommendRequest);
+    } else {
+      popularBucketList = bucketRepository.findBucketExcludingIds(null, popularRequest, reportedBucketIds);
+      recommendBucketList = bucketRepository.findBucketExcludingIds(null, recommendRequest, reportedBucketIds);
+    }
 
     return GetPopularBucketResponse.of(popularBucketList, recommendBucketList);
   }

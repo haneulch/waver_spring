@@ -75,7 +75,10 @@ public class FeedService {
       .map(UserKeyword::getCode)
       .toList();
 
-    List<Bucket> buckets = bucketRepository.findFeed(keywordCodes, userId, nextKey);
+    List<Long> reportedBucketIds =
+        reportRepository.findBucketlistIdsByReportUserIdAndReportType(userId, ReportType.BUCKET);
+
+    List<Bucket> buckets = bucketRepository.findFeed(keywordCodes, userId, nextKey, reportedBucketIds);
 
     // 사용자가 좋아요한 버킷 ID들을 한 번에 조회
     Set<Long> likedBucketIds = buckets.stream()

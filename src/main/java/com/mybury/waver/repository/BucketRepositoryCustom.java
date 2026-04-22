@@ -11,9 +11,9 @@ public interface BucketRepositoryCustom {
 
   List<Bucket> findBucketExcludingIds(Long userId, BucketRequest request, List<Long> excludedBucketIds);
 
-  List<Bucket> findFeed(List<String> keywords, Long myUserId, Long nextKey);
+  List<Bucket> findFeed(List<String> keywords, Long myUserId, Long nextKey, List<Long> excludedBucketIds);
 
-  List<Bucket> search(String text);
+  List<Bucket> search(String text, List<Long> excludedBucketIds);
 
   void commit();
 }
