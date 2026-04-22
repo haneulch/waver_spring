@@ -61,6 +61,7 @@ public record BucketUpdateRequest(
             .targetDate(targetDate)
             .goalCount(goalCount)
             .keywords(keywords)
+            .friendUserIds(friendUserIds)
             .build();
     }
 }

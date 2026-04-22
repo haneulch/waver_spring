@@ -65,6 +65,7 @@ public record BucketCreateRequest(
         .exposureStatus(exposureStatus)
         .scrapYn(scrapYn == null ? YesNo.N : scrapYn)
         .keywords(keywords)
+        .friendUserIds(friendUserIds)
         .targetDate(targetDate)
         .goalCount(goalCount)
         .build();

@@ -5,7 +5,9 @@ import com.mybury.waver.common.code.ReportType;
 import com.mybury.waver.common.code.ResultCode;
 import com.mybury.waver.common.code.SortType;
 import com.mybury.waver.common.code.YesNo;
+import com.mybury.waver.repository.UserRepository;
 import com.mybury.waver.domain.Bucket;
+import com.mybury.waver.domain.User;
 import com.mybury.waver.domain.vo.BucketGoalCount;
 import com.mybury.waver.event.message.BadgeCountEvent;
 import com.mybury.waver.exception.WaverException;
@@ -40,6 +42,7 @@ public class BucketService {
   private final BucketRepository bucketRepository;
   private final LikeBucketRepository likeBucketRepository;
   private final ReportRepository reportRepository;
+  private final UserRepository userRepository;
   private final ApplicationEventPublisher publisher;
 
   @Transactional
@@ -165,8 +168,17 @@ public class BucketService {
     }
     boolean isLike = likeBucketRepository.existsByUserIdAndBucketId(userId, id);
 
-    // TODO: 함께하기 친구
-    return BucketDetailResponse.of(bucket, userId, keywords, List.of(), isLike);
+    List<User> friendUserList = new ArrayList<>();
+    if (StringUtils.hasText(bucket.getFriendUserIds())) {
+      List<Long> friendIds = Arrays.stream(bucket.getFriendUserIds().split(","))
+          .map(String::trim)
+          .filter(StringUtils::hasText)
+          .map(Long::parseLong)
+          .toList();
+      friendUserList = userRepository.findAllById(friendIds);
+    }
+
+    return BucketDetailResponse.of(bucket, userId, keywords, friendUserList, isLike);
   }
 
   public void delete(long id, long userId) {

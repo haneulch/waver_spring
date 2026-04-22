@@ -103,6 +103,8 @@ public class Bucket extends BaseEntity {
 
   private String keywords;
 
+  private String friendUserIds;
+
   @Builder.Default
   @Enumerated(value = EnumType.STRING)
   @Column(length = 1, nullable = false)
@@ -138,6 +140,7 @@ public class Bucket extends BaseEntity {
         .goalCount(bucket.getGoalCount())
         .imgUrl(bucket.getImgUrl())
         .keywords(bucket.getKeywords())
+        .friendUserIds(bucket.getFriendUserIds())
         .build();
   }
 }
