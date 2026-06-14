@@ -77,12 +77,15 @@ public class FollowService {
     followRepository.deleteFollow(userId, followUserId);
   }
 
-  public List<Follow> getMutual(Long userId) {
+  public List<Follow> getMutual(Long userId, String name) {
     List<Follow> follows = new ArrayList<>();
     List<Follow> followers = new ArrayList<>();
     Set<Long> mutualIds = new HashSet<>();
     followInfo(userId, follows, followers, mutualIds);
 
-    return follows.stream().filter(item -> mutualIds.contains(item.getFollowUserId())).toList();
+    return follows.stream()
+        .filter(item -> mutualIds.contains(item.getFollowUserId()))
+        .filter(item -> name == null || item.getFollowUser().getName().contains(name))
+        .toList();
   }
 }

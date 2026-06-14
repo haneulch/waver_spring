@@ -16,6 +16,7 @@ import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.PostMapping;
 import org.springframework.web.bind.annotation.RequestBody;
 import org.springframework.web.bind.annotation.RequestMapping;
+import org.springframework.web.bind.annotation.RequestParam;
 import org.springframework.web.bind.annotation.RestController;
 
 @Tag(name = "팔로우")
@@ -63,8 +64,9 @@ public class FollowController {
 
     @Operation(summary = "맞팔목록")
     @GetMapping("mutual")
-    public List<FollowElement> getMutual(@Parameter(hidden = true) @UserId Long userId) {
-        List<Follow> follows = followService.getMutual(userId);
+    public List<FollowElement> getMutual(@Parameter(hidden = true) @UserId Long userId,
+        @RequestParam(required = false) String name) {
+        List<Follow> follows = followService.getMutual(userId, name);
         return follows.stream().map(FollowElement::new).toList();
     }
 }
