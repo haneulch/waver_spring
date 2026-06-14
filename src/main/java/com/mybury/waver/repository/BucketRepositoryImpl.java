@@ -3,6 +3,7 @@ package com.mybury.waver.repository;
 import com.mybury.waver.common.code.ExposureStatus;
 import com.mybury.waver.common.code.YesNo;
 import com.mybury.waver.domain.Bucket;
+import com.mybury.waver.domain.Follow;
 import com.mybury.waver.web.message.v1.bucket.BucketRequest;
 import jakarta.persistence.EntityManager;
 import jakarta.persistence.PersistenceContext;
@@ -12,6 +13,7 @@ import jakarta.persistence.criteria.Order;
 import jakarta.persistence.criteria.Path;
 import jakarta.persistence.criteria.Predicate;
 import jakarta.persistence.criteria.Root;
+import jakarta.persistence.criteria.Subquery;
 import org.springframework.stereotype.Repository;
 import org.springframework.util.StringUtils;
 
@@ -118,7 +120,6 @@ public class BucketRepositoryImpl implements BucketRepositoryCustom {
     List<Predicate> predicates = new ArrayList<>();
     predicates.add(cb.notEqual(root.get("userId"), myUserId));
     predicates.add(cb.equal(root.get("deleted"), YesNo.N));
-    predicates.add(cb.equal(root.get("exposureStatus"), ExposureStatus.PUBLIC));
 
     if (excludedBucketIds != null && !excludedBucketIds.isEmpty()) {
       predicates.add(cb.not(root.get("id").in(excludedBucketIds)));
@@ -128,9 +129,27 @@ public class BucketRepositoryImpl implements BucketRepositoryCustom {
       predicates.add(cb.lessThanOrEqualTo(root.get("id"), nextKey));
     }
 
-    query.select(root).where(cb.and(predicates.toArray(new Predicate[0])));
+    // 맞팔인 사용자의 FOLLOWER 공개 버킷도 포함
+    // mutual follow: I follow them AND they follow me
+    Subquery<Long> iFollowThem = query.subquery(Long.class);
+    Root<Follow> iFollowThemRoot = iFollowThem.from(Follow.class);
+    iFollowThem.select(iFollowThemRoot.get("followUserId"))
+        .where(cb.equal(iFollowThemRoot.get("userId"), myUserId));
 
-    // TODO: public이 아닌데 맞팔인 사람들 피드도 나와야함..
+    Subquery<Long> theyFollowMe = query.subquery(Long.class);
+    Root<Follow> theyFollowMeRoot = theyFollowMe.from(Follow.class);
+    theyFollowMe.select(theyFollowMeRoot.get("userId"))
+        .where(cb.equal(theyFollowMeRoot.get("followUserId"), myUserId));
+
+    Predicate isPublic = cb.equal(root.get("exposureStatus"), ExposureStatus.PUBLIC);
+    Predicate isMutualFollowerBucket = cb.and(
+        cb.equal(root.get("exposureStatus"), ExposureStatus.FOLLOWER),
+        root.get("userId").in(iFollowThem),
+        root.get("userId").in(theyFollowMe)
+    );
+    predicates.add(cb.or(isPublic, isMutualFollowerBucket));
+
+    query.select(root).where(cb.and(predicates.toArray(new Predicate[0])));
 
     List<Order> orders = new ArrayList<>();
     orders.add(cb.desc(root.get("id")));
