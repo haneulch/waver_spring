@@ -586,12 +586,20 @@ FCM 토큰 업데이트
 
 맞팔 목록
 
+**Query Parameters**
+
+| Param | Type   | Required | Description              |
+|-------|--------|----------|--------------------------|
+| name  | String | ❌       | 닉네임 검색 (부분 일치)   |
+
 **Response** `200 OK` — `List<FollowElement>`
 
-| Field  | Type   | Description |
-|--------|--------|-------------|
-| userId | Long   | 유저 ID     |
-| name   | String | 닉네임      |
+| Field       | Type    | Description    |
+|-------------|---------|----------------|
+| id          | Long    | 유저 ID        |
+| name        | String  | 닉네임         |
+| imgUrl      | String  | 프로필 이미지   |
+| mutualFollow| Boolean | 맞팔 여부 (항상 true) |
 
 ---
 

@@ -1,0 +1,1472 @@
+<!DOCTYPE html>
+<html lang="ko">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Waver API Document</title>
+<style>
+  :root {
+    --bg: #0f1117;
+    --surface: #1a1d27;
+    --surface2: #222636;
+    --border: #2e3349;
+    --text: #e2e8f0;
+    --text-muted: #8892a4;
+    --accent: #6c8fff;
+    --green: #4ade80;
+    --yellow: #facc15;
+    --red: #f87171;
+    --orange: #fb923c;
+    --purple: #a78bfa;
+    --teal: #2dd4bf;
+    --method-get: #4ade80;
+    --method-post: #6c8fff;
+    --method-patch: #facc15;
+    --method-delete: #f87171;
+    --tag-public: #2dd4bf;
+  }
+  * { box-sizing: border-box; margin: 0; padding: 0; }
+  body {
+    font-family: 'Segoe UI', system-ui, -apple-system, sans-serif;
+    background: var(--bg);
+    color: var(--text);
+    display: flex;
+    min-height: 100vh;
+  }
+
+  /* Sidebar */
+  #sidebar {
+    width: 260px;
+    min-width: 260px;
+    background: var(--surface);
+    border-right: 1px solid var(--border);
+    position: fixed;
+    top: 0; left: 0; bottom: 0;
+    overflow-y: auto;
+    z-index: 100;
+    padding-bottom: 32px;
+  }
+  #sidebar-header {
+    padding: 24px 20px 16px;
+    border-bottom: 1px solid var(--border);
+    position: sticky;
+    top: 0;
+    background: var(--surface);
+  }
+  #sidebar-header h1 {
+    font-size: 15px;
+    font-weight: 700;
+    color: var(--accent);
+    letter-spacing: .3px;
+  }
+  #sidebar-header p {
+    font-size: 11px;
+    color: var(--text-muted);
+    margin-top: 4px;
+  }
+  .nav-group { padding: 8px 0; }
+  .nav-group-label {
+    padding: 8px 20px 4px;
+    font-size: 10px;
+    font-weight: 700;
+    text-transform: uppercase;
+    letter-spacing: 1px;
+    color: var(--text-muted);
+  }
+  .nav-item {
+    display: flex;
+    align-items: center;
+    gap: 8px;
+    padding: 6px 20px;
+    font-size: 13px;
+    color: var(--text-muted);
+    text-decoration: none;
+    cursor: pointer;
+    transition: background .15s, color .15s;
+    border-left: 2px solid transparent;
+  }
+  .nav-item:hover { background: var(--surface2); color: var(--text); }
+  .nav-item.active { color: var(--accent); border-left-color: var(--accent); background: rgba(108,143,255,.08); }
+  .nav-badge {
+    font-size: 10px;
+    padding: 1px 6px;
+    border-radius: 10px;
+    font-weight: 600;
+    margin-left: auto;
+  }
+
+  /* Main */
+  #main {
+    margin-left: 260px;
+    flex: 1;
+    padding: 40px 48px;
+    max-width: 960px;
+  }
+  .page-title {
+    font-size: 28px;
+    font-weight: 800;
+    margin-bottom: 8px;
+    background: linear-gradient(135deg, var(--accent), var(--teal));
+    -webkit-background-clip: text;
+    -webkit-text-fill-color: transparent;
+  }
+  .page-meta {
+    display: flex;
+    gap: 12px;
+    align-items: center;
+    flex-wrap: wrap;
+    margin-bottom: 40px;
+  }
+  .meta-chip {
+    font-size: 12px;
+    padding: 4px 10px;
+    border-radius: 6px;
+    background: var(--surface2);
+    border: 1px solid var(--border);
+    color: var(--text-muted);
+  }
+  .meta-chip span { color: var(--text); font-weight: 600; }
+
+  /* Section */
+  .section { margin-bottom: 56px; }
+  .section-title {
+    font-size: 20px;
+    font-weight: 700;
+    padding-bottom: 12px;
+    border-bottom: 1px solid var(--border);
+    margin-bottom: 24px;
+    color: var(--text);
+  }
+
+  /* Endpoint card */
+  .endpoint {
+    background: var(--surface);
+    border: 1px solid var(--border);
+    border-radius: 12px;
+    margin-bottom: 16px;
+    overflow: hidden;
+  }
+  .endpoint-header {
+    display: flex;
+    align-items: center;
+    gap: 12px;
+    padding: 14px 20px;
+    cursor: pointer;
+    user-select: none;
+    transition: background .15s;
+  }
+  .endpoint-header:hover { background: var(--surface2); }
+  .method-badge {
+    font-size: 11px;
+    font-weight: 800;
+    padding: 3px 10px;
+    border-radius: 6px;
+    min-width: 60px;
+    text-align: center;
+    letter-spacing: .5px;
+  }
+  .method-GET    { background: rgba(74,222,128,.15); color: var(--method-get); }
+  .method-POST   { background: rgba(108,143,255,.15); color: var(--method-post); }
+  .method-PATCH  { background: rgba(250,204,21,.15); color: var(--method-patch); }
+  .method-DELETE { background: rgba(248,113,113,.15); color: var(--method-delete); }
+  .endpoint-path {
+    font-family: 'JetBrains Mono', 'Fira Code', monospace;
+    font-size: 13px;
+    color: var(--text);
+    flex: 1;
+  }
+  .endpoint-path .path-param { color: var(--orange); }
+  .tag-public {
+    font-size: 10px;
+    font-weight: 700;
+    padding: 2px 8px;
+    border-radius: 10px;
+    background: rgba(45,212,191,.12);
+    color: var(--teal);
+    border: 1px solid rgba(45,212,191,.3);
+  }
+  .tag-wip {
+    font-size: 10px;
+    font-weight: 700;
+    padding: 2px 8px;
+    border-radius: 10px;
+    background: rgba(250,204,21,.1);
+    color: var(--yellow);
+    border: 1px solid rgba(250,204,21,.3);
+  }
+  .endpoint-summary {
+    font-size: 13px;
+    color: var(--text-muted);
+    margin-left: auto;
+  }
+  .chevron {
+    color: var(--text-muted);
+    font-size: 12px;
+    transition: transform .2s;
+    flex-shrink: 0;
+  }
+  .endpoint.open .chevron { transform: rotate(90deg); }
+
+  .endpoint-body {
+    display: none;
+    padding: 0 20px 20px;
+    border-top: 1px solid var(--border);
+  }
+  .endpoint.open .endpoint-body { display: block; }
+
+  /* Param tables */
+  .param-section { margin-top: 16px; }
+  .param-section-title {
+    font-size: 11px;
+    font-weight: 700;
+    text-transform: uppercase;
+    letter-spacing: .8px;
+    color: var(--text-muted);
+    margin-bottom: 8px;
+  }
+  .param-table {
+    width: 100%;
+    border-collapse: collapse;
+    font-size: 13px;
+  }
+  .param-table th {
+    text-align: left;
+    padding: 6px 12px;
+    background: var(--surface2);
+    color: var(--text-muted);
+    font-size: 11px;
+    font-weight: 600;
+    text-transform: uppercase;
+    letter-spacing: .5px;
+  }
+  .param-table th:first-child { border-radius: 6px 0 0 6px; }
+  .param-table th:last-child  { border-radius: 0 6px 6px 0; }
+  .param-table td {
+    padding: 8px 12px;
+    border-bottom: 1px solid var(--border);
+    vertical-align: top;
+  }
+  .param-table tr:last-child td { border-bottom: none; }
+  .param-name {
+    font-family: 'JetBrains Mono', 'Fira Code', monospace;
+    font-size: 12px;
+    color: var(--accent);
+  }
+  .param-type {
+    font-family: 'JetBrains Mono', 'Fira Code', monospace;
+    font-size: 12px;
+    color: var(--purple);
+  }
+  .req-yes { color: var(--green); font-size: 12px; font-weight: 700; }
+  .req-no  { color: var(--text-muted); font-size: 12px; }
+
+  /* Response / Error */
+  .response-block {
+    margin-top: 16px;
+    background: var(--surface2);
+    border: 1px solid var(--border);
+    border-radius: 8px;
+    padding: 12px 16px;
+    font-size: 13px;
+  }
+  .response-block .label {
+    font-size: 11px;
+    font-weight: 700;
+    text-transform: uppercase;
+    letter-spacing: .5px;
+    color: var(--text-muted);
+    margin-bottom: 6px;
+  }
+  .status-200 { color: var(--green); font-weight: 700; }
+  .no-body { color: var(--text-muted); font-style: italic; }
+
+  .error-row td:first-child { font-family: monospace; color: var(--red); font-size: 12px; }
+  .error-row td:nth-child(2) { font-family: monospace; color: var(--yellow); font-size: 12px; }
+</style>
+</head>
+<body>
+
+<nav id="sidebar">
+  <div id="sidebar-header">
+    <h1>🌊 Waver API</h1>
+    <p>Base URL: <code>/waver</code></p>
+  </div>
+  <div class="nav-group">
+    <div class="nav-group-label">인증</div>
+    <a class="nav-item" href="#main-section">Main <span class="nav-badge" style="background:rgba(45,212,191,.15);color:var(--teal)">1</span></a>
+    <a class="nav-item" href="#user-section">User (유저) <span class="nav-badge" style="background:rgba(108,143,255,.1);color:var(--accent)">7</span></a>
+  </div>
+  <div class="nav-group">
+    <div class="nav-group-label">컨텐츠</div>
+    <a class="nav-item" href="#bucket-section">Bucket (버킷리스트) <span class="nav-badge" style="background:rgba(108,143,255,.1);color:var(--accent)">10</span></a>
+    <a class="nav-item" href="#category-section">Category (카테고리) <span class="nav-badge" style="background:rgba(108,143,255,.1);color:var(--accent)">5</span></a>
+    <a class="nav-item" href="#feed-section">Feed (피드) <span class="nav-badge" style="background:rgba(108,143,255,.1);color:var(--accent)">5</span></a>
+  </div>
+  <div class="nav-group">
+    <div class="nav-group-label">소셜</div>
+    <a class="nav-item" href="#follow-section">Follow (팔로우) <span class="nav-badge" style="background:rgba(108,143,255,.1);color:var(--accent)">4</span></a>
+    <a class="nav-item" href="#comment-section">Comment (댓글) <span class="nav-badge" style="background:rgba(108,143,255,.1);color:var(--accent)">5</span></a>
+  </div>
+  <div class="nav-group">
+    <div class="nav-group-label">기타</div>
+    <a class="nav-item" href="#my-section">My (마이) <span class="nav-badge" style="background:rgba(108,143,255,.1);color:var(--accent)">4</span></a>
+    <a class="nav-item" href="#explore-section">Explore (검색) <span class="nav-badge" style="background:rgba(108,143,255,.1);color:var(--accent)">5</span></a>
+    <a class="nav-item" href="#badge-section">Badge (배지) <span class="nav-badge" style="background:rgba(108,143,255,.1);color:var(--accent)">2</span></a>
+    <a class="nav-item" href="#subscription-section">Subscription (구독) <span class="nav-badge" style="background:rgba(108,143,255,.1);color:var(--accent)">1</span></a>
+    <a class="nav-item" href="#image-section">Image (이미지) <span class="nav-badge" style="background:rgba(108,143,255,.1);color:var(--accent)">1</span></a>
+    <a class="nav-item" href="#utility-section">Utility (유틸리티) <span class="nav-badge" style="background:rgba(108,143,255,.1);color:var(--accent)">1</span></a>
+  </div>
+</nav>
+
+<main id="main">
+  <h1 class="page-title">Waver API Document</h1>
+  <div class="page-meta">
+    <div class="meta-chip">Base URL <span>/waver</span></div>
+    <div class="meta-chip">Auth <span>JWT Bearer Token</span></div>
+    <div class="meta-chip">Total Endpoints <span>51</span></div>
+    <div class="meta-chip">Last Updated <span>2026-06-14</span></div>
+  </div>
+
+  <!-- ────────── MAIN ────────── -->
+  <div class="section" id="main-section">
+    <h2 class="section-title">Main (인증)</h2>
+
+    <div class="endpoint">
+      <div class="endpoint-header" onclick="toggle(this)">
+        <span class="method-badge method-POST">POST</span>
+        <span class="endpoint-path">/waver/login</span>
+        <span class="tag-public">Public</span>
+        <span class="endpoint-summary">로그인</span>
+        <span class="chevron">▶</span>
+      </div>
+      <div class="endpoint-body">
+        <div class="param-section">
+          <div class="param-section-title">Request Body — application/json</div>
+          <table class="param-table">
+            <tr><th>Name</th><th>Type</th><th>Required</th><th>Description</th></tr>
+            <tr><td class="param-name">uid</td><td class="param-type">String</td><td class="req-yes">✅</td><td>Firebase UID</td></tr>
+          </table>
+        </div>
+        <div class="param-section">
+          <div class="param-section-title">Response — 200 OK</div>
+          <table class="param-table">
+            <tr><th>Field</th><th>Type</th><th>Description</th></tr>
+            <tr><td class="param-name">token</td><td class="param-type">String</td><td>JWT Access Token</td></tr>
+            <tr><td class="param-name">premiumStatus</td><td class="param-type">String</td><td>프리미엄 상태 (NONE, PLUS, …)</td></tr>
+          </table>
+        </div>
+        <div class="param-section">
+          <div class="param-section-title">Error Responses</div>
+          <table class="param-table">
+            <tr><th>Code</th><th>Key</th><th>Description</th></tr>
+            <tr class="error-row"><td>9000</td><td>WITHDRAWAL_USER</td><td>탈퇴한 사용자</td></tr>
+          </table>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <!-- ────────── USER ────────── -->
+  <div class="section" id="user-section">
+    <h2 class="section-title">User (유저)</h2>
+
+    <div class="endpoint">
+      <div class="endpoint-header" onclick="toggle(this)">
+        <span class="method-badge method-POST">POST</span>
+        <span class="endpoint-path">/waver/user/join</span>
+        <span class="tag-public">Public</span>
+        <span class="endpoint-summary">회원가입</span>
+        <span class="chevron">▶</span>
+      </div>
+      <div class="endpoint-body">
+        <div class="param-section">
+          <div class="param-section-title">Request Body — multipart/form-data</div>
+          <table class="param-table">
+            <tr><th>Name</th><th>Type</th><th>Required</th><th>Description</th></tr>
+            <tr><td class="param-name">profileImage</td><td class="param-type">File</td><td class="req-no">❌</td><td>프로필 이미지</td></tr>
+            <tr><td class="param-name">name</td><td class="param-type">String</td><td class="req-yes">✅</td><td>닉네임</td></tr>
+            <tr><td class="param-name">bio</td><td class="param-type">String</td><td class="req-no">❌</td><td>소개글</td></tr>
+            <tr><td class="param-name">uid</td><td class="param-type">String</td><td class="req-yes">✅</td><td>Firebase UID</td></tr>
+          </table>
+        </div>
+        <div class="param-section">
+          <div class="param-section-title">Response — 200 OK</div>
+          <table class="param-table">
+            <tr><th>Field</th><th>Type</th><th>Description</th></tr>
+            <tr><td class="param-name">token</td><td class="param-type">String</td><td>JWT Access Token</td></tr>
+            <tr><td class="param-name">premiumStatus</td><td class="param-type">String</td><td>프리미엄 상태 (NONE)</td></tr>
+          </table>
+        </div>
+      </div>
+    </div>
+
+    <div class="endpoint">
+      <div class="endpoint-header" onclick="toggle(this)">
+        <span class="method-badge method-GET">GET</span>
+        <span class="endpoint-path">/waver/user/profile</span>
+        <span class="endpoint-summary">프로필 조회</span>
+        <span class="chevron">▶</span>
+      </div>
+      <div class="endpoint-body">
+        <div class="param-section">
+          <div class="param-section-title">Query Parameters</div>
+          <table class="param-table">
+            <tr><th>Name</th><th>Type</th><th>Required</th><th>Description</th></tr>
+            <tr><td class="param-name">otherUserId</td><td class="param-type">Long</td><td class="req-no">❌</td><td>타인 조회 시 해당 유저 ID 전달</td></tr>
+          </table>
+        </div>
+        <div class="param-section">
+          <div class="param-section-title">Response — 200 OK · ProfileResponse</div>
+          <table class="param-table">
+            <tr><th>Field</th><th>Type</th><th>Description</th></tr>
+            <tr><td class="param-name">userId</td><td class="param-type">Long</td><td>유저 ID</td></tr>
+            <tr><td class="param-name">name</td><td class="param-type">String</td><td>닉네임</td></tr>
+            <tr><td class="param-name">bio</td><td class="param-type">String</td><td>소개글</td></tr>
+            <tr><td class="param-name">profileImage</td><td class="param-type">String</td><td>프로필 이미지 URL</td></tr>
+            <tr><td class="param-name">isFollowing</td><td class="param-type">Boolean</td><td>팔로우 여부</td></tr>
+          </table>
+        </div>
+      </div>
+    </div>
+
+    <div class="endpoint">
+      <div class="endpoint-header" onclick="toggle(this)">
+        <span class="method-badge method-PATCH">PATCH</span>
+        <span class="endpoint-path">/waver/user/profile</span>
+        <span class="endpoint-summary">프로필 수정</span>
+        <span class="chevron">▶</span>
+      </div>
+      <div class="endpoint-body">
+        <div class="param-section">
+          <div class="param-section-title">Request Body — multipart/form-data</div>
+          <table class="param-table">
+            <tr><th>Name</th><th>Type</th><th>Required</th><th>Description</th></tr>
+            <tr><td class="param-name">profileImage</td><td class="param-type">File</td><td class="req-no">❌</td><td>프로필 이미지</td></tr>
+            <tr><td class="param-name">name</td><td class="param-type">String</td><td class="req-no">❌</td><td>닉네임</td></tr>
+            <tr><td class="param-name">bio</td><td class="param-type">String</td><td class="req-no">❌</td><td>소개글</td></tr>
+          </table>
+        </div>
+        <div class="response-block"><div class="label">Response</div><span class="status-200">200 OK</span> <span class="no-body">— no body</span></div>
+      </div>
+    </div>
+
+    <div class="endpoint">
+      <div class="endpoint-header" onclick="toggle(this)">
+        <span class="method-badge method-GET">GET</span>
+        <span class="endpoint-path">/waver/user/profile/name</span>
+        <span class="tag-public">Public</span>
+        <span class="endpoint-summary">이름 중복 확인</span>
+        <span class="chevron">▶</span>
+      </div>
+      <div class="endpoint-body">
+        <div class="param-section">
+          <div class="param-section-title">Query Parameters</div>
+          <table class="param-table">
+            <tr><th>Name</th><th>Type</th><th>Required</th><th>Description</th></tr>
+            <tr><td class="param-name">name</td><td class="param-type">String</td><td class="req-yes">✅</td><td>확인할 닉네임</td></tr>
+          </table>
+        </div>
+        <div class="response-block"><div class="label">Response</div><span class="status-200">200 OK</span> <span class="no-body">— 사용 가능 시 정상, 중복 시 에러</span></div>
+      </div>
+    </div>
+
+    <div class="endpoint">
+      <div class="endpoint-header" onclick="toggle(this)">
+        <span class="method-badge method-GET">GET</span>
+        <span class="endpoint-path">/waver/user/check/limit</span>
+        <span class="endpoint-summary">웨이버 플러스 제한 확인</span>
+        <span class="chevron">▶</span>
+      </div>
+      <div class="endpoint-body">
+        <div class="param-section">
+          <div class="param-section-title">Response — 200 OK</div>
+          <table class="param-table">
+            <tr><th>Field</th><th>Type</th><th>Description</th></tr>
+            <tr><td class="param-name">premiumStatus</td><td class="param-type">String</td><td>현재 프리미엄 상태</td></tr>
+          </table>
+        </div>
+      </div>
+    </div>
+
+    <div class="endpoint">
+      <div class="endpoint-header" onclick="toggle(this)">
+        <span class="method-badge method-POST">POST</span>
+        <span class="endpoint-path">/waver/user/withdraw</span>
+        <span class="endpoint-summary">회원 탈퇴</span>
+        <span class="chevron">▶</span>
+      </div>
+      <div class="endpoint-body">
+        <div class="response-block"><div class="label">Response</div><span class="status-200">200 OK</span> <span class="no-body">— no body</span></div>
+      </div>
+    </div>
+
+    <div class="endpoint">
+      <div class="endpoint-header" onclick="toggle(this)">
+        <span class="method-badge method-POST">POST</span>
+        <span class="endpoint-path">/waver/user/status</span>
+        <span class="tag-public">Public</span>
+        <span class="endpoint-summary">사용자 상태 확인</span>
+        <span class="chevron">▶</span>
+      </div>
+      <div class="endpoint-body">
+        <div class="param-section">
+          <div class="param-section-title">Request Body — application/json</div>
+          <table class="param-table">
+            <tr><th>Name</th><th>Type</th><th>Required</th><th>Description</th></tr>
+            <tr><td class="param-name">email</td><td class="param-type">String</td><td class="req-yes">✅</td><td>이메일</td></tr>
+            <tr><td class="param-name">uid</td><td class="param-type">String</td><td class="req-yes">✅</td><td>Firebase UID</td></tr>
+          </table>
+        </div>
+        <div class="response-block"><div class="label">Response</div><span class="status-200">200 OK</span> — UserStatusResponse</div>
+      </div>
+    </div>
+
+    <div class="endpoint">
+      <div class="endpoint-header" onclick="toggle(this)">
+        <span class="method-badge method-POST">POST</span>
+        <span class="endpoint-path">/waver/user/fcm-token</span>
+        <span class="endpoint-summary">FCM 토큰 업데이트</span>
+        <span class="chevron">▶</span>
+      </div>
+      <div class="endpoint-body">
+        <div class="param-section">
+          <div class="param-section-title">Request Body — text/plain</div>
+          <table class="param-table">
+            <tr><th>Body</th><th>Type</th><th>Description</th></tr>
+            <tr><td class="param-name">(plain)</td><td class="param-type">String</td><td>FCM 디바이스 토큰</td></tr>
+          </table>
+        </div>
+        <div class="response-block"><div class="label">Response</div><span class="status-200">200 OK</span> <span class="no-body">— no body</span></div>
+      </div>
+    </div>
+  </div>
+
+  <!-- ────────── BUCKET ────────── -->
+  <div class="section" id="bucket-section">
+    <h2 class="section-title">Bucket (버킷리스트)</h2>
+
+    <div class="endpoint">
+      <div class="endpoint-header" onclick="toggle(this)">
+        <span class="method-badge method-POST">POST</span>
+        <span class="endpoint-path">/waver/bucket</span>
+        <span class="endpoint-summary">버킷리스트 등록</span>
+        <span class="chevron">▶</span>
+      </div>
+      <div class="endpoint-body">
+        <div class="param-section">
+          <div class="param-section-title">Request Body — multipart/form-data</div>
+          <table class="param-table">
+            <tr><th>Name</th><th>Type</th><th>Required</th><th>Description</th></tr>
+            <tr><td class="param-name">title</td><td class="param-type">String</td><td class="req-yes">✅</td><td>버킷리스트 제목</td></tr>
+            <tr><td class="param-name">categoryId</td><td class="param-type">Long</td><td class="req-yes">✅</td><td>카테고리 ID</td></tr>
+            <tr><td class="param-name">goalCount</td><td class="param-type">Integer</td><td class="req-no">❌</td><td>목표 달성 횟수</td></tr>
+            <tr><td class="param-name">image</td><td class="param-type">File</td><td class="req-no">❌</td><td>첨부 이미지</td></tr>
+            <tr><td class="param-name">isPublic</td><td class="param-type">Boolean</td><td class="req-no">❌</td><td>공개 여부</td></tr>
+          </table>
+        </div>
+        <div class="response-block"><div class="label">Response</div><span class="status-200">200 OK</span> — BucketDetailResponse</div>
+      </div>
+    </div>
+
+    <div class="endpoint">
+      <div class="endpoint-header" onclick="toggle(this)">
+        <span class="method-badge method-GET">GET</span>
+        <span class="endpoint-path">/waver/bucket</span>
+        <span class="endpoint-summary">버킷리스트 목록</span>
+        <span class="chevron">▶</span>
+      </div>
+      <div class="endpoint-body">
+        <div class="param-section">
+          <div class="param-section-title">Query Parameters</div>
+          <table class="param-table">
+            <tr><th>Name</th><th>Type</th><th>Required</th><th>Description</th></tr>
+            <tr><td class="param-name">categoryId</td><td class="param-type">Long</td><td class="req-no">❌</td><td>카테고리 필터</td></tr>
+            <tr><td class="param-name">status</td><td class="param-type">String</td><td class="req-no">❌</td><td>상태 필터 (진행중/완료 등)</td></tr>
+          </table>
+        </div>
+        <div class="response-block"><div class="label">Response</div><span class="status-200">200 OK</span> — BucketResponse</div>
+      </div>
+    </div>
+
+    <div class="endpoint">
+      <div class="endpoint-header" onclick="toggle(this)">
+        <span class="method-badge method-GET">GET</span>
+        <span class="endpoint-path">/waver/bucket/popular</span>
+        <span class="endpoint-summary">인기 버킷리스트 조회</span>
+        <span class="chevron">▶</span>
+      </div>
+      <div class="endpoint-body">
+        <div class="response-block"><div class="label">Response</div><span class="status-200">200 OK</span> — GetPopularBucketResponse</div>
+      </div>
+    </div>
+
+    <div class="endpoint">
+      <div class="endpoint-header" onclick="toggle(this)">
+        <span class="method-badge method-POST">POST</span>
+        <span class="endpoint-path">/waver/bucket/<span class="path-param">{id}</span></span>
+        <span class="endpoint-summary">버킷리스트 수정</span>
+        <span class="chevron">▶</span>
+      </div>
+      <div class="endpoint-body">
+        <div class="param-section">
+          <div class="param-section-title">Path Parameters</div>
+          <table class="param-table">
+            <tr><th>Name</th><th>Type</th><th>Description</th></tr>
+            <tr><td class="param-name">id</td><td class="param-type">Long</td><td>버킷리스트 ID</td></tr>
+          </table>
+        </div>
+        <div class="param-section">
+          <div class="param-section-title">Request Body — multipart/form-data (버킷 등록과 동일 구조)</div>
+        </div>
+        <div class="response-block"><div class="label">Response</div><span class="status-200">200 OK</span> — BucketDetailResponse</div>
+      </div>
+    </div>
+
+    <div class="endpoint">
+      <div class="endpoint-header" onclick="toggle(this)">
+        <span class="method-badge method-GET">GET</span>
+        <span class="endpoint-path">/waver/bucket/<span class="path-param">{id}</span></span>
+        <span class="endpoint-summary">버킷리스트 상세</span>
+        <span class="chevron">▶</span>
+      </div>
+      <div class="endpoint-body">
+        <div class="param-section">
+          <div class="param-section-title">Path Parameters</div>
+          <table class="param-table">
+            <tr><th>Name</th><th>Type</th><th>Description</th></tr>
+            <tr><td class="param-name">id</td><td class="param-type">Long</td><td>버킷리스트 ID</td></tr>
+          </table>
+        </div>
+        <div class="response-block"><div class="label">Response</div><span class="status-200">200 OK</span> — BucketDetailResponse</div>
+      </div>
+    </div>
+
+    <div class="endpoint">
+      <div class="endpoint-header" onclick="toggle(this)">
+        <span class="method-badge method-DELETE">DELETE</span>
+        <span class="endpoint-path">/waver/bucket/<span class="path-param">{id}</span></span>
+        <span class="endpoint-summary">버킷리스트 삭제</span>
+        <span class="chevron">▶</span>
+      </div>
+      <div class="endpoint-body">
+        <div class="param-section">
+          <div class="param-section-title">Path Parameters</div>
+          <table class="param-table">
+            <tr><th>Name</th><th>Type</th><th>Description</th></tr>
+            <tr><td class="param-name">id</td><td class="param-type">Long</td><td>버킷리스트 ID</td></tr>
+          </table>
+        </div>
+        <div class="response-block"><div class="label">Response</div><span class="status-200">200 OK</span> <span class="no-body">— no body</span></div>
+      </div>
+    </div>
+
+    <div class="endpoint">
+      <div class="endpoint-header" onclick="toggle(this)">
+        <span class="method-badge method-GET">GET</span>
+        <span class="endpoint-path">/waver/bucket/<span class="path-param">{id}</span>/achieve</span>
+        <span class="endpoint-summary">버킷리스트 달성</span>
+        <span class="chevron">▶</span>
+      </div>
+      <div class="endpoint-body">
+        <div class="param-section">
+          <div class="param-section-title">Path Parameters</div>
+          <table class="param-table">
+            <tr><th>Name</th><th>Type</th><th>Description</th></tr>
+            <tr><td class="param-name">id</td><td class="param-type">Long</td><td>버킷리스트 ID</td></tr>
+          </table>
+        </div>
+        <div class="response-block"><div class="label">Response</div><span class="status-200">200 OK</span> <span class="no-body">— no body</span></div>
+      </div>
+    </div>
+
+    <div class="endpoint">
+      <div class="endpoint-header" onclick="toggle(this)">
+        <span class="method-badge method-GET">GET</span>
+        <span class="endpoint-path">/waver/bucket/<span class="path-param">{id}</span>/achieve/cancel</span>
+        <span class="endpoint-summary">버킷리스트 달성 취소</span>
+        <span class="chevron">▶</span>
+      </div>
+      <div class="endpoint-body">
+        <div class="param-section">
+          <div class="param-section-title">Path Parameters</div>
+          <table class="param-table">
+            <tr><th>Name</th><th>Type</th><th>Description</th></tr>
+            <tr><td class="param-name">id</td><td class="param-type">Long</td><td>버킷리스트 ID</td></tr>
+          </table>
+        </div>
+        <div class="response-block"><div class="label">Response</div><span class="status-200">200 OK</span> <span class="no-body">— no body</span></div>
+      </div>
+    </div>
+
+    <div class="endpoint">
+      <div class="endpoint-header" onclick="toggle(this)">
+        <span class="method-badge method-GET">GET</span>
+        <span class="endpoint-path">/waver/bucket/<span class="path-param">{id}</span>/reset</span>
+        <span class="endpoint-summary">버킷리스트 다시 도전하기</span>
+        <span class="chevron">▶</span>
+      </div>
+      <div class="endpoint-body">
+        <div class="param-section">
+          <div class="param-section-title">Path Parameters</div>
+          <table class="param-table">
+            <tr><th>Name</th><th>Type</th><th>Description</th></tr>
+            <tr><td class="param-name">id</td><td class="param-type">Long</td><td>버킷리스트 ID</td></tr>
+          </table>
+        </div>
+        <div class="response-block"><div class="label">Response</div><span class="status-200">200 OK</span> <span class="no-body">— no body</span></div>
+      </div>
+    </div>
+
+    <div class="endpoint">
+      <div class="endpoint-header" onclick="toggle(this)">
+        <span class="method-badge method-PATCH">PATCH</span>
+        <span class="endpoint-path">/waver/bucket/<span class="path-param">{id}</span>/goalCount</span>
+        <span class="endpoint-summary">달성 횟수 수정</span>
+        <span class="chevron">▶</span>
+      </div>
+      <div class="endpoint-body">
+        <div class="param-section">
+          <div class="param-section-title">Path Parameters</div>
+          <table class="param-table">
+            <tr><th>Name</th><th>Type</th><th>Description</th></tr>
+            <tr><td class="param-name">id</td><td class="param-type">Long</td><td>버킷리스트 ID</td></tr>
+          </table>
+        </div>
+        <div class="param-section">
+          <div class="param-section-title">Request Body — application/json</div>
+          <table class="param-table">
+            <tr><th>Name</th><th>Type</th><th>Required</th><th>Description</th></tr>
+            <tr><td class="param-name">goalCount</td><td class="param-type">Integer</td><td class="req-yes">✅</td><td>목표 달성 횟수</td></tr>
+          </table>
+        </div>
+        <div class="response-block"><div class="label">Response</div><span class="status-200">200 OK</span> <span class="no-body">— no body</span></div>
+      </div>
+    </div>
+  </div>
+
+  <!-- ────────── CATEGORY ────────── -->
+  <div class="section" id="category-section">
+    <h2 class="section-title">Category (카테고리)</h2>
+
+    <div class="endpoint">
+      <div class="endpoint-header" onclick="toggle(this)">
+        <span class="method-badge method-GET">GET</span>
+        <span class="endpoint-path">/waver/category</span>
+        <span class="endpoint-summary">카테고리 목록</span>
+        <span class="chevron">▶</span>
+      </div>
+      <div class="endpoint-body">
+        <div class="param-section">
+          <div class="param-section-title">Query Parameters</div>
+          <table class="param-table">
+            <tr><th>Name</th><th>Type</th><th>Required</th><th>Description</th></tr>
+            <tr><td class="param-name">query</td><td class="param-type">String</td><td class="req-no">❌</td><td>검색 키워드</td></tr>
+          </table>
+        </div>
+        <div class="param-section">
+          <div class="param-section-title">Response — 200 OK · List&lt;CategoryResponse&gt;</div>
+          <table class="param-table">
+            <tr><th>Field</th><th>Type</th><th>Description</th></tr>
+            <tr><td class="param-name">id</td><td class="param-type">Long</td><td>카테고리 ID</td></tr>
+            <tr><td class="param-name">name</td><td class="param-type">String</td><td>카테고리 이름</td></tr>
+            <tr><td class="param-name">seq</td><td class="param-type">Integer</td><td>순서</td></tr>
+          </table>
+        </div>
+      </div>
+    </div>
+
+    <div class="endpoint">
+      <div class="endpoint-header" onclick="toggle(this)">
+        <span class="method-badge method-POST">POST</span>
+        <span class="endpoint-path">/waver/category</span>
+        <span class="endpoint-summary">카테고리 추가</span>
+        <span class="chevron">▶</span>
+      </div>
+      <div class="endpoint-body">
+        <div class="param-section">
+          <div class="param-section-title">Request Body — application/json</div>
+          <table class="param-table">
+            <tr><th>Name</th><th>Type</th><th>Required</th><th>Description</th></tr>
+            <tr><td class="param-name">name</td><td class="param-type">String</td><td class="req-yes">✅</td><td>카테고리 이름</td></tr>
+          </table>
+        </div>
+        <div class="response-block"><div class="label">Response</div><span class="status-200">200 OK</span> <span class="no-body">— no body</span></div>
+      </div>
+    </div>
+
+    <div class="endpoint">
+      <div class="endpoint-header" onclick="toggle(this)">
+        <span class="method-badge method-PATCH">PATCH</span>
+        <span class="endpoint-path">/waver/category/<span class="path-param">{id}</span></span>
+        <span class="endpoint-summary">카테고리 이름 변경</span>
+        <span class="chevron">▶</span>
+      </div>
+      <div class="endpoint-body">
+        <div class="param-section">
+          <div class="param-section-title">Path Parameters</div>
+          <table class="param-table">
+            <tr><th>Name</th><th>Type</th><th>Description</th></tr>
+            <tr><td class="param-name">id</td><td class="param-type">Long</td><td>카테고리 ID</td></tr>
+          </table>
+        </div>
+        <div class="param-section">
+          <div class="param-section-title">Request Body — application/json</div>
+          <table class="param-table">
+            <tr><th>Name</th><th>Type</th><th>Required</th><th>Description</th></tr>
+            <tr><td class="param-name">name</td><td class="param-type">String</td><td class="req-yes">✅</td><td>변경할 카테고리 이름</td></tr>
+          </table>
+        </div>
+        <div class="response-block"><div class="label">Response</div><span class="status-200">200 OK</span> <span class="no-body">— no body</span></div>
+      </div>
+    </div>
+
+    <div class="endpoint">
+      <div class="endpoint-header" onclick="toggle(this)">
+        <span class="method-badge method-DELETE">DELETE</span>
+        <span class="endpoint-path">/waver/category/<span class="path-param">{id}</span></span>
+        <span class="endpoint-summary">카테고리 삭제</span>
+        <span class="chevron">▶</span>
+      </div>
+      <div class="endpoint-body">
+        <div class="param-section">
+          <div class="param-section-title">Path Parameters</div>
+          <table class="param-table">
+            <tr><th>Name</th><th>Type</th><th>Description</th></tr>
+            <tr><td class="param-name">id</td><td class="param-type">Long</td><td>카테고리 ID</td></tr>
+          </table>
+        </div>
+        <div class="response-block"><div class="label">Response</div><span class="status-200">200 OK</span> <span class="no-body">— no body</span></div>
+      </div>
+    </div>
+
+    <div class="endpoint">
+      <div class="endpoint-header" onclick="toggle(this)">
+        <span class="method-badge method-PATCH">PATCH</span>
+        <span class="endpoint-path">/waver/category/seq</span>
+        <span class="endpoint-summary">카테고리 순서 변경</span>
+        <span class="chevron">▶</span>
+      </div>
+      <div class="endpoint-body">
+        <div class="param-section">
+          <div class="param-section-title">Request Body — application/json</div>
+          <table class="param-table">
+            <tr><th>Name</th><th>Type</th><th>Required</th><th>Description</th></tr>
+            <tr><td class="param-name">categoryIds</td><td class="param-type">List&lt;Long&gt;</td><td class="req-yes">✅</td><td>순서대로 정렬된 카테고리 ID 목록</td></tr>
+          </table>
+        </div>
+        <div class="response-block"><div class="label">Response</div><span class="status-200">200 OK</span> <span class="no-body">— no body</span></div>
+      </div>
+    </div>
+  </div>
+
+  <!-- ────────── FEED ────────── -->
+  <div class="section" id="feed-section">
+    <h2 class="section-title">Feed (피드)</h2>
+
+    <div class="endpoint">
+      <div class="endpoint-header" onclick="toggle(this)">
+        <span class="method-badge method-GET">GET</span>
+        <span class="endpoint-path">/waver/feeds</span>
+        <span class="endpoint-summary">피드 목록</span>
+        <span class="chevron">▶</span>
+      </div>
+      <div class="endpoint-body">
+        <div class="param-section">
+          <div class="param-section-title">Query Parameters</div>
+          <table class="param-table">
+            <tr><th>Name</th><th>Type</th><th>Required</th><th>Description</th></tr>
+            <tr><td class="param-name">nextKey</td><td class="param-type">Long</td><td class="req-no">❌</td><td>페이지네이션 커서 (이전 응답의 nextKey 값)</td></tr>
+          </table>
+        </div>
+        <div class="response-block"><div class="label">Response</div><span class="status-200">200 OK</span> — FeedResponse</div>
+        <div class="param-section">
+          <div class="param-section-title">Error Responses</div>
+          <table class="param-table">
+            <tr><th>Code</th><th>Key</th><th>Description</th></tr>
+            <tr class="error-row"><td>8000</td><td>KEYWORD_NOT_FOUND</td><td>저장된 관심 키워드 없음</td></tr>
+          </table>
+        </div>
+      </div>
+    </div>
+
+    <div class="endpoint">
+      <div class="endpoint-header" onclick="toggle(this)">
+        <span class="method-badge method-POST">POST</span>
+        <span class="endpoint-path">/waver/feeds/keyword</span>
+        <span class="endpoint-summary">관심 키워드 저장</span>
+        <span class="chevron">▶</span>
+      </div>
+      <div class="endpoint-body">
+        <div class="param-section">
+          <div class="param-section-title">Request Body — application/json</div>
+          <table class="param-table">
+            <tr><th>Name</th><th>Type</th><th>Required</th><th>Description</th></tr>
+            <tr><td class="param-name">keywordCodes</td><td class="param-type">List&lt;String&gt;</td><td class="req-yes">✅</td><td>관심 키워드 코드 목록</td></tr>
+          </table>
+        </div>
+        <div class="response-block"><div class="label">Response</div><span class="status-200">200 OK</span> <span class="no-body">— no body</span></div>
+      </div>
+    </div>
+
+    <div class="endpoint">
+      <div class="endpoint-header" onclick="toggle(this)">
+        <span class="method-badge method-POST">POST</span>
+        <span class="endpoint-path">/waver/feeds/<span class="path-param">{id}</span>/like</span>
+        <span class="endpoint-summary">피드 좋아요 / 취소 (토글)</span>
+        <span class="chevron">▶</span>
+      </div>
+      <div class="endpoint-body">
+        <div class="param-section">
+          <div class="param-section-title">Path Parameters</div>
+          <table class="param-table">
+            <tr><th>Name</th><th>Type</th><th>Description</th></tr>
+            <tr><td class="param-name">id</td><td class="param-type">Long</td><td>피드(버킷) ID</td></tr>
+          </table>
+        </div>
+        <div class="response-block"><div class="label">Response</div><span class="status-200">200 OK</span> <span class="no-body">— no body</span></div>
+      </div>
+    </div>
+
+    <div class="endpoint">
+      <div class="endpoint-header" onclick="toggle(this)">
+        <span class="method-badge method-POST">POST</span>
+        <span class="endpoint-path">/waver/feeds/<span class="path-param">{id}</span>/scrap</span>
+        <span class="endpoint-summary">피드 스크랩 (복사)</span>
+        <span class="chevron">▶</span>
+      </div>
+      <div class="endpoint-body">
+        <div class="param-section">
+          <div class="param-section-title">Path Parameters</div>
+          <table class="param-table">
+            <tr><th>Name</th><th>Type</th><th>Description</th></tr>
+            <tr><td class="param-name">id</td><td class="param-type">Long</td><td>피드(버킷) ID</td></tr>
+          </table>
+        </div>
+        <div class="param-section">
+          <div class="param-section-title">Response — 200 OK · FeedCopyResponse</div>
+          <table class="param-table">
+            <tr><th>Field</th><th>Type</th><th>Description</th></tr>
+            <tr><td class="param-name">copiedId</td><td class="param-type">Long</td><td>복사된 버킷리스트 ID</td></tr>
+          </table>
+        </div>
+      </div>
+    </div>
+
+    <div class="endpoint">
+      <div class="endpoint-header" onclick="toggle(this)">
+        <span class="method-badge method-POST">POST</span>
+        <span class="endpoint-path">/waver/feeds/<span class="path-param">{id}</span>/report</span>
+        <span class="endpoint-summary">피드 신고</span>
+        <span class="chevron">▶</span>
+      </div>
+      <div class="endpoint-body">
+        <div class="param-section">
+          <div class="param-section-title">Path Parameters</div>
+          <table class="param-table">
+            <tr><th>Name</th><th>Type</th><th>Description</th></tr>
+            <tr><td class="param-name">id</td><td class="param-type">Long</td><td>피드(버킷) ID</td></tr>
+          </table>
+        </div>
+        <div class="param-section">
+          <div class="param-section-title">Request Body — application/json</div>
+          <table class="param-table">
+            <tr><th>Name</th><th>Type</th><th>Required</th><th>Description</th></tr>
+            <tr><td class="param-name">reason</td><td class="param-type">String</td><td class="req-yes">✅</td><td>신고 사유</td></tr>
+          </table>
+        </div>
+        <div class="response-block"><div class="label">Response</div><span class="status-200">200 OK</span> <span class="no-body">— no body</span></div>
+        <div class="param-section">
+          <div class="param-section-title">Error Responses</div>
+          <table class="param-table">
+            <tr><th>Code</th><th>Key</th><th>Description</th></tr>
+            <tr class="error-row"><td>4040</td><td>NOT_FOUND</td><td>버킷을 찾을 수 없음</td></tr>
+            <tr class="error-row"><td>4030</td><td>FORBIDDEN</td><td>자기 버킷 신고 불가</td></tr>
+          </table>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <!-- ────────── MY ────────── -->
+  <div class="section" id="my-section">
+    <h2 class="section-title">My (마이)</h2>
+
+    <div class="endpoint">
+      <div class="endpoint-header" onclick="toggle(this)">
+        <span class="method-badge method-GET">GET</span>
+        <span class="endpoint-path">/waver/my</span>
+        <span class="endpoint-summary">마이페이지 메인</span>
+        <span class="chevron">▶</span>
+      </div>
+      <div class="endpoint-body">
+        <div class="response-block"><div class="label">Response</div><span class="status-200">200 OK</span> — MyResponse</div>
+      </div>
+    </div>
+
+    <div class="endpoint">
+      <div class="endpoint-header" onclick="toggle(this)">
+        <span class="method-badge method-GET">GET</span>
+        <span class="endpoint-path">/waver/my/<span class="path-param">{otherUserId}</span></span>
+        <span class="endpoint-summary">타인 마이페이지</span>
+        <span class="chevron">▶</span>
+      </div>
+      <div class="endpoint-body">
+        <div class="param-section">
+          <div class="param-section-title">Path Parameters</div>
+          <table class="param-table">
+            <tr><th>Name</th><th>Type</th><th>Description</th></tr>
+            <tr><td class="param-name">otherUserId</td><td class="param-type">Long</td><td>조회할 유저 ID</td></tr>
+          </table>
+        </div>
+        <div class="response-block"><div class="label">Response</div><span class="status-200">200 OK</span> — OtherMyResponse</div>
+      </div>
+    </div>
+
+    <div class="endpoint">
+      <div class="endpoint-header" onclick="toggle(this)">
+        <span class="method-badge method-GET">GET</span>
+        <span class="endpoint-path">/waver/my/push</span>
+        <span class="endpoint-summary">푸시 알림 목록</span>
+        <span class="chevron">▶</span>
+      </div>
+      <div class="endpoint-body">
+        <div class="response-block"><div class="label">Response</div><span class="status-200">200 OK</span> — AlarmResponse</div>
+      </div>
+    </div>
+
+    <div class="endpoint">
+      <div class="endpoint-header" onclick="toggle(this)">
+        <span class="method-badge method-GET">GET</span>
+        <span class="endpoint-path">/waver/my/info</span>
+        <span class="endpoint-summary">내 웨이브 정보</span>
+        <span class="chevron">▶</span>
+      </div>
+      <div class="endpoint-body">
+        <div class="response-block"><div class="label">Response</div><span class="status-200">200 OK</span> — MyWaveInfoResponse</div>
+      </div>
+    </div>
+  </div>
+
+  <!-- ────────── FOLLOW ────────── -->
+  <div class="section" id="follow-section">
+    <h2 class="section-title">Follow (팔로우)</h2>
+
+    <div class="endpoint">
+      <div class="endpoint-header" onclick="toggle(this)">
+        <span class="method-badge method-GET">GET</span>
+        <span class="endpoint-path">/waver/follow</span>
+        <span class="endpoint-summary">팔로우 / 팔로워 목록</span>
+        <span class="chevron">▶</span>
+      </div>
+      <div class="endpoint-body">
+        <div class="response-block"><div class="label">Response</div><span class="status-200">200 OK</span> — GetFollowersResponse</div>
+      </div>
+    </div>
+
+    <div class="endpoint">
+      <div class="endpoint-header" onclick="toggle(this)">
+        <span class="method-badge method-POST">POST</span>
+        <span class="endpoint-path">/waver/follow</span>
+        <span class="endpoint-summary">팔로우</span>
+        <span class="chevron">▶</span>
+      </div>
+      <div class="endpoint-body">
+        <div class="param-section">
+          <div class="param-section-title">Request Body — application/json</div>
+          <table class="param-table">
+            <tr><th>Name</th><th>Type</th><th>Required</th><th>Description</th></tr>
+            <tr><td class="param-name">followUserId</td><td class="param-type">Long</td><td class="req-yes">✅</td><td>팔로우할 유저 ID</td></tr>
+          </table>
+        </div>
+        <div class="response-block"><div class="label">Response</div><span class="status-200">200 OK</span> <span class="no-body">— no body</span></div>
+      </div>
+    </div>
+
+    <div class="endpoint">
+      <div class="endpoint-header" onclick="toggle(this)">
+        <span class="method-badge method-POST">POST</span>
+        <span class="endpoint-path">/waver/follow/unfollow</span>
+        <span class="endpoint-summary">언팔로우</span>
+        <span class="chevron">▶</span>
+      </div>
+      <div class="endpoint-body">
+        <div class="param-section">
+          <div class="param-section-title">Request Body — application/json</div>
+          <table class="param-table">
+            <tr><th>Name</th><th>Type</th><th>Required</th><th>Description</th></tr>
+            <tr><td class="param-name">followUserId</td><td class="param-type">Long</td><td class="req-yes">✅</td><td>언팔로우할 유저 ID</td></tr>
+          </table>
+        </div>
+        <div class="response-block"><div class="label">Response</div><span class="status-200">200 OK</span> <span class="no-body">— no body</span></div>
+      </div>
+    </div>
+
+    <div class="endpoint">
+      <div class="endpoint-header" onclick="toggle(this)">
+        <span class="method-badge method-GET">GET</span>
+        <span class="endpoint-path">/waver/follow/mutual</span>
+        <span class="endpoint-summary">맞팔 목록</span>
+        <span class="chevron">▶</span>
+      </div>
+      <div class="endpoint-body">
+        <div class="param-section">
+          <div class="param-section-title">Query Parameters</div>
+          <table class="param-table">
+            <tr><th>Name</th><th>Type</th><th>Required</th><th>Description</th></tr>
+            <tr><td class="param-name">name</td><td class="param-type">String</td><td class="req-no">❌</td><td>닉네임 검색 (부분 일치)</td></tr>
+          </table>
+        </div>
+        <div class="param-section">
+          <div class="param-section-title">Response — 200 OK · List&lt;FollowElement&gt;</div>
+          <table class="param-table">
+            <tr><th>Field</th><th>Type</th><th>Description</th></tr>
+            <tr><td class="param-name">id</td><td class="param-type">Long</td><td>유저 ID</td></tr>
+            <tr><td class="param-name">name</td><td class="param-type">String</td><td>닉네임</td></tr>
+            <tr><td class="param-name">imgUrl</td><td class="param-type">String</td><td>프로필 이미지</td></tr>
+            <tr><td class="param-name">mutualFollow</td><td class="param-type">Boolean</td><td>맞팔 여부 (항상 true)</td></tr>
+          </table>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <!-- ────────── COMMENT ────────── -->
+  <div class="section" id="comment-section">
+    <h2 class="section-title">Comment (댓글)</h2>
+
+    <div class="endpoint">
+      <div class="endpoint-header" onclick="toggle(this)">
+        <span class="method-badge method-POST">POST</span>
+        <span class="endpoint-path">/waver/comment</span>
+        <span class="endpoint-summary">댓글 등록</span>
+        <span class="chevron">▶</span>
+      </div>
+      <div class="endpoint-body">
+        <div class="param-section">
+          <div class="param-section-title">Request Body — application/json</div>
+          <table class="param-table">
+            <tr><th>Name</th><th>Type</th><th>Required</th><th>Description</th></tr>
+            <tr><td class="param-name">bucketId</td><td class="param-type">Long</td><td class="req-yes">✅</td><td>버킷리스트 ID</td></tr>
+            <tr><td class="param-name">content</td><td class="param-type">String</td><td class="req-yes">✅</td><td>댓글 내용</td></tr>
+          </table>
+        </div>
+        <div class="response-block"><div class="label">Response</div><span class="status-200">200 OK</span> <span class="no-body">— no body</span></div>
+      </div>
+    </div>
+
+    <div class="endpoint">
+      <div class="endpoint-header" onclick="toggle(this)">
+        <span class="method-badge method-PATCH">PATCH</span>
+        <span class="endpoint-path">/waver/comment/<span class="path-param">{id}</span></span>
+        <span class="endpoint-summary">댓글 수정</span>
+        <span class="chevron">▶</span>
+      </div>
+      <div class="endpoint-body">
+        <div class="param-section">
+          <div class="param-section-title">Path Parameters</div>
+          <table class="param-table">
+            <tr><th>Name</th><th>Type</th><th>Description</th></tr>
+            <tr><td class="param-name">id</td><td class="param-type">Long</td><td>댓글 ID</td></tr>
+          </table>
+        </div>
+        <div class="param-section">
+          <div class="param-section-title">Request Body — application/json</div>
+          <table class="param-table">
+            <tr><th>Name</th><th>Type</th><th>Required</th><th>Description</th></tr>
+            <tr><td class="param-name">content</td><td class="param-type">String</td><td class="req-yes">✅</td><td>수정할 댓글 내용</td></tr>
+          </table>
+        </div>
+        <div class="response-block"><div class="label">Response</div><span class="status-200">200 OK</span> <span class="no-body">— no body</span></div>
+      </div>
+    </div>
+
+    <div class="endpoint">
+      <div class="endpoint-header" onclick="toggle(this)">
+        <span class="method-badge method-DELETE">DELETE</span>
+        <span class="endpoint-path">/waver/comment/<span class="path-param">{id}</span></span>
+        <span class="endpoint-summary">댓글 삭제</span>
+        <span class="chevron">▶</span>
+      </div>
+      <div class="endpoint-body">
+        <div class="param-section">
+          <div class="param-section-title">Path Parameters</div>
+          <table class="param-table">
+            <tr><th>Name</th><th>Type</th><th>Description</th></tr>
+            <tr><td class="param-name">id</td><td class="param-type">Long</td><td>댓글 ID</td></tr>
+          </table>
+        </div>
+        <div class="response-block"><div class="label">Response</div><span class="status-200">200 OK</span> <span class="no-body">— no body</span></div>
+      </div>
+    </div>
+
+    <div class="endpoint">
+      <div class="endpoint-header" onclick="toggle(this)">
+        <span class="method-badge method-PATCH">PATCH</span>
+        <span class="endpoint-path">/waver/comment/<span class="path-param">{id}</span>/report</span>
+        <span class="tag-wip">미구현</span>
+        <span class="endpoint-summary">댓글 신고</span>
+        <span class="chevron">▶</span>
+      </div>
+      <div class="endpoint-body">
+        <div class="param-section">
+          <div class="param-section-title">Path Parameters</div>
+          <table class="param-table">
+            <tr><th>Name</th><th>Type</th><th>Description</th></tr>
+            <tr><td class="param-name">id</td><td class="param-type">Long</td><td>댓글 ID</td></tr>
+          </table>
+        </div>
+        <div class="param-section">
+          <div class="param-section-title">Request Body — application/json</div>
+          <table class="param-table">
+            <tr><th>Name</th><th>Type</th><th>Required</th><th>Description</th></tr>
+            <tr><td class="param-name">reason</td><td class="param-type">String</td><td class="req-yes">✅</td><td>신고 사유</td></tr>
+          </table>
+        </div>
+      </div>
+    </div>
+
+    <div class="endpoint">
+      <div class="endpoint-header" onclick="toggle(this)">
+        <span class="method-badge method-PATCH">PATCH</span>
+        <span class="endpoint-path">/waver/comment/<span class="path-param">{id}</span>/hide</span>
+        <span class="endpoint-summary">댓글 숨기기</span>
+        <span class="chevron">▶</span>
+      </div>
+      <div class="endpoint-body">
+        <div class="param-section">
+          <div class="param-section-title">Path Parameters</div>
+          <table class="param-table">
+            <tr><th>Name</th><th>Type</th><th>Description</th></tr>
+            <tr><td class="param-name">id</td><td class="param-type">Long</td><td>댓글 ID</td></tr>
+          </table>
+        </div>
+        <div class="response-block"><div class="label">Response</div><span class="status-200">200 OK</span> <span class="no-body">— no body</span></div>
+      </div>
+    </div>
+  </div>
+
+  <!-- ────────── EXPLORE ────────── -->
+  <div class="section" id="explore-section">
+    <h2 class="section-title">Explore (검색)</h2>
+
+    <div class="endpoint">
+      <div class="endpoint-header" onclick="toggle(this)">
+        <span class="method-badge method-GET">GET</span>
+        <span class="endpoint-path">/waver/explore</span>
+        <span class="endpoint-summary">검색</span>
+        <span class="chevron">▶</span>
+      </div>
+      <div class="endpoint-body">
+        <div class="param-section">
+          <div class="param-section-title">Query Parameters</div>
+          <table class="param-table">
+            <tr><th>Name</th><th>Type</th><th>Required</th><th>Description</th></tr>
+            <tr><td class="param-name">query</td><td class="param-type">String</td><td class="req-yes">✅</td><td>검색어</td></tr>
+          </table>
+        </div>
+        <div class="response-block"><div class="label">Response</div><span class="status-200">200 OK</span> — ExploreResponse</div>
+      </div>
+    </div>
+
+    <div class="endpoint">
+      <div class="endpoint-header" onclick="toggle(this)">
+        <span class="method-badge method-GET">GET</span>
+        <span class="endpoint-path">/waver/explore/keywords</span>
+        <span class="endpoint-summary">키워드 전체 목록</span>
+        <span class="chevron">▶</span>
+      </div>
+      <div class="endpoint-body">
+        <div class="response-block"><div class="label">Response</div><span class="status-200">200 OK</span> — List&lt;KeywordResponse&gt;</div>
+      </div>
+    </div>
+
+    <div class="endpoint">
+      <div class="endpoint-header" onclick="toggle(this)">
+        <span class="method-badge method-GET">GET</span>
+        <span class="endpoint-path">/waver/explore/searchOptions</span>
+        <span class="endpoint-summary">최근 검색어 &amp; 추천 키워드</span>
+        <span class="chevron">▶</span>
+      </div>
+      <div class="endpoint-body">
+        <div class="response-block"><div class="label">Response</div><span class="status-200">200 OK</span> — SearchOptionResponse</div>
+      </div>
+    </div>
+
+    <div class="endpoint">
+      <div class="endpoint-header" onclick="toggle(this)">
+        <span class="method-badge method-DELETE">DELETE</span>
+        <span class="endpoint-path">/waver/explore/recentSearch/all</span>
+        <span class="endpoint-summary">최근 검색어 전체 삭제</span>
+        <span class="chevron">▶</span>
+      </div>
+      <div class="endpoint-body">
+        <div class="response-block"><div class="label">Response</div><span class="status-200">200 OK</span> <span class="no-body">— no body</span></div>
+      </div>
+    </div>
+
+    <div class="endpoint">
+      <div class="endpoint-header" onclick="toggle(this)">
+        <span class="method-badge method-DELETE">DELETE</span>
+        <span class="endpoint-path">/waver/explore/recentSearch/<span class="path-param">{keyword}</span></span>
+        <span class="endpoint-summary">최근 검색어 개별 삭제</span>
+        <span class="chevron">▶</span>
+      </div>
+      <div class="endpoint-body">
+        <div class="param-section">
+          <div class="param-section-title">Path Parameters</div>
+          <table class="param-table">
+            <tr><th>Name</th><th>Type</th><th>Description</th></tr>
+            <tr><td class="param-name">keyword</td><td class="param-type">String</td><td>삭제할 검색어</td></tr>
+          </table>
+        </div>
+        <div class="response-block"><div class="label">Response</div><span class="status-200">200 OK</span> <span class="no-body">— no body</span></div>
+      </div>
+    </div>
+  </div>
+
+  <!-- ────────── BADGE ────────── -->
+  <div class="section" id="badge-section">
+    <h2 class="section-title">Badge (배지)</h2>
+
+    <div class="endpoint">
+      <div class="endpoint-header" onclick="toggle(this)">
+        <span class="method-badge method-GET">GET</span>
+        <span class="endpoint-path">/waver/badge</span>
+        <span class="endpoint-summary">배지 목록 조회</span>
+        <span class="chevron">▶</span>
+      </div>
+      <div class="endpoint-body">
+        <div class="response-block"><div class="label">Response</div><span class="status-200">200 OK</span> — List&lt;BadgeResponse&gt;</div>
+      </div>
+    </div>
+
+    <div class="endpoint">
+      <div class="endpoint-header" onclick="toggle(this)">
+        <span class="method-badge method-POST">POST</span>
+        <span class="endpoint-path">/waver/badge/<span class="path-param">{badgeId}</span></span>
+        <span class="endpoint-summary">배지 선택</span>
+        <span class="chevron">▶</span>
+      </div>
+      <div class="endpoint-body">
+        <div class="param-section">
+          <div class="param-section-title">Path Parameters</div>
+          <table class="param-table">
+            <tr><th>Name</th><th>Type</th><th>Description</th></tr>
+            <tr><td class="param-name">badgeId</td><td class="param-type">Long</td><td>배지 ID</td></tr>
+          </table>
+        </div>
+        <div class="response-block"><div class="label">Response</div><span class="status-200">200 OK</span> <span class="no-body">— no body</span></div>
+      </div>
+    </div>
+  </div>
+
+  <!-- ────────── SUBSCRIPTION ────────── -->
+  <div class="section" id="subscription-section">
+    <h2 class="section-title">Subscription (구독)</h2>
+
+    <div class="endpoint">
+      <div class="endpoint-header" onclick="toggle(this)">
+        <span class="method-badge method-POST">POST</span>
+        <span class="endpoint-path">/waver/subscribe</span>
+        <span class="endpoint-summary">구독</span>
+        <span class="chevron">▶</span>
+      </div>
+      <div class="endpoint-body">
+        <div class="param-section">
+          <div class="param-section-title">Request Body — application/json</div>
+          <table class="param-table">
+            <tr><th>Name</th><th>Type</th><th>Required</th><th>Description</th></tr>
+            <tr><td class="param-name">subscribeId</td><td class="param-type">Long</td><td class="req-yes">✅</td><td>구독 대상 ID</td></tr>
+          </table>
+        </div>
+        <div class="response-block"><div class="label">Response</div><span class="status-200">200 OK</span> <span class="no-body">— no body</span></div>
+      </div>
+    </div>
+  </div>
+
+  <!-- ────────── IMAGE ────────── -->
+  <div class="section" id="image-section">
+    <h2 class="section-title">Image (이미지)</h2>
+
+    <div class="endpoint">
+      <div class="endpoint-header" onclick="toggle(this)">
+        <span class="method-badge method-GET">GET</span>
+        <span class="endpoint-path">/waver/image/<span class="path-param">{*path}</span></span>
+        <span class="tag-public">Public</span>
+        <span class="endpoint-summary">이미지 조회</span>
+        <span class="chevron">▶</span>
+      </div>
+      <div class="endpoint-body">
+        <div class="param-section">
+          <div class="param-section-title">Path Parameters</div>
+          <table class="param-table">
+            <tr><th>Name</th><th>Type</th><th>Description</th></tr>
+            <tr><td class="param-name">path</td><td class="param-type">String</td><td>이미지 파일 경로 (와일드카드)</td></tr>
+          </table>
+        </div>
+        <div class="response-block"><div class="label">Response</div><span class="status-200">200 OK</span> — 이미지 바이너리 (Content-Type: 파일 형식에 따라 자동)</div>
+      </div>
+    </div>
+  </div>
+
+  <!-- ────────── UTILITY ────────── -->
+  <div class="section" id="utility-section">
+    <h2 class="section-title">Utility (유틸리티)</h2>
+
+    <div class="endpoint">
+      <div class="endpoint-header" onclick="toggle(this)">
+        <span class="method-badge method-GET">GET</span>
+        <span class="endpoint-path">/waver/utility/codes/<span class="path-param">{groupCode}</span></span>
+        <span class="endpoint-summary">코드 목록 조회</span>
+        <span class="chevron">▶</span>
+      </div>
+      <div class="endpoint-body">
+        <div class="param-section">
+          <div class="param-section-title">Path Parameters</div>
+          <table class="param-table">
+            <tr><th>Name</th><th>Type</th><th>Description</th></tr>
+            <tr><td class="param-name">groupCode</td><td class="param-type">String</td><td>코드 그룹 코드 (예: REPORT — 신고 내용 목록)</td></tr>
+          </table>
+        </div>
+        <div class="param-section">
+          <div class="param-section-title">Response — 200 OK · List&lt;CodeResponse&gt;</div>
+          <table class="param-table">
+            <tr><th>Field</th><th>Type</th><th>Description</th></tr>
+            <tr><td class="param-name">code</td><td class="param-type">String</td><td>코드 값</td></tr>
+            <tr><td class="param-name">name</td><td class="param-type">String</td><td>코드 이름</td></tr>
+          </table>
+        </div>
+        <div class="param-section">
+          <div class="param-section-title">Error Responses</div>
+          <table class="param-table">
+            <tr><th>Code</th><th>Key</th><th>Description</th></tr>
+            <tr class="error-row"><td>400</td><td>BAD_REQUEST</td><td>존재하지 않는 그룹 코드</td></tr>
+          </table>
+        </div>
+      </div>
+    </div>
+  </div>
+
+</main>
+
+<script>
+  function toggle(header) {
+    header.parentElement.classList.toggle('open');
+  }
+
+  // Active sidebar highlighting on scroll
+  const sections = document.querySelectorAll('.section');
+  const navItems = document.querySelectorAll('.nav-item');
+  const observer = new IntersectionObserver(entries => {
+    entries.forEach(e => {
+      if (e.isIntersecting) {
+        navItems.forEach(n => n.classList.remove('active'));
+        const active = document.querySelector(`.nav-item[href="#${e.target.id}"]`);
+        if (active) active.classList.add('active');
+      }
+    });
+  }, { threshold: 0.2 });
+  sections.forEach(s => observer.observe(s));
+</script>
+</body>
+</html>
