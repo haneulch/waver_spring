@@ -1,11 +1,6 @@
 package com.mybury.waver.service;
 
-import com.mybury.waver.common.code.FixedKeyword;
-import com.mybury.waver.common.code.ReportType;
-import com.mybury.waver.common.code.ResultCode;
-import com.mybury.waver.common.code.SortType;
-import com.mybury.waver.common.code.YesNo;
-import com.mybury.waver.repository.UserRepository;
+import com.mybury.waver.common.code.*;
 import com.mybury.waver.domain.Bucket;
 import com.mybury.waver.domain.User;
 import com.mybury.waver.domain.vo.BucketGoalCount;
@@ -14,25 +9,22 @@ import com.mybury.waver.exception.WaverException;
 import com.mybury.waver.repository.BucketRepository;
 import com.mybury.waver.repository.LikeBucketRepository;
 import com.mybury.waver.repository.ReportRepository;
+import com.mybury.waver.repository.UserRepository;
 import com.mybury.waver.util.FileUploadUtils;
-import com.mybury.waver.web.message.v1.bucket.BucketCreateRequest;
-import com.mybury.waver.web.message.v1.bucket.BucketDetailResponse;
-import com.mybury.waver.web.message.v1.bucket.BucketRequest;
-import com.mybury.waver.web.message.v1.bucket.BucketUpdateRequest;
-import com.mybury.waver.web.message.v1.bucket.GetPopularBucketResponse;
-import com.mybury.waver.web.message.v1.bucket.KeywordElement;
+import com.mybury.waver.web.message.v1.bucket.*;
 import jakarta.transaction.Transactional;
 import jakarta.validation.Valid;
-import java.time.LocalDate;
-import java.util.ArrayList;
-import java.util.Arrays;
-import java.util.List;
-import java.util.stream.Collectors;
 import lombok.RequiredArgsConstructor;
 import org.springframework.context.ApplicationEventPublisher;
 import org.springframework.stereotype.Service;
 import org.springframework.util.ObjectUtils;
 import org.springframework.util.StringUtils;
+
+import java.time.LocalDate;
+import java.util.ArrayList;
+import java.util.Arrays;
+import java.util.List;
+import java.util.stream.Collectors;
 
 @Service
 @RequiredArgsConstructor
@@ -159,7 +151,9 @@ public class BucketService {
   }
 
   public BucketDetailResponse bucketDetail(long id, long userId) {
-    Bucket bucket = bucketRepository.findByIdAndDeleted(id, YesNo.N);
+    Bucket bucket = bucketRepository.findByIdAndDeleted(id, YesNo.N)
+        .orElseThrow(() -> new WaverException(ResultCode.NOT_FOUND));
+    
     List<KeywordElement> keywords = new ArrayList<>();
     if (StringUtils.hasText(bucket.getKeywords())) {
       String[] selectedKeyword = bucket.getKeywords().split(",");

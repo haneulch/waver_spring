@@ -6,3 +6,11 @@ spring:
   jpa:
     hibernate:
       ddl-auto: update
+  cloud:
+    gcp:
+      credentials:
+        location: classpath:google-api-key.json
+
+google:
+  play:
+    credentials-path: src/main/resources/google-api-key.json

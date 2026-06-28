@@ -4,11 +4,12 @@ import com.mybury.waver.common.code.YesNo;
 import com.mybury.waver.domain.Bucket;
 import com.mybury.waver.domain.vo.BucketGoalCount;
 import jakarta.transaction.Transactional;
-import java.util.List;
-import java.util.Optional;
 import org.springframework.data.jpa.repository.JpaRepository;
 import org.springframework.data.jpa.repository.Modifying;
 import org.springframework.data.jpa.repository.Query;
+
+import java.util.List;
+import java.util.Optional;
 
 public interface BucketRepository extends JpaRepository<Bucket, Long>, BucketRepositoryCustom {
 
@@ -25,9 +26,9 @@ public interface BucketRepository extends JpaRepository<Bucket, Long>, BucketRep
   void updateLike(long id, int count);
 
   @Query("SELECT bucket FROM Bucket bucket LEFT JOIN FETCH bucket.category WHERE bucket.id = :id AND bucket.deleted = :deleted")
-  Bucket findByIdAndDeleted(Long id, YesNo deleted);
+  Optional<Bucket> findByIdAndDeleted(Long id, YesNo deleted);
 
-  Bucket findByIdAndDeletedAndScrapYn(Long id, YesNo deleted, YesNo scrapYn);
+  Optional<Bucket> findByIdAndDeletedAndScrapYn(Long id, YesNo deleted, YesNo scrapYn);
 
   @Query("SELECT userId FROM Bucket WHERE id = :id")
   Long findUserIdById(long id);

@@ -24,6 +24,13 @@ spring:
   messages:
     encoding: UTF-8
     basename: messages
+  cloud:
+    gcp:
+      project-id: "waver-478413"
+      credentials:
+        location: "file: /home/opc/google-api-key.json"
+      pubsub:
+        subscription-id: "play-rtdn-sub"
 
 springdoc:
   api-docs:
@@ -46,6 +53,11 @@ waver:
       path: /waver/image
     statics:
       path: http://localhost:8080/images
+
+google:
+  play:
+    credentials-path: /home/opc/google-api-key.json
+    package-name: "com.zinc.waver"
 
 logging:
   level:

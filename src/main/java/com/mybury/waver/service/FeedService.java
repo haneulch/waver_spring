@@ -9,11 +9,7 @@ import com.mybury.waver.domain.Report;
 import com.mybury.waver.domain.UserKeyword;
 import com.mybury.waver.event.message.BucketReportedEvent;
 import com.mybury.waver.exception.WaverException;
-import com.mybury.waver.repository.BucketRepository;
-import com.mybury.waver.repository.CategoryRepository;
-import com.mybury.waver.repository.LikeBucketRepository;
-import com.mybury.waver.repository.ReportRepository;
-import com.mybury.waver.repository.UserKeywordRepository;
+import com.mybury.waver.repository.*;
 import com.mybury.waver.web.message.v1.feed.FeedResponse;
 import jakarta.transaction.Transactional;
 import lombok.RequiredArgsConstructor;
@@ -38,26 +34,24 @@ public class FeedService {
 
   @Transactional
   public void report(long id, String reason, long userId) {
-    Bucket bucket = bucketRepository.findByIdAndDeleted(id, YesNo.N);
-    if (bucket == null) {
-      throw new WaverException(ResultCode.NOT_FOUND);
-    }
+    Bucket bucket = bucketRepository.findByIdAndDeleted(id, YesNo.N)
+        .orElseThrow(() -> new WaverException(ResultCode.NOT_FOUND));
     if (bucket.getUserId() != null && bucket.getUserId().equals(userId)) {
       throw new WaverException(ResultCode.FORBIDDEN);
     }
 
     boolean isDuplicated = reportRepository.existsByReportUserIdAndBucketlistIdAndReportType(userId, id,
-      ReportType.BUCKET);
+        ReportType.BUCKET);
     if (isDuplicated) {
       return;
     }
 
     Report report = Report.builder()
-      .reportType(ReportType.BUCKET)
-      .bucketlistId(id)
-      .reason(reason)
-      .reportUserId(userId)
-      .build();
+        .reportType(ReportType.BUCKET)
+        .bucketlistId(id)
+        .reason(reason)
+        .reportUserId(userId)
+        .build();
     reportRepository.save(report);
 
     publisher.publishEvent(new BucketReportedEvent(id));
@@ -72,8 +66,8 @@ public class FeedService {
 
     // 관심 키워드
     List<String> keywordCodes = keywords.stream()
-      .map(UserKeyword::getCode)
-      .toList();
+        .map(UserKeyword::getCode)
+        .toList();
 
     List<Long> reportedBucketIds =
         reportRepository.findBucketlistIdsByReportUserIdAndReportType(userId, ReportType.BUCKET);
@@ -82,34 +76,32 @@ public class FeedService {
 
     // 사용자가 좋아요한 버킷 ID들을 한 번에 조회
     Set<Long> likedBucketIds = buckets.stream()
-      .map(Bucket::getId)
-      .collect(Collectors.toSet());
+        .map(Bucket::getId)
+        .collect(Collectors.toSet());
 
     Set<Long> userLikedBucketIds = likeBucketRepository.findByUserIdAndBucketIdIn(userId, likedBucketIds)
-      .stream()
-      .map(LikeBucket::getBucketId)
-      .collect(Collectors.toSet());
+        .stream()
+        .map(LikeBucket::getBucketId)
+        .collect(Collectors.toSet());
 
     return buckets.stream()
-      .map(bucket -> {
-        YesNo likeYn = userLikedBucketIds.contains(bucket.getId()) ? YesNo.Y : YesNo.N;
-        return FeedResponse.FeedElement.of(bucket, likeYn);
-      })
-      .toList();
+        .map(bucket -> {
+          YesNo likeYn = userLikedBucketIds.contains(bucket.getId()) ? YesNo.Y : YesNo.N;
+          return FeedResponse.FeedElement.of(bucket, likeYn);
+        })
+        .toList();
   }
 
   @Transactional
   public void keyword(long userId, List<String> keywordCodes) {
     List<UserKeyword> keywords = keywordCodes.stream()
-      .map(code -> UserKeyword.builder().userId(userId).code(code).build()).toList();
+        .map(code -> UserKeyword.builder().userId(userId).code(code).build()).toList();
     userKeywordRepository.saveAll(keywords);
   }
 
   public long copy(long userId, long id) {
-    Bucket bucket = bucketRepository.findByIdAndDeletedAndScrapYn(id, YesNo.N, YesNo.Y);
-    if (bucket == null) {
-      throw new WaverException(ResultCode.NOT_FOUND);
-    }
+    Bucket bucket = bucketRepository.findByIdAndDeletedAndScrapYn(id, YesNo.N, YesNo.Y)
+        .orElseThrow(() -> new WaverException(ResultCode.NOT_FOUND));
 
     Long categoryId = categoryRepository.findIdByUserIdAndDefaultYn(userId, YesNo.Y);
 

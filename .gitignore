@@ -32,3 +32,4 @@ src/main/resources/application-prod.yml
 **/.DS_Store
 
 src/main/resources/waver-service-account.json
+src/main/resources/google-api-key.json
