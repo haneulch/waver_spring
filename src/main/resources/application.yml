@@ -28,7 +28,7 @@ spring:
     gcp:
       project-id: "waver-478413"
       credentials:
-        location: /home/opc/google-api-key.json
+        location: "file:/home/opc/google-api-key.json"
       pubsub:
         subscription-id: "play-rtdn-topic-sub"
 
