@@ -30,7 +30,7 @@ spring:
       credentials:
         location: "file: /home/opc/google-api-key.json"
       pubsub:
-        subscription-id: "play-rtdn-sub"
+        subscription-id: "play-rtdn-topic-sub"
 
 springdoc:
   api-docs:
@@ -53,6 +53,7 @@ waver:
       path: /waver/image
     statics:
       path: http://localhost:8080/images
+  service-key-path: /home/opc/waver-service-account.json
 
 google:
   play:

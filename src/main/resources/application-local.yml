@@ -14,3 +14,6 @@ spring:
 google:
   play:
     credentials-path: src/main/resources/google-api-key.json
+
+waver:
+  service-key-path: src/main/resources/waver-service-account.json
