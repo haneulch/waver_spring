@@ -6,21 +6,17 @@ import com.mybury.waver.domain.Bucket;
 import com.mybury.waver.domain.Follow;
 import com.mybury.waver.domain.RecentSearch;
 import com.mybury.waver.domain.User;
-import com.mybury.waver.repository.BucketRepository;
-import com.mybury.waver.repository.FollowRepository;
-import com.mybury.waver.repository.RecentSearchRepository;
-import com.mybury.waver.repository.ReportRepository;
-import com.mybury.waver.repository.UserRepository;
+import com.mybury.waver.repository.*;
 import com.mybury.waver.web.message.v1.explore.ExploreResponse;
 import com.mybury.waver.web.message.v1.explore.SearchOptionResponse;
 import jakarta.transaction.Transactional;
-import java.util.HashSet;
-import java.util.List;
-import java.util.Set;
-import java.util.stream.Collectors;
 import lombok.RequiredArgsConstructor;
 import org.springframework.scheduling.annotation.Async;
 import org.springframework.stereotype.Service;
+
+import java.util.HashSet;
+import java.util.List;
+import java.util.Set;
 
 @Service
 @RequiredArgsConstructor
@@ -70,7 +66,7 @@ public class ExploreService {
   public SearchOptionResponse searchOptions(Long userId) {
     List<String> recentSearch = recentSearchRepository.findQueryByUserId(userId);
     List<SearchOptionResponse.KeywordElement> recommendedKeywords = SearchOptionResponse.KeywordElement
-        .getAllKeywords();
+        .getRandomKeywords();
     return new SearchOptionResponse(recentSearch, null, recommendedKeywords);
   }
 }
