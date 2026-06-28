@@ -41,7 +41,7 @@ waver:
   file:
     upload:
       # 로컬 경로에 맞게 수정 필요
-      path: /Users/a1000369/Desktop/workspace/waver_spring/upload
+      path: upload
     images:
       path: /waver/image
     statics:

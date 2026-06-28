@@ -3,3 +3,6 @@ spring:
     init:
       data-locations: classpath:init-data.sql
       mode: always
+  jpa:
+    hibernate:
+      ddl-auto: update

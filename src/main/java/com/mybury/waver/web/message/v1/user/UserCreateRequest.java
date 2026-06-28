@@ -6,8 +6,9 @@ import io.swagger.v3.oas.annotations.media.Schema;
 import jakarta.validation.constraints.NotBlank;
 import jakarta.validation.constraints.NotEmpty;
 import jakarta.validation.constraints.NotNull;
-import java.util.Locale;
 import org.springframework.web.multipart.MultipartFile;
+
+import java.util.Locale;
 
 public record UserCreateRequest(
     @NotEmpty
@@ -24,7 +25,9 @@ public record UserCreateRequest(
     @Schema(description = "bio")
     String bio,
     @Schema(description = "프로필 이미지", type = "string", format = "binary")
-    MultipartFile profileImage
+    MultipartFile profileImage,
+    @Schema(description = "FCM Token")
+    String fcmToken
 ) {
 
   public User user(Locale locale) {
@@ -35,6 +38,7 @@ public record UserCreateRequest(
         .name(name)
         .bio(bio)
         .locale(locale)
+        .fcmToken(fcmToken)
         .build();
   }
 }
