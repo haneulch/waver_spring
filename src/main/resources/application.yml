@@ -43,7 +43,7 @@ springdoc:
 waver:
   secret:
     name: USER_ID
-    key: "wH5pbJDmpvIKWy3k5CXHTIApJEb3M/EAT7EwSrBscJA="
+    key: ${JWT_SECRET_KEY}
     access-token-validity: 300d
   file:
     upload:
