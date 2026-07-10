@@ -8,8 +8,10 @@ import jakarta.persistence.Id;
 import lombok.AccessLevel;
 import lombok.AllArgsConstructor;
 import lombok.Builder;
+import lombok.Getter;
 import lombok.NoArgsConstructor;
 
+@Getter
 @Entity
 @NoArgsConstructor(access = AccessLevel.PROTECTED)
 @AllArgsConstructor(access = AccessLevel.PRIVATE)
@@ -41,5 +43,21 @@ public class FreeTier extends BaseEntity {
 
   public static FreeTier createDefaultFreeTier(long userId) {
     return FreeTier.builder().userId(userId).imageLimit(1).togetherLimit(3).build();
+  }
+
+  public boolean canUseMultiImage() {
+    return imageUsed < imageLimit;
+  }
+
+  public void useMultiImage() {
+    imageUsed++;
+  }
+
+  public boolean canUseTogether() {
+    return togetherUsed < togetherLimit;
+  }
+
+  public void useTogether() {
+    togetherUsed++;
   }
 }

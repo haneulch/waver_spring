@@ -74,8 +74,7 @@ public class UserController {
   @Operation(summary = "웨이버 플러스 제한 확인")
   @GetMapping("check/limit")
   public WaverPlusResponse checkWaverPlusLimit(@Parameter(hidden = true) @UserId Long userId) {
-    PremiumStatus status = userService.checkWaverPlusLimit(userId);
-    return new WaverPlusResponse(status);
+    return userService.checkWaverPlusLimit(userId);
   }
 
   @Operation(summary = "회원 탈퇴")

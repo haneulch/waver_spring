@@ -29,6 +29,12 @@ public enum ResultCode {
   // 저장된 관심 키워드 없음 오류
   KEYWORD_NOT_FOUND("8000", "KEYWORD_NOT_FOUND"),
 
+  // 이미지 저장 제한 초과 (무료: 기본 1개 + 3개 저장 1회 / 구독: 최대 3개)
+  IMAGE_LIMIT_EXCEEDED("8100", "IMAGE_LIMIT_EXCEEDED"),
+
+  // 함께하기 사용 제한 초과 (무료: 최대 3회)
+  TOGETHER_LIMIT_EXCEEDED("8101", "TOGETHER_LIMIT_EXCEEDED"),
+
   // 탈퇴한 사용자
   WITHDRAWAL_USER("9000", "WITHDRAWAL_USER"),
 

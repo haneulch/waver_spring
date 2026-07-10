@@ -19,6 +19,7 @@ import com.mybury.waver.util.FileUploadUtils;
 import com.mybury.waver.web.message.v1.user.ProfileResponse;
 import com.mybury.waver.web.message.v1.user.UserCreateRequest;
 import com.mybury.waver.web.message.v1.user.UserStatusResponse;
+import com.mybury.waver.web.message.v1.user.WaverPlusResponse;
 import jakarta.transaction.Transactional;
 import java.util.Locale;
 import lombok.RequiredArgsConstructor;
@@ -110,10 +111,16 @@ public class UserService {
     }
   }
 
-  public PremiumStatus checkWaverPlusLimit(long userId) {
+  @Transactional
+  public WaverPlusResponse checkWaverPlusLimit(long userId) {
     User user = userRepository.findById(userId).orElseThrow(() -> new WaverException(ResultCode.NOT_FOUND));
 
-    return user.getPremiumStatus();
+    FreeTier freeTier = freeTierRepository.findByUserId(userId)
+        .orElseGet(() -> freeTierRepository.save(FreeTier.createDefaultFreeTier(userId)));
+
+    return new WaverPlusResponse(user.getPremiumStatus(),
+        freeTier.getImageLimit(), freeTier.getImageUsed(),
+        freeTier.getTogetherLimit(), freeTier.getTogetherUsed());
   }
 
   public User getUserOnlyById(Long userId) {
