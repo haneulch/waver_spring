@@ -1,5 +1,6 @@
 package com.mybury.waver.repository;
 
+import com.mybury.waver.common.code.ContentType;
 import com.mybury.waver.common.code.ExposureStatus;
 import com.mybury.waver.common.code.YesNo;
 import com.mybury.waver.domain.Bucket;
@@ -49,7 +50,12 @@ public class BucketRepositoryImpl implements BucketRepositoryCustom {
     predicates.add(cb.equal(root.get("deleted"), YesNo.N));
 
     if (userId != null) {
-      predicates.add(cb.equal(root.get("userId"), userId));
+      // 내가 만든 버킷 + 내가 함께하기 친구로 등록된 TOGETHER 버킷
+      Predicate isOwner = cb.equal(root.get("userId"), userId);
+      Predicate isTogetherFriend = cb.and(
+          cb.equal(root.get("type"), ContentType.TOGETHER),
+          friendUserIdsContains(cb, root, userId));
+      predicates.add(cb.or(isOwner, isTogetherFriend));
     }
 
     if (excludedBucketIds != null && !excludedBucketIds.isEmpty()) {
@@ -111,6 +117,17 @@ public class BucketRepositoryImpl implements BucketRepositoryCustom {
 
     query.orderBy(orders);
     return em.createQuery(query).setMaxResults(request.limit()).getResultList();
+  }
+
+  // friendUserIds는 ','로 구분된 사용자 ID 문자열 - 단독/맨앞/맨뒤/중간 위치를 모두 매칭한다
+  private Predicate friendUserIdsContains(CriteriaBuilder cb, Root<Bucket> root, Long userId) {
+    Path<String> friendUserIds = root.get("friendUserIds");
+    String id = String.valueOf(userId);
+    return cb.or(
+        cb.equal(friendUserIds, id),
+        cb.like(friendUserIds, id + ",%"),
+        cb.like(friendUserIds, "%," + id),
+        cb.like(friendUserIds, "%," + id + ",%"));
   }
 
   @Override

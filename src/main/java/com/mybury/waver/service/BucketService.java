@@ -2,11 +2,12 @@ package com.mybury.waver.service;
 
 import com.mybury.waver.common.code.*;
 import com.mybury.waver.domain.Bucket;
+import com.mybury.waver.domain.FreeTier;
 import com.mybury.waver.domain.User;
-import com.mybury.waver.domain.vo.BucketGoalCount;
 import com.mybury.waver.event.message.BadgeCountEvent;
 import com.mybury.waver.exception.WaverException;
 import com.mybury.waver.repository.BucketRepository;
+import com.mybury.waver.repository.FreeTierRepository;
 import com.mybury.waver.repository.LikeBucketRepository;
 import com.mybury.waver.repository.ReportRepository;
 import com.mybury.waver.repository.UserRepository;
@@ -31,16 +32,23 @@ import java.util.stream.Collectors;
 public class BucketService {
 
   private static final int POPULAR_BUCKET_LIMIT = 4;
+  private static final int MAX_IMAGE_COUNT = 3;
 
   private final FileUploadUtils fileUploadUtils;
   private final BucketRepository bucketRepository;
   private final LikeBucketRepository likeBucketRepository;
   private final ReportRepository reportRepository;
   private final UserRepository userRepository;
+  private final FreeTierRepository freeTierRepository;
   private final ApplicationEventPublisher publisher;
 
   @Transactional
   public BucketDetailResponse create(long userId, BucketCreateRequest request) {
+    int imageCount = ObjectUtils.isEmpty(request.images()) ? 0 : request.images().size();
+    checkSaveLimits(userId, imageCount,
+        imageCount > 1,
+        StringUtils.hasText(request.friendUserIds()));
+
     Bucket bucket = request.toBucket(userId);
 
     if (!ObjectUtils.isEmpty(request.images())) {
@@ -56,6 +64,53 @@ public class BucketService {
     return bucketDetail(saved.getId(), userId);
   }
 
+  /**
+   * 저장 제한 검사 및 무료 사용 횟수 차감.
+   * <p>
+   * - 이미지: 구독 여부와 무관하게 최대 {@value MAX_IMAGE_COUNT}개
+   * - 무료 사용자: 이미지 2개 이상 저장은 제공된 횟수(기본 1회)만, 함께하기는 제공된 횟수(기본 3회)만 가능
+   * - 구독(ACTIVE) 사용자: 이미지 하드캡 외 제한 없음
+   */
+  private void checkSaveLimits(long userId, int imageCount, boolean usesMultiImage, boolean usesTogether) {
+    if (imageCount > MAX_IMAGE_COUNT) {
+      throw new WaverException(ResultCode.IMAGE_LIMIT_EXCEEDED);
+    }
+
+    User user = userRepository.findById(userId)
+        .orElseThrow(() -> new WaverException(ResultCode.NOT_FOUND));
+    if (user.getPremiumStatus() == PremiumStatus.ACTIVE) {
+      return;
+    }
+
+    if (!usesMultiImage && !usesTogether) {
+      return;
+    }
+
+    FreeTier freeTier = freeTierRepository.findByUserId(userId)
+        .orElseGet(() -> freeTierRepository.save(FreeTier.createDefaultFreeTier(userId)));
+
+    if (usesMultiImage) {
+      if (!freeTier.canUseMultiImage()) {
+        throw new WaverException(ResultCode.IMAGE_LIMIT_EXCEEDED);
+      }
+      freeTier.useMultiImage();
+    }
+
+    if (usesTogether) {
+      if (!freeTier.canUseTogether()) {
+        throw new WaverException(ResultCode.TOGETHER_LIMIT_EXCEEDED);
+      }
+      freeTier.useTogether();
+    }
+  }
+
+  private int countImages(String imgUrl) {
+    if (!StringUtils.hasText(imgUrl)) {
+      return 0;
+    }
+    return imgUrl.split(",").length;
+  }
+
   private void processBadgeCount(long userId, String joinedKeywords) {
     if (!StringUtils.hasText(joinedKeywords)) {
       return;
@@ -69,15 +124,40 @@ public class BucketService {
 
   @Transactional
   public BucketDetailResponse update(long id, long userId, BucketUpdateRequest request) {
-    Bucket bucket = request.toBucket(userId);
-    bucket.setId(id);
+    Bucket bucket = bucketRepository.findByIdAndDeleted(id, YesNo.N)
+        .orElseThrow(() -> new WaverException(ResultCode.NOT_FOUND));
+    if (!bucket.getUserId().equals(userId)) {
+      throw new WaverException(ResultCode.FORBIDDEN);
+    }
 
+    // 무료 사용 횟수는 새로 추가되는 경우에만 차감한다 (기존 상태 유지 수정은 무료)
+    int imageCount = ObjectUtils.isEmpty(request.images()) ? 0 : request.images().size();
+    boolean addsMultiImage = imageCount > 1 && countImages(bucket.getImgUrl()) <= 1;
+    boolean addsTogether = StringUtils.hasText(request.friendUserIds())
+        && !StringUtils.hasText(bucket.getFriendUserIds());
+    checkSaveLimits(userId, imageCount, addsMultiImage, addsTogether);
+
+    // 관리 중인 엔티티에 요청 필드만 반영한다.
+    // (새 객체를 merge 하면 요청에 없는 type/likeCount/status 등이 빌더 기본값으로 덮여 초기화된다)
+    bucket.setTitle(request.title());
+    bucket.setMemo(request.memo());
+    bucket.setCategoryId(request.categoryId());
+    bucket.setExposureStatus(request.exposureStatus());
+    bucket.setTargetDate(request.targetDate());
+    bucket.setGoalCount(request.goalCount());
+    bucket.setKeywords(request.keywords());
+    bucket.setFriendUserIds(request.friendUserIds());
+    if (request.bucketType() != null) {
+      bucket.setType(request.bucketType());
+    }
+    if (request.scrapYn() != null) {
+      bucket.setScrapYn(request.scrapYn());
+    }
     if (!ObjectUtils.isEmpty(request.images())) {
       String imageUrl = request.images().stream().map(fileUploadUtils::uploadFile)
           .collect(Collectors.joining(","));
       bucket.setImgUrl(imageUrl);
     }
-    bucketRepository.save(bucket);
     bucketRepository.commit();
     return bucketDetail(id, userId);
   }
@@ -179,18 +259,40 @@ public class BucketService {
   }
 
   public void achieve(long id, long userId) {
-    BucketGoalCount goalCount = bucketRepository.findByIdAndUserId(id, userId)
-        .orElseThrow(() -> new WaverException(ResultCode.NOT_FOUND));
+    Bucket bucket = getBucketForCount(id, userId);
 
-    if (goalCount.getGoalCount() == goalCount.getUserCount() + 1) {
-      bucketRepository.complete(id, userId);
+    if (bucket.getGoalCount() == bucket.getUserCount() + 1) {
+      bucketRepository.complete(id, bucket.getUserId());
     } else {
-      bucketRepository.achieve(id, userId);
+      bucketRepository.achieve(id, bucket.getUserId());
     }
   }
 
   public void achieveCancel(long id, long userId) {
-    bucketRepository.achieveCancel(id, userId);
+    Bucket bucket = getBucketForCount(id, userId);
+    bucketRepository.achieveCancel(id, bucket.getUserId());
+  }
+
+  // 달성 횟수는 소유자 또는 함께하기(TOGETHER) 친구만 변경할 수 있다
+  private Bucket getBucketForCount(long id, long userId) {
+    Bucket bucket = bucketRepository.findByIdAndDeleted(id, YesNo.N)
+        .orElseThrow(() -> new WaverException(ResultCode.NOT_FOUND));
+
+    boolean isOwner = bucket.getUserId() != null && bucket.getUserId() == userId;
+    if (!isOwner && !isTogetherFriend(bucket, userId)) {
+      throw new WaverException(ResultCode.FORBIDDEN);
+    }
+    return bucket;
+  }
+
+  private boolean isTogetherFriend(Bucket bucket, long userId) {
+    if (bucket.getType() != ContentType.TOGETHER || !StringUtils.hasText(bucket.getFriendUserIds())) {
+      return false;
+    }
+    String target = String.valueOf(userId);
+    return Arrays.stream(bucket.getFriendUserIds().split(","))
+        .map(String::trim)
+        .anyMatch(target::equals);
   }
 
   public void reset(long id, long userId) {

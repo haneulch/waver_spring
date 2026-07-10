@@ -1,8 +1,8 @@
 package com.mybury.waver.web.message.v1.bucket;
 
+import com.mybury.waver.common.code.ContentType;
 import com.mybury.waver.common.code.ExposureStatus;
 import com.mybury.waver.common.code.YesNo;
-import com.mybury.waver.domain.Bucket;
 import io.swagger.v3.oas.annotations.media.ArraySchema;
 import io.swagger.v3.oas.annotations.media.Schema;
 import jakarta.validation.constraints.Min;
@@ -13,6 +13,9 @@ import java.util.List;
 import org.springframework.web.multipart.MultipartFile;
 
 public record BucketUpdateRequest(
+    @Schema(description = "종류(미전달 시 기존 값 유지)", implementation = ContentType.class)
+    ContentType bucketType,
+
     @NotNull
     @Schema(description = "공개여부", implementation = ExposureStatus.class)
     ExposureStatus exposureStatus,
@@ -50,18 +53,4 @@ public record BucketUpdateRequest(
     List<MultipartFile> images
 ) {
 
-    public Bucket toBucket(long userId) {
-        return Bucket.builder()
-            .title(title)
-            .memo(memo)
-            .userId(userId)
-            .categoryId(categoryId)
-            .exposureStatus(exposureStatus)
-            .scrapYn(scrapYn)
-            .targetDate(targetDate)
-            .goalCount(goalCount)
-            .keywords(keywords)
-            .friendUserIds(friendUserIds)
-            .build();
-    }
 }

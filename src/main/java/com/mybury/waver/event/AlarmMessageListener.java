@@ -1,7 +1,6 @@
 package com.mybury.waver.event;
 
 import com.google.firebase.messaging.FirebaseMessaging;
-import com.google.firebase.messaging.FirebaseMessagingException;
 import com.google.firebase.messaging.Message;
 import com.google.firebase.messaging.Notification;
 import com.mybury.waver.alarm.AlarmMessageParser;
@@ -13,8 +12,10 @@ import com.mybury.waver.service.AlarmService;
 import com.mybury.waver.service.UserService;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
-import org.springframework.context.event.EventListener;
 import org.springframework.stereotype.Component;
+import org.springframework.transaction.annotation.Propagation;
+import org.springframework.transaction.annotation.Transactional;
+import org.springframework.transaction.event.TransactionalEventListener;
 import org.springframework.util.StringUtils;
 
 import java.util.Locale;
@@ -31,7 +32,10 @@ public class AlarmMessageListener {
   private final AlarmService alarmService;
   private final AlarmMessageParser alarmMessageParser;
 
-  @EventListener
+  // 발행 트랜잭션 커밋 후 별도 트랜잭션에서 실행한다.
+  // (같은 트랜잭션에서 동기 실행하면 알람/푸시 실패가 원래 작업(좋아요, 댓글 저장)까지 롤백시킨다)
+  @Transactional(propagation = Propagation.REQUIRES_NEW)
+  @TransactionalEventListener
   public void handle(AlarmMessageEvent event) {
     long userId = event.userId();
     AlarmMessageType type = event.type();
@@ -41,6 +45,10 @@ public class AlarmMessageListener {
     }
 
     User user = userService.getUserOnlyById(userId);
+    if (user == null) {
+      log.warn("User not found for alarm event: {}", event);
+      return;
+    }
     Locale locale = user.getLocale();
 
     String otherUserName = event.otherUserId() != null
@@ -95,7 +103,8 @@ public class AlarmMessageListener {
     try {
       String response = FirebaseMessaging.getInstance().send(message);
       log.info("Successfully sent message: {}", response);
-    } catch (FirebaseMessagingException e) {
+    } catch (Exception e) {
+      // Firebase 미초기화(IllegalStateException) 등 어떤 실패도 알람 저장에 영향 주지 않는다
       log.warn("Failed to send fcm.", e);
     }
   }
