@@ -29,7 +29,7 @@ public class MyService {
 
   private Badge getUserWithBadgeById(Long userId) {
     return badgeRepository.findByUserIdAndSelectYn(userId, YesNo.Y)
-        .orElseThrow(() -> new WaverException(ResultCode.BAD_REQUEST));
+        .orElseThrow(() -> new WaverException(ResultCode.NOT_FOUND));
   }
 
   public MyResponse my(Long userId) {
@@ -48,9 +48,9 @@ public class MyService {
     int totalLikeCount = 0;
     int totalBucketCount = bucketRepository.countByUserIdAndDeleted(userId, YesNo.N);
 
-    Badge badge = badgeRepository.findByUserIdAndSelectYn(userId, YesNo.Y).orElse(null);
-    String badgeImgUrl = badge == null ? null
-        : BadgeStep.getImgUrl(BadgeStep.getStep(badge.getAchieveCount()), badge.getBadgeType());
+    String badgeImgUrl = badgeRepository.findByUserIdAndSelectYn(userId, YesNo.Y)
+        .map(badge -> BadgeStep.getImgUrl(BadgeStep.getStep(badge.getAchieveCount()), badge.getBadgeType()))
+        .orElse(null);
 
     return new MyWaveInfoResponse(totalBadgeCount, totalLikeCount, totalBucketCount, badgeImgUrl);
   }

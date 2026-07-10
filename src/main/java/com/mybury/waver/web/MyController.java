@@ -43,11 +43,6 @@ public class MyController {
         return alarmService.getList(userId);
     }
 
-    @Operation(summary = "푸시 메세지 테스트")
-    @GetMapping("pushTest")
-    public void pushTest() {
-    }
-
     @Operation(summary = "내 웨이브")
     @GetMapping("info")
     public MyWaveInfoResponse info(@Parameter(hidden = true) @UserId Long userId) {

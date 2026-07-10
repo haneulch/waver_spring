@@ -121,7 +121,7 @@ public class UserService {
   }
 
   public String getUserNameById(Long userId) {
-    return null;
+    return userRepository.findById(userId).map(User::getName).orElse(null);
   }
 
   @Transactional

@@ -4,7 +4,6 @@ import com.mybury.waver.annotation.UserId;
 import com.mybury.waver.service.CommentService;
 import com.mybury.waver.web.message.v1.comment.CommentCreateRequest;
 import com.mybury.waver.web.message.v1.comment.CommentUpdateRequest;
-import com.mybury.waver.web.message.v1.common.ReportRequest;
 import io.swagger.v3.oas.annotations.Operation;
 import io.swagger.v3.oas.annotations.Parameter;
 import io.swagger.v3.oas.annotations.tags.Tag;
@@ -43,11 +42,6 @@ public class CommentController {
     @DeleteMapping("{id}")
     public void commentDelete(@Parameter(hidden = true) @UserId Long userId, @PathVariable Long id) {
         commentService.commentDelete(id, userId);
-    }
-
-    @Operation(summary = "댓글신고 (미구현)")
-    @PatchMapping("{id}/report")
-    public void commentReport(@PathVariable Long id, @Valid @RequestBody ReportRequest request) {
     }
 
     @Operation(summary = "댓글숨기기")
