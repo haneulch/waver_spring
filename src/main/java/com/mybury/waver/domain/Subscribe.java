@@ -24,10 +24,4 @@ public class Subscribe extends BaseEntity {
 
   @Column(nullable = false)
   private String subscribeId;
-
-//  @Column
-//  private LocalDateTime startAt;
-//
-//  @Column
-//  private LocalDateTime endAt;
 }

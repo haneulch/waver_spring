@@ -26,6 +26,8 @@ import org.springframework.util.CollectionUtils;
 @RequiredArgsConstructor
 public class BadgeCountEventListener {
 
+  private static final int ACHIEVE_COUNT_THRESHOLD = 30;
+
   private final BadgeRepository badgeRepository;
   private final BadgeTypeRepository badgeTypeRepository;
 
@@ -61,8 +63,7 @@ public class BadgeCountEventListener {
 
         badge.incrementAchieveCount();
 
-        final int THRESHOLD = 30;
-        if (badge.getAchieveCount() >= THRESHOLD) {
+        if (badge.getAchieveCount() >= ACHIEVE_COUNT_THRESHOLD) {
           badge.setAchieveYn(YesNo.Y);
         }
       } else {

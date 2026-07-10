@@ -45,23 +45,6 @@ public class FollowController {
         followService.unfollow(userId, request.followUserId());
     }
 
-    // 차단 안하기로 했었나..
-//    @Operation(summary = "사용자 차단")
-//    @PostMapping("block/{otherUserId}")
-//    public void postBlock(@Parameter(hidden = true) @UserId Long userId, @PathVariable Long otherUserId) {
-//
-//    }
-//
-//    @Operation(summary = "사용자 차단 해제")
-//    @PostMapping("block/release")
-//    public void postBlockRelease() {
-//    }
-//
-//    @Operation(summary = "차단된 사용자 목록")
-//    @GetMapping("blockUsers")
-//    public void getBlockUsers() {
-//    }
-
     @Operation(summary = "맞팔목록")
     @GetMapping("mutual")
     public List<FollowElement> getMutual(@Parameter(hidden = true) @UserId Long userId,

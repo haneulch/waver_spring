@@ -6,7 +6,6 @@ import org.springframework.core.io.UrlResource;
 import org.springframework.http.MediaType;
 import org.springframework.stereotype.Component;
 import org.springframework.util.StringUtils;
-import org.springframework.web.bind.annotation.PathVariable;
 
 import java.nio.file.Path;
 import java.nio.file.Paths;
@@ -25,7 +24,7 @@ public class FileImageUtils {
     FileImageUtils.staticPath = properties.getStatics().getPath();
   }
 
-  public Resource getImage(@PathVariable String path) {
+  public Resource getImage(String path) {
     try {
       Path filePath = Paths.get(properties.getUpload().getPath() + "/" + path).normalize();
       return new UrlResource(filePath.toUri());

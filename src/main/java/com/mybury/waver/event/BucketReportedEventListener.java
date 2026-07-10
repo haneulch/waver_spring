@@ -20,6 +20,8 @@ import org.springframework.transaction.event.TransactionalEventListener;
 @RequiredArgsConstructor
 public class BucketReportedEventListener {
 
+  private static final long REPORT_COUNT_THRESHOLD = 3;
+
   private final ReportRepository reportRepository;
   private final BucketRepository bucketRepository;
 
@@ -29,7 +31,7 @@ public class BucketReportedEventListener {
     long bucketId = event.bucketId();
     long reportCount = reportRepository.countByBucketlistIdAndReportType(bucketId, ReportType.BUCKET);
 
-    if (reportCount >= 3) {
+    if (reportCount >= REPORT_COUNT_THRESHOLD) {
       bucketRepository.markDeletedById(bucketId);
     }
   }

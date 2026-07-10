@@ -25,6 +25,8 @@ import java.util.List;
 @Repository
 public class BucketRepositoryImpl implements BucketRepositoryCustom {
 
+  private static final int FEED_PAGE_SIZE = 21;
+
   @PersistenceContext
   private EntityManager em;
 
@@ -155,7 +157,7 @@ public class BucketRepositoryImpl implements BucketRepositoryCustom {
     orders.add(cb.desc(root.get("id")));
     query.orderBy(orders);
 
-    return em.createQuery(query).setMaxResults(21).getResultList();
+    return em.createQuery(query).setMaxResults(FEED_PAGE_SIZE).getResultList();
   }
 
   @Override

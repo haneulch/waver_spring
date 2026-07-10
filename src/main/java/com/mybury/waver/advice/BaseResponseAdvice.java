@@ -32,10 +32,6 @@ public class BaseResponseAdvice implements ResponseBodyAdvice<Object> {
             return BaseResponse.ok(body);
         }
 
-        if (body instanceof BaseResponse) {
-            return body;
-        }
-
         return body;
     }
 }

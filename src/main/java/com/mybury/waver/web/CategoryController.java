@@ -65,9 +65,4 @@ public class CategoryController {
         @Valid @RequestBody CategoryOrderRequest request) {
         categoryService.patchCategorySeq(userId, request.categoryIds());
     }
-
-//  @Operation(summary = "추천 카테고리 목록 조회")
-//  @GetMapping("recommend")
-//  public void recommendCategory(@Parameter(hidden = true) @UserId Long userId) {
-//  }
 }

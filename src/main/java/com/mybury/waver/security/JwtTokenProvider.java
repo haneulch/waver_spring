@@ -21,6 +21,8 @@ import org.springframework.util.StringUtils;
 @Component
 public class JwtTokenProvider {
 
+    private static final String BEARER_PREFIX = "Bearer ";
+
     @Value("${waver.secret.name}")
     private String name;
 
@@ -66,9 +68,9 @@ public class JwtTokenProvider {
     }
 
     public String extractToken(String tokenHeaderValue) {
-        if (!StringUtils.hasText(tokenHeaderValue) || !tokenHeaderValue.startsWith("Bearer ")) {
+        if (!StringUtils.hasText(tokenHeaderValue) || !tokenHeaderValue.startsWith(BEARER_PREFIX)) {
             throw new WaverException(UNAUTHORIZED);
         }
-        return tokenHeaderValue.substring(7);
+        return tokenHeaderValue.substring(BEARER_PREFIX.length());
     }
 }

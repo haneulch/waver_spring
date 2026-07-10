@@ -16,6 +16,7 @@ import org.springframework.stereotype.Service;
 
 import java.util.HashSet;
 import java.util.List;
+import java.util.Objects;
 import java.util.Set;
 
 @Service
@@ -42,7 +43,7 @@ public class ExploreService {
     Set<Long> followIds = new HashSet<>();
 
     for (Follow follow : follows) {
-      if (java.util.Objects.equals(follow.getUserId(), userId) && follow.getFollowUser().getDeleteYn() == YesNo.N) {
+      if (Objects.equals(follow.getUserId(), userId) && follow.getFollowUser().getDeleteYn() == YesNo.N) {
         followIds.add(follow.getFollowUserId());
       }
     }

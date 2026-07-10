@@ -94,7 +94,7 @@ public class AlarmMessageListener {
     // 4. FCM 서버로 발송요청 (비동기로 하려면 sendAsync 사용)
     try {
       String response = FirebaseMessaging.getInstance().send(message);
-      System.out.println("Successfully sent message: " + response);
+      log.info("Successfully sent message: {}", response);
     } catch (FirebaseMessagingException e) {
       log.warn("Failed to send fcm.", e);
     }

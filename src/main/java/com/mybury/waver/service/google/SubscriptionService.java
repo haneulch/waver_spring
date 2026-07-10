@@ -3,13 +3,17 @@ package com.mybury.waver.service.google;
 import com.google.api.services.androidpublisher.AndroidPublisher;
 import com.google.api.services.androidpublisher.model.SubscriptionPurchaseV2;
 import lombok.RequiredArgsConstructor;
+import lombok.extern.slf4j.Slf4j;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
+@Slf4j
 @RequiredArgsConstructor
 @Service
 public class SubscriptionService {
+
+  private static final String SUBSCRIPTION_STATE_ACTIVE = "SUBSCRIPTION_STATE_ACTIVE";
 
   private final AndroidPublisher androidPublisher;
 
@@ -33,16 +37,16 @@ public class SubscriptionService {
       // 3. 자동 갱신 여부 확인 (기본값: AcknowledgementState)
       String acknowledgmentState = subscription.getAcknowledgementState();
 
-      if ("SUBSCRIPTION_STATE_ACTIVE".equals(subscriptionState)) {
+      if (SUBSCRIPTION_STATE_ACTIVE.equals(subscriptionState)) {
         // ➡️ [성공] 유저의 구독 등급 권한을 DB에 반영하고 만료일을 기록합니다.
         // 예: userSubscriptionRepository.save(new UserSubscription(userId, expiryTime, true));
-        System.out.println("구독 인증 성공! 만료일자: " + expiryTime);
+        log.info("구독 인증 성공! 만료일자: {}", expiryTime);
       } else {
-        System.out.println("활성화되지 않은 구독 상태입니다: " + subscriptionState);
+        log.info("활성화되지 않은 구독 상태입니다: {}", subscriptionState);
       }
 
     } catch (Exception e) {
-      System.err.println("구독 정보 조회 중 에러 발생: " + e.getMessage());
+      log.error("구독 정보 조회 중 에러 발생: {}", e.getMessage(), e);
     }
   }
 }

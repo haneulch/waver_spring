@@ -2,7 +2,6 @@ package com.mybury.waver.annotation;
 
 import com.mybury.waver.security.JwtTokenProvider;
 import lombok.RequiredArgsConstructor;
-import org.springframework.beans.factory.annotation.Value;
 import org.springframework.core.MethodParameter;
 import org.springframework.stereotype.Component;
 import org.springframework.web.bind.support.WebDataBinderFactory;
@@ -15,9 +14,6 @@ import org.springframework.web.method.support.ModelAndViewContainer;
 public class UserIdArgumentResolver implements HandlerMethodArgumentResolver {
 
   private final JwtTokenProvider jwtTokenProvider;
-
-  @Value("${spring.profiles.active:default}")
-  private String activeProfile;
 
   @Override
   public boolean supportsParameter(MethodParameter parameter) {

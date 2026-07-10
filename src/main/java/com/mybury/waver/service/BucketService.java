@@ -30,6 +30,8 @@ import java.util.stream.Collectors;
 @RequiredArgsConstructor
 public class BucketService {
 
+  private static final int POPULAR_BUCKET_LIMIT = 4;
+
   private final FileUploadUtils fileUploadUtils;
   private final BucketRepository bucketRepository;
   private final LikeBucketRepository likeBucketRepository;
@@ -89,6 +91,11 @@ public class BucketService {
 
     List<Long> reportedBucketIds =
         reportRepository.findBucketlistIdsByReportUserIdAndReportType(userId, ReportType.BUCKET);
+
+    return findBuckets(targetUserId, request, reportedBucketIds);
+  }
+
+  private List<Bucket> findBuckets(Long targetUserId, BucketRequest request, List<Long> reportedBucketIds) {
     if (reportedBucketIds == null || reportedBucketIds.isEmpty()) {
       return bucketRepository.findBucket(targetUserId, request);
     }
@@ -113,7 +120,7 @@ public class BucketService {
         YesNo.N,
         from,
         now,
-        4,
+        POPULAR_BUCKET_LIMIT,
         null
     );
 
@@ -127,7 +134,7 @@ public class BucketService {
         YesNo.N,
         from,
         now,
-        4,
+        POPULAR_BUCKET_LIMIT,
         YesNo.Y
     );
 
@@ -136,16 +143,8 @@ public class BucketService {
       reportedBucketIds = reportRepository.findBucketlistIdsByReportUserIdAndReportType(userId, ReportType.BUCKET);
     }
 
-    List<Bucket> popularBucketList;
-    List<Bucket> recommendBucketList;
-
-    if (reportedBucketIds == null || reportedBucketIds.isEmpty()) {
-      popularBucketList = bucketRepository.findBucket(null, popularRequest);
-      recommendBucketList = bucketRepository.findBucket(null, recommendRequest);
-    } else {
-      popularBucketList = bucketRepository.findBucketExcludingIds(null, popularRequest, reportedBucketIds);
-      recommendBucketList = bucketRepository.findBucketExcludingIds(null, recommendRequest, reportedBucketIds);
-    }
+    List<Bucket> popularBucketList = findBuckets(null, popularRequest, reportedBucketIds);
+    List<Bucket> recommendBucketList = findBuckets(null, recommendRequest, reportedBucketIds);
 
     return GetPopularBucketResponse.of(popularBucketList, recommendBucketList);
   }
