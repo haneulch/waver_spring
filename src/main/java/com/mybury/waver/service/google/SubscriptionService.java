@@ -2,11 +2,14 @@ package com.mybury.waver.service.google;
 
 import com.google.api.services.androidpublisher.AndroidPublisher;
 import com.google.api.services.androidpublisher.model.SubscriptionPurchaseV2;
+import com.mybury.waver.common.code.ResultCode;
+import com.mybury.waver.exception.WaverException;
+import java.io.IOException;
+import java.util.List;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.stereotype.Service;
-import org.springframework.transaction.annotation.Transactional;
 
 @Slf4j
 @RequiredArgsConstructor
@@ -20,33 +23,42 @@ public class SubscriptionService {
   @Value("${google.play.package-name}")
   private String packageName;
 
-  @Transactional
-  public void verifySubscription(Long userId, String purchaseToken) {
+  /**
+   * 구글 서버에서 구독 상태를 조회한다.
+   *
+   * @return 구독이 활성 상태면 true
+   * @throws WaverException 구글 API 호출에 실패한 경우 (상태 판별 불가)
+   */
+  public boolean verifySubscription(String purchaseToken) {
     try {
-      // 🚨 구독형(Subscription) 검증 API 호출
+      // 구독형(Subscription) 검증 API 호출
       SubscriptionPurchaseV2 subscription = androidPublisher.purchases().subscriptionsv2()
           .get(packageName, purchaseToken)
           .execute();
 
-      // 1. 현재 구독의 상태 확인 (SUBSCRIPTION_STATE_ACTIVE = 활성화됨)
       String subscriptionState = subscription.getSubscriptionState();
 
-      // 2. 만료 시간 확인 (유닉스 타임스탬프 문자열로 리턴됨)
-      String expiryTime = subscription.getLineItems().get(0).getExpiryTime();
-
-      // 3. 자동 갱신 여부 확인 (기본값: AcknowledgementState)
-      String acknowledgmentState = subscription.getAcknowledgementState();
-
       if (SUBSCRIPTION_STATE_ACTIVE.equals(subscriptionState)) {
-        // ➡️ [성공] 유저의 구독 등급 권한을 DB에 반영하고 만료일을 기록합니다.
-        // 예: userSubscriptionRepository.save(new UserSubscription(userId, expiryTime, true));
-        log.info("구독 인증 성공! 만료일자: {}", expiryTime);
-      } else {
-        log.info("활성화되지 않은 구독 상태입니다: {}", subscriptionState);
+        log.info("구독 인증 성공! 만료일자: {}", extractExpiryTime(subscription));
+        return true;
       }
 
-    } catch (Exception e) {
+      log.info("활성화되지 않은 구독 상태입니다: {}", subscriptionState);
+      return false;
+
+    } catch (IOException e) {
+      // 통신 실패는 '비활성'과 구분해야 하므로 예외로 전파 (RTDN 재시도 대상)
       log.error("구독 정보 조회 중 에러 발생: {}", e.getMessage(), e);
+      throw new WaverException(ResultCode.INTERNAL_SERVER_ERROR);
     }
+  }
+
+  private String extractExpiryTime(SubscriptionPurchaseV2 subscription) {
+    List<com.google.api.services.androidpublisher.model.SubscriptionPurchaseLineItem> lineItems =
+        subscription.getLineItems();
+    if (lineItems == null || lineItems.isEmpty()) {
+      return null;
+    }
+    return lineItems.get(0).getExpiryTime();
   }
 }
