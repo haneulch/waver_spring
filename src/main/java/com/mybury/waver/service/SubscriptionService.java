@@ -1,33 +1,36 @@
 package com.mybury.waver.service;
 
+import com.mybury.waver.common.code.BillingCycle;
 import com.mybury.waver.common.code.PremiumStatus;
 import com.mybury.waver.common.code.ResultCode;
+import com.mybury.waver.common.code.SubscriptionStatus;
 import com.mybury.waver.domain.Subscribe;
 import com.mybury.waver.domain.User;
 import com.mybury.waver.exception.WaverException;
 import com.mybury.waver.repository.SubscribeRepository;
 import com.mybury.waver.repository.UserRepository;
-import com.mybury.waver.service.google.SubscriptionService;
-import jakarta.transaction.Transactional;
+import com.mybury.waver.service.google.GooglePlaySubscriptionService;
+import java.time.LocalDateTime;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.stereotype.Service;
+import org.springframework.transaction.annotation.Transactional;
 
 @Slf4j
 @Service
 @RequiredArgsConstructor
-public class SubscribeService {
+public class SubscriptionService {
 
   private final SubscribeRepository subscribeRepository;
   private final UserRepository userRepository;
-  private final SubscriptionService subscriptionService;
+  private final GooglePlaySubscriptionService googlePlaySubscriptionService;
 
   /**
-   * 클라이언트가 보낸 구매 토큰을 구글에 검증한 뒤 구독을 등록하고 프리미엄을 활성화한다.
+   * 클라이언트가 보낸 구매 토큰을 구글에 검증한 뒤 구독을 시작하고 프리미엄을 활성화한다.
    */
   @Transactional
-  public void subscribe(long userId, String subscribeId) {
-    if (!subscriptionService.verifySubscription(subscribeId)) {
+  public Subscribe start(Long userId, BillingCycle billingCycle, String subscribeId) {
+    if (!googlePlaySubscriptionService.verifySubscription(subscribeId)) {
       throw new WaverException(ResultCode.BAD_REQUEST);
     }
 
@@ -35,11 +38,32 @@ public class SubscribeService {
         .orElseThrow(() -> new WaverException(ResultCode.NOT_FOUND));
     user.setPremiumStatus(PremiumStatus.ACTIVE);
 
-    Subscribe subscribe = Subscribe.builder()
+    LocalDateTime now = LocalDateTime.now();
+    Subscribe subscription = Subscribe.builder()
         .userId(userId)
         .subscribeId(subscribeId)
+        .billingCycle(billingCycle)
+        .status(SubscriptionStatus.ACTIVE)
+        .startAt(now)
+        .expiredAt(billingCycle.nextBillingDate(now))
         .build();
-    subscribeRepository.save(subscribe);
+    return subscribeRepository.save(subscription);
+  }
+
+  @Transactional
+  public Subscribe cancel(Long userId) {
+    Subscribe subscription = subscribeRepository.findTopByUserIdOrderByStartAtDesc(userId)
+        .orElseThrow(() -> new WaverException(ResultCode.SUBSCRIPTION_NOT_FOUND));
+
+    if (subscription.getStatus() == SubscriptionStatus.PENDING_CANCELLATION) {
+      throw new WaverException(ResultCode.SUBSCRIPTION_ALREADY_CANCELLED);
+    }
+    if (subscription.getStatus() != SubscriptionStatus.ACTIVE) {
+      throw new WaverException(ResultCode.SUBSCRIPTION_NOT_FOUND);
+    }
+
+    subscription.cancel(LocalDateTime.now());
+    return subscription;
   }
 
   /**
@@ -55,7 +79,7 @@ public class SubscribeService {
       return;
     }
 
-    boolean active = subscriptionService.verifySubscription(purchaseToken);
+    boolean active = googlePlaySubscriptionService.verifySubscription(purchaseToken);
 
     userRepository.findById(subscribe.getUserId())
         .ifPresent(user -> user.setPremiumStatus(active ? PremiumStatus.ACTIVE : PremiumStatus.EXPIRED));

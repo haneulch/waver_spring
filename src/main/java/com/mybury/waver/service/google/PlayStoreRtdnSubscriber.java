@@ -4,7 +4,7 @@ import com.fasterxml.jackson.databind.JsonNode;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import com.google.cloud.spring.pubsub.core.PubSubTemplate;
 import com.google.cloud.spring.pubsub.support.BasicAcknowledgeablePubsubMessage;
-import com.mybury.waver.service.SubscribeService;
+import com.mybury.waver.service.SubscriptionService;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.boot.context.event.ApplicationReadyEvent;
@@ -16,15 +16,15 @@ import org.springframework.stereotype.Service;
 public class PlayStoreRtdnSubscriber {
 
   private final PubSubTemplate pubSubTemplate;
-  private final SubscribeService subscribeService;
+  private final SubscriptionService subscriptionService;
   private final ObjectMapper objectMapper = new ObjectMapper();
 
   @Value("${spring.cloud.gcp.pubsub.subscription-id}")
   private String subscriptionId;
 
-  public PlayStoreRtdnSubscriber(PubSubTemplate pubSubTemplate, SubscribeService subscribeService) {
+  public PlayStoreRtdnSubscriber(PubSubTemplate pubSubTemplate, SubscriptionService subscriptionService) {
     this.pubSubTemplate = pubSubTemplate;
-    this.subscribeService = subscribeService;
+    this.subscriptionService = subscriptionService;
   }
 
   // 애플리케이션이 구동 완료되면 구글 큐(Queue) 리스닝 시작
@@ -50,7 +50,7 @@ public class PlayStoreRtdnSubscriber {
           log.info("🔔 구독 상태 변경 감지! 토큰: {} / 타입: {}", purchaseToken, notificationType);
 
           // 구글 서버의 최신 상태를 재조회한 뒤 사용자 프리미엄 상태를 동기화
-          subscribeService.syncSubscriptionState(purchaseToken);
+          subscriptionService.syncSubscriptionState(purchaseToken);
         }
 
         // 3. 메시지 처리 완료 알림 (큐에서 메시지 제거 - 안 하면 구글이 계속 다시 보냄)

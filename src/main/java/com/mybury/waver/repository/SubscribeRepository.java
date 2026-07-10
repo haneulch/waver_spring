@@ -7,4 +7,6 @@ import org.springframework.data.jpa.repository.JpaRepository;
 public interface SubscribeRepository extends JpaRepository<Subscribe, Long> {
 
   Optional<Subscribe> findTopBySubscribeIdOrderByIdDesc(String subscribeId);
+
+  Optional<Subscribe> findTopByUserIdOrderByStartAtDesc(Long userId);
 }
