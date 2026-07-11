@@ -14,7 +14,7 @@ import org.springframework.web.bind.annotation.PathVariable;
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RestController;
 
-@Tag(name = "유틸리티")
+@Tag(name = "유틸리티", description = "공통 코드 조회")
 @RestController
 @RequestMapping("waver/utility")
 @RequiredArgsConstructor
@@ -22,7 +22,8 @@ public class UtilityController {
 
     private final UtilityService utilityService;
 
-    @Operation(summary = "코드목록", description = "[REPORT] 신고내용목록")
+    @Operation(summary = "공통 코드 목록",
+        description = "그룹 코드에 속한 코드/라벨 목록을 반환합니다. 예: REPORT(신고 사유). 없는 그룹이면 4000을 반환합니다.")
     @GetMapping("codes/{groupCode}")
     public List<CodeResponse> utilityCodes(@PathVariable String groupCode) {
         CodeGroup codeGroup = CodeGroup.get(groupCode);

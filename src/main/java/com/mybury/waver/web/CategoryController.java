@@ -23,7 +23,7 @@ import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RequestParam;
 import org.springframework.web.bind.annotation.RestController;
 
-@Tag(name = "카테고리")
+@Tag(name = "카테고리", description = "버킷리스트 분류 카테고리 관리")
 @RestController
 @RequestMapping("waver/category")
 @RequiredArgsConstructor
@@ -31,7 +31,7 @@ public class CategoryController {
 
     private final CategoryService categoryService;
 
-    @Operation(summary = "카테고리 목록")
+    @Operation(summary = "카테고리 목록", description = "내 카테고리를 순서대로 반환합니다. query로 이름 검색이 가능합니다.")
     @GetMapping
     public List<CategoryResponse> getCategory(@Parameter(hidden = true) @UserId Long userId,
         @RequestParam(required = false) String query) {
@@ -39,27 +39,27 @@ public class CategoryController {
         return categories.stream().map(CategoryResponse::new).toList();
     }
 
-    @Operation(summary = "카테고리 추가")
+    @Operation(summary = "카테고리 추가", description = "이름이 중복이면 6000(CATEGORY_CANNOT_DUPLICATE)을 반환합니다.")
     @PostMapping
     public void postCategory(@Parameter(hidden = true) @UserId Long userId,
         @Valid @RequestBody CategoryCreateRequest request) {
         categoryService.postCategory(userId, request.name());
     }
 
-    @Operation(summary = "카테고리 이름 변경")
+    @Operation(summary = "카테고리 이름 변경", description = "내 카테고리의 이름을 변경합니다.")
     @PatchMapping("{id}")
     public void patchCategory(@PathVariable Long id, @Parameter(hidden = true) @UserId Long userId,
         @Valid @RequestBody CategoryNameRequest request) {
         categoryService.patchCategory(id, userId, request.name());
     }
 
-    @Operation(summary = "카테고리 삭제")
+    @Operation(summary = "카테고리 삭제", description = "카테고리를 삭제합니다. 소속 버킷 처리 방식은 서비스 정책을 따릅니다.")
     @DeleteMapping("{id}")
     public void deleteCategory(@PathVariable Long id, @Parameter(hidden = true) @UserId Long userId) {
         categoryService.deleteCategory(id, userId);
     }
 
-    @Operation(summary = "카테고리 순서 변경")
+    @Operation(summary = "카테고리 순서 변경", description = "categoryIds 배열 순서대로 노출 순서를 재정렬합니다.")
     @PatchMapping("seq")
     public void patchCategorySeq(@Parameter(hidden = true) @UserId Long userId,
         @Valid @RequestBody CategoryOrderRequest request) {

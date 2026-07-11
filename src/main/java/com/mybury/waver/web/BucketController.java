@@ -28,7 +28,7 @@ import org.springframework.web.bind.annotation.RequestBody;
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RestController;
 
-@Tag(name = "버킷리스트")
+@Tag(name = "버킷리스트", description = "버킷리스트 등록·조회·수정·삭제와 달성 관리")
 @RestController
 @RequestMapping("waver/bucket")
 @RequiredArgsConstructor
@@ -36,14 +36,18 @@ public class BucketController {
 
     private final BucketService bucketService;
 
-    @Operation(summary = "버킷리스트 등록")
+    @Operation(summary = "버킷리스트 등록",
+        description = "이미지는 최대 3장. 무료 사용자는 기본 1장이며 2장 이상 저장은 1회만 제공됩니다(초과 시 8100). "
+            + "함께하기(TOGETHER)는 무료 3회 제공됩니다(초과 시 8101). 키워드 등록 시 배지 달성 횟수가 올라갑니다.")
     @PostMapping(consumes = MediaType.MULTIPART_FORM_DATA_VALUE)
     public BucketDetailResponse bucketCreate(@Parameter(hidden = true) @UserId Long userId,
         @Valid @ModelAttribute BucketCreateRequest request) {
         return bucketService.create(userId, request);
     }
 
-    @Operation(summary = "버킷리스트 목록")
+    @Operation(summary = "버킷리스트 목록",
+        description = "필터·정렬 조건으로 목록을 조회합니다. hasMyBucket=Y이면 내 버킷과 함께하기 친구로 등록된 버킷이 함께 반환됩니다. "
+            + "신고한 버킷은 자동 제외됩니다.")
     @GetMapping
     public BucketResponse bucketList(@Parameter(hidden = true) @UserId Long userId,
         @Valid @ParameterObject BucketRequest request) {
@@ -51,50 +55,58 @@ public class BucketController {
         return BucketResponse.of(bucketList);
     }
 
-    @Operation(summary = "인기 버킷리스트 조회")
+    @Operation(summary = "인기 버킷리스트 조회",
+        description = "최근 한 달 기준 인기(좋아요순) 4개와 추천(최신순) 4개, 각 키워드 목록을 반환합니다.")
     @GetMapping("popular")
     public GetPopularBucketResponse popularBucket(@Parameter(hidden = true) @UserId Long userId) {
         return bucketService.popularBucket(userId);
     }
 
-    @Operation(summary = "버킷리스트 수정")
+    @Operation(summary = "버킷리스트 수정",
+        description = "소유자만 수정할 수 있습니다(아니면 4030). 이미지를 보내면 교체, 생략하면 기존 이미지가 유지됩니다. "
+            + "bucketType을 생략하면 기존 종류가 유지됩니다.")
     @PostMapping(value = "{id}", consumes = MediaType.MULTIPART_FORM_DATA_VALUE)
     public BucketDetailResponse bucketUpdate(@Parameter(hidden = true) @UserId Long userId, @PathVariable Long id,
         @Valid @ModelAttribute BucketUpdateRequest request) {
         return bucketService.update(id, userId, request);
     }
 
-    @Operation(summary = "버킷리스트 상세")
+    @Operation(summary = "버킷리스트 상세",
+        description = "키워드, 함께하는 친구 목록, 좋아요 여부, 댓글까지 포함한 상세 정보를 반환합니다.")
     @GetMapping("{id}")
     public BucketDetailResponse bucketDetail(@Parameter(hidden = true) @UserId Long userId, @PathVariable Long id) {
         return bucketService.bucketDetail(id, userId);
     }
 
-    @Operation(summary = "버킷리스트 삭제")
+    @Operation(summary = "버킷리스트 삭제", description = "소유자의 버킷을 삭제 상태로 전환합니다(soft delete).")
     @DeleteMapping("{id}")
     public void bucketDelete(@Parameter(hidden = true) @UserId Long userId, @PathVariable Long id) {
         bucketService.delete(id, userId);
     }
 
-    @Operation(summary = "버킷리스트 달성")
+    @Operation(summary = "버킷리스트 달성(횟수 +1)",
+        description = "달성 횟수를 1 올립니다. 목표 횟수에 도달하면 COMPLETE 상태로 전환됩니다. "
+            + "소유자와 함께하기(TOGETHER) 친구만 호출할 수 있습니다(아니면 4030).")
     @GetMapping("{id}/achieve")
     public void bucketAchieve(@Parameter(hidden = true) @UserId Long userId, @PathVariable Long id) {
         bucketService.achieve(id, userId);
     }
 
-    @Operation(summary = "버킷리스트 달성취소")
+    @Operation(summary = "버킷리스트 달성 취소(횟수 -1)",
+        description = "달성 횟수를 1 내립니다. 소유자와 함께하기 친구만 호출할 수 있습니다.")
     @GetMapping("{id}/achieve/cancel")
     public void bucketAchieveCancel(@Parameter(hidden = true) @UserId Long userId, @PathVariable Long id) {
         bucketService.achieveCancel(id, userId);
     }
 
-    @Operation(summary = "버킷리스트 다시 도전하기")
+    @Operation(summary = "버킷리스트 다시 도전하기",
+        description = "달성 횟수를 0으로 초기화하고 진행중(PROGRESS) 상태로 되돌립니다.")
     @GetMapping("{id}/reset")
     public void bucketReset(@Parameter(hidden = true) @UserId Long userId, @PathVariable Long id) {
         bucketService.reset(id, userId);
     }
 
-    @Operation(summary = "버킷리스트 달성횟수 수정")
+    @Operation(summary = "목표 횟수 수정", description = "버킷리스트의 목표 달성 횟수(goalCount)를 변경합니다.")
     @PatchMapping("{id}/goalCount")
     public void bucketGoalCountPatch(@Parameter(hidden = true) @UserId Long userId, @PathVariable Long id,
         @Valid @RequestBody BucketGoalCountRequest request) {
