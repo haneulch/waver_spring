@@ -1,3 +1,8 @@
+# 프록시(nginx 등) 뒤에서 X-Forwarded-* 헤더 기준으로 스킴/호스트를 인식한다
+# (없으면 https 접속 시 Swagger가 API 주소를 http로 만들어 mixed content로 차단됨)
+server:
+  forward-headers-strategy: framework
+
 spring:
   application:
     name: waver
