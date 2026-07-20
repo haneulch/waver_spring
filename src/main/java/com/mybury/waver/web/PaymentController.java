@@ -1,7 +1,9 @@
 package com.mybury.waver.web;
 
+import com.mybury.waver.annotation.UserId;
 import com.mybury.waver.service.google.PurchaseService;
 import io.swagger.v3.oas.annotations.Operation;
+import io.swagger.v3.oas.annotations.Parameter;
 import io.swagger.v3.oas.annotations.tags.Tag;
 import lombok.RequiredArgsConstructor;
 import org.springframework.http.ResponseEntity;
@@ -12,17 +14,17 @@ import java.util.Map;
 @Tag(name = "결제", description = "구글 인앱 일회성 결제 검증")
 @RequiredArgsConstructor
 @RestController
-@RequestMapping("/api/v1/payments")
+@RequestMapping("/waver/payments")
 public class PaymentController {
 
   private final PurchaseService purchaseService;
 
   @Operation(summary = "구글 결제 검증",
       description = "일회성 상품 구매 영수증(purchaseToken)을 구글 서버에 검증합니다. "
-          + "주의: /waver 경로 밖이라 현재 토큰 인증이 적용되지 않는 엔드포인트입니다.")
+          + "사용자는 토큰(Authorization)에서 식별합니다.")
   @PostMapping("/google/verify")
   public ResponseEntity<String> verifyPayment(
-      @RequestParam Long userId,
+      @Parameter(hidden = true) @UserId Long userId,
       @RequestBody Map<String, String> request) {
 
     String productId = request.get("productId");
