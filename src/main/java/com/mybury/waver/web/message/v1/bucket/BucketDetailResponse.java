@@ -45,14 +45,19 @@ public record BucketDetailResponse(
         List<CommentElement> comment) {
 
     public static BucketDetailResponse of(Bucket bucket, long userId,
-            List<KeywordElement> keywordList, List<User> friendUserList, boolean isLike) {
+            List<KeywordElement> keywordList, List<User> friendUserList, boolean isLike,
+            List<Long> reportedCommentIds) {
         CategoryElement category = new CategoryElement(bucket.getCategory());
         List<FriendElement> friendUsers = friendUserList.stream().map(
                 FriendElement::new).toList();
         List<String> images = bucket.getImgUrl() != null
                 ? Arrays.stream(bucket.getImgUrl().split(",")).map(FileImageUtils::imagePath).toList()
                 : List.of();
+        // 미노출 조건: 차단(신고 누적) / 작성자 숨김 / 조회 사용자가 신고한 댓글
         List<CommentElement> comment = bucket.getComments().stream()
+                .filter(item -> item.getIsBlocked() != YesNo.Y)
+                .filter(item -> item.getIsHide() != YesNo.Y)
+                .filter(item -> reportedCommentIds == null || !reportedCommentIds.contains(item.getId()))
                 .map(item -> new CommentElement(item, userId)).toList().reversed();
         return new BucketDetailResponse(
                 bucket.getId(),

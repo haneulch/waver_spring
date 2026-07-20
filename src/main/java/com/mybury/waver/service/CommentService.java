@@ -1,13 +1,17 @@
 package com.mybury.waver.service;
 
+import com.mybury.waver.common.code.ReportType;
 import com.mybury.waver.common.code.ResultCode;
 import com.mybury.waver.common.code.YesNo;
 import com.mybury.waver.domain.Bucket;
 import com.mybury.waver.domain.Comment;
+import com.mybury.waver.domain.Report;
 import com.mybury.waver.event.message.AlarmMessageEvent;
+import com.mybury.waver.event.message.CommentReportedEvent;
 import com.mybury.waver.exception.WaverException;
 import com.mybury.waver.repository.BucketRepository;
 import com.mybury.waver.repository.CommentRepository;
+import com.mybury.waver.repository.ReportRepository;
 import com.mybury.waver.web.message.v1.comment.CommentCreateRequest;
 import com.mybury.waver.web.message.v1.comment.CommentUpdateRequest;
 import jakarta.transaction.Transactional;
@@ -22,6 +26,7 @@ public class CommentService {
 
   private final CommentRepository commentRepository;
   private final BucketRepository bucketRepository;
+  private final ReportRepository reportRepository;
   private final ApplicationEventPublisher publisher;
 
   @Transactional
@@ -69,5 +74,30 @@ public class CommentService {
         .orElseThrow(() -> new WaverException(ResultCode.NOT_FOUND));
     comment.setIsHide(YesNo.Y);
     commentRepository.save(comment);
+  }
+
+  @Transactional
+  public void report(Long id, String reason, Long userId) {
+    Comment comment = commentRepository.findById(id)
+        .orElseThrow(() -> new WaverException(ResultCode.NOT_FOUND));
+    if (comment.getUserId() != null && comment.getUserId().equals(userId)) {
+      throw new WaverException(ResultCode.FORBIDDEN);
+    }
+
+    boolean isDuplicated = reportRepository.existsByReportUserIdAndCommentIdAndReportType(userId, id,
+        ReportType.COMMENT);
+    if (isDuplicated) {
+      return;
+    }
+
+    Report report = Report.builder()
+        .reportType(ReportType.COMMENT)
+        .commentId(id)
+        .reason(reason)
+        .reportUserId(userId)
+        .build();
+    reportRepository.save(report);
+
+    publisher.publishEvent(new CommentReportedEvent(id));
   }
 }

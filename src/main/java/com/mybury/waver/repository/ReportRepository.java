@@ -25,4 +25,21 @@ public interface ReportRepository extends JpaRepository<Report, Long> {
       @Param("reportUserId") Long reportUserId,
       @Param("reportType") ReportType reportType
   );
+
+  long countByCommentIdAndReportType(Long commentId, ReportType reportType);
+
+  boolean existsByReportUserIdAndCommentIdAndReportType(Long reportUserId, Long commentId,
+      ReportType reportType);
+
+  @Query("""
+      SELECT r.commentId
+      FROM Report r
+      WHERE r.reportUserId = :reportUserId
+        AND r.reportType = :reportType
+        AND r.commentId IS NOT NULL
+      """)
+  List<Long> findCommentIdsByReportUserIdAndReportType(
+      @Param("reportUserId") Long reportUserId,
+      @Param("reportType") ReportType reportType
+  );
 }

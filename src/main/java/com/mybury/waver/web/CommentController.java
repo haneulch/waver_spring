@@ -4,8 +4,11 @@ import com.mybury.waver.annotation.UserId;
 import com.mybury.waver.service.CommentService;
 import com.mybury.waver.web.message.v1.comment.CommentCreateRequest;
 import com.mybury.waver.web.message.v1.comment.CommentUpdateRequest;
+import com.mybury.waver.web.message.v1.common.ReportRequest;
 import io.swagger.v3.oas.annotations.Operation;
 import io.swagger.v3.oas.annotations.Parameter;
+import io.swagger.v3.oas.annotations.responses.ApiResponse;
+import io.swagger.v3.oas.annotations.responses.ApiResponses;
 import io.swagger.v3.oas.annotations.tags.Tag;
 import jakarta.validation.Valid;
 import lombok.RequiredArgsConstructor;
@@ -49,5 +52,17 @@ public class CommentController {
     @PatchMapping("{id}/hide")
     public void commentHide(@Parameter(hidden = true) @UserId Long userId, @PathVariable Long id) {
         commentService.commentHide(id, userId);
+    }
+
+    @Operation(summary = "댓글 신고",
+        description = "댓글을 신고합니다. 신고한 댓글은 이후 본인에게 미노출되며, 누적 3회 신고되면 모든 사용자에게 미노출(차단) 처리됩니다. 중복 신고는 무시됩니다.")
+    @ApiResponses({
+        @ApiResponse(responseCode = "4040", description = "NOT_FOUND — 댓글을 찾을 수 없음"),
+        @ApiResponse(responseCode = "4030", description = "FORBIDDEN — 자기 댓글은 신고 불가")
+    })
+    @PatchMapping("{id}/report")
+    public void commentReport(@Parameter(hidden = true) @UserId Long userId, @PathVariable Long id,
+        @RequestBody ReportRequest request) {
+        commentService.report(id, request.reason(), userId);
     }
 }

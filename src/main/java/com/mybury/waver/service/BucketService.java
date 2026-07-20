@@ -251,7 +251,10 @@ public class BucketService {
       friendUserList = userRepository.findAllById(friendIds);
     }
 
-    return BucketDetailResponse.of(bucket, userId, keywords, friendUserList, isLike);
+    List<Long> reportedCommentIds =
+        reportRepository.findCommentIdsByReportUserIdAndReportType(userId, ReportType.COMMENT);
+
+    return BucketDetailResponse.of(bucket, userId, keywords, friendUserList, isLike, reportedCommentIds);
   }
 
   public void delete(long id, long userId) {
