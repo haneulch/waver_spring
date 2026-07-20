@@ -656,7 +656,7 @@ FCM 토큰 업데이트
 
 ### PATCH `/waver/comment/{id}/report`
 
-댓글 신고 *(미구현)*
+댓글 신고. 신고한 댓글은 이후 본인에게 미노출되며, 누적 3회 신고되면 모든 사용자에게 미노출(차단) 처리된다. 자기 댓글은 신고할 수 없고(4030), 중복 신고는 무시된다.
 
 **Path Parameters**
 
@@ -669,6 +669,15 @@ FCM 토큰 업데이트
 | Field  | Type   | Required | Description |
 |--------|--------|----------|-------------|
 | reason | String | ✅       | 신고 사유    |
+
+**Response** `200 OK` (no body)
+
+**Errors**
+
+| Code | Description |
+|------|-------------|
+| 4040 | NOT_FOUND — 댓글을 찾을 수 없음 |
+| 4030 | FORBIDDEN — 자기 댓글은 신고 불가 |
 
 ---
 
@@ -764,19 +773,60 @@ FCM 토큰 업데이트
 
 ---
 
-## Subscription (구독)
+## Subscription (구독, Waver+)
 
-### POST `/waver/subscribe`
+구글 인앱 구독 시작·취소. 상태 변경(갱신/만료 등)은 RTDN(Pub/Sub)으로 자동 동기화된다.
 
-구독
+### POST `/waver/subscription/start`
+
+구독 시작. 구글 결제 완료 후 받은 purchaseToken을 서버가 구글에 검증하고, 통과하면 구독을 등록하고 프리미엄(ACTIVE)을 활성화한다.
 
 **Request Body** (`application/json`)
 
-| Field       | Type | Required | Description  |
-|-------------|------|----------|--------------|
-| subscribeId | Long | ✅       | 구독 대상 ID  |
+| Field        | Type   | Required | Description                              |
+|--------------|--------|----------|------------------------------------------|
+| billingCycle | String | ✅       | 결제 주기 (`BillingCycle` enum)           |
+| subscribeId  | String | ✅       | 구글 결제 구매 토큰(purchaseToken)         |
 
-**Response** `200 OK` (no body)
+**Response** `200 OK` — `SubscriptionResponse` (id, billingCycle, status, startAt, expiredAt, cancelledAt)
+
+**Errors**
+
+| Code | Description |
+|------|-------------|
+| 4000 | BAD_REQUEST — 구글 검증 실패(유효하지 않은 토큰/비활성 구독) |
+
+---
+
+### POST `/waver/subscription/cancel`
+
+구독 취소. 구독을 취소 대기(PENDING_CANCELLATION) 상태로 전환한다. 프리미엄 혜택은 만료일까지 유지된다.
+
+**Response** `200 OK` — `SubscriptionResponse`
+
+**Errors**
+
+| Code | Description |
+|------|-------------|
+| 9100 | SUBSCRIPTION_NOT_FOUND — 활성 구독 없음 |
+| 9101 | SUBSCRIPTION_ALREADY_CANCELLED — 이미 취소 대기 중 |
+
+---
+
+## Payment (결제)
+
+### POST `/waver/payments/google/verify`
+
+구글 인앱 일회성 결제 검증. 구매 영수증(purchaseToken)을 구글 서버에 검증한다. 사용자는 토큰(Authorization)에서 식별한다.
+
+**Request Body** (`application/json`)
+
+| Field         | Type   | Required | Description        |
+|---------------|--------|----------|--------------------|
+| productId     | String | ✅       | 구글 상품 ID        |
+| purchaseToken | String | ✅       | 구글 결제 구매 토큰  |
+
+**Response** `200 OK` — 검증 성공 메시지 / `400 Bad Request` — 검증 실패
 
 ---
 
