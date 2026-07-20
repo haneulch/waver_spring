@@ -33,3 +33,7 @@ src/main/resources/application-prod.yml
 src/main/resources/waver-service-account.json
 src/main/resources/google-api-key.json
 src/main/resources/firebase-service-account.json
+
+# 로컬 환경변수 (실제 시크릿). 템플릿 .env.example 은 커밋한다.
+.env
+.env.local

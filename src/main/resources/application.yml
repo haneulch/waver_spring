@@ -4,6 +4,10 @@ server:
   forward-headers-strategy: framework
 
 spring:
+  # 로컬/개발 환경에서는 프로젝트 루트의 .env 파일을 읽어 환경변수를 채운다.
+  # 파일이 없으면(optional) 시스템 환경변수만 사용한다. 운영은 시스템 환경변수로 주입.
+  config:
+    import: optional:file:.env[.properties]
   application:
     name: waver
   cache:
@@ -11,9 +15,9 @@ spring:
     caffeine:
       spec: maximumSize=500,expireAfterAccess=5m
   datasource:
-    url: jdbc:mysql://localhost:3306/bucket
-    username: root
-    password: 12345
+    url: ${DB_URL:jdbc:mysql://localhost:3306/bucket}
+    username: ${DB_USERNAME:root}
+    password: ${DB_PASSWORD:}
   jackson:
     default-property-inclusion: non_null
   jpa:
@@ -31,11 +35,11 @@ spring:
     basename: messages
   cloud:
     gcp:
-      project-id: "waver-478413"
+      project-id: ${GCP_PROJECT_ID:}
       credentials:
-        location: "file:/home/opc/google-api-key.json"
+        location: ${GCP_CREDENTIALS_LOCATION:}
       pubsub:
-        subscription-id: "play-rtdn-topic-sub"
+        subscription-id: ${PLAY_RTDN_SUBSCRIPTION_ID:play-rtdn-topic-sub}
 
 springdoc:
   api-docs:
@@ -52,18 +56,17 @@ waver:
     access-token-validity: 300d
   file:
     upload:
-      # 로컬 경로에 맞게 수정 필요
-      path: upload
+      path: ${FILE_UPLOAD_PATH:upload}
     images:
       path: /waver/image
     statics:
-      path: http://localhost:8080/images
-  service-key-path: /home/opc/waver-service-account.json
+      path: ${FILE_STATICS_PATH:http://localhost:8080/images}
+  service-key-path: ${WAVER_SERVICE_KEY_PATH:}
 
 google:
   play:
-    credentials-path: /home/opc/google-api-key.json
-    package-name: "com.zinc.waver"
+    credentials-path: ${GOOGLE_PLAY_CREDENTIALS_PATH:}
+    package-name: ${GOOGLE_PLAY_PACKAGE_NAME:com.zinc.waver}
 
 logging:
   level:
