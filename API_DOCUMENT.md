@@ -530,9 +530,29 @@ FCM 토큰 업데이트
 
 ### GET `/waver/my/push`
 
-푸시 알림 목록
+푸시 알림 목록. 발송된 푸시는 알림 목록에 저장되며, 각 알림의 타입과 메시지를 함께 반환한다.
 
 **Response** `200 OK` — `AlarmResponse`
+
+| Field           | Type   | Description                                             |
+|-----------------|--------|---------------------------------------------------------|
+| alarms          | Array  | 알림 목록                                               |
+| alarms[].type   | String | 알림 타입 (`PushType`)                                  |
+| alarms[].message| String | 알림 메시지                                             |
+| alarms[].imgUrl | String | `FOLLOW` 타입일 때 팔로워 프로필 이미지 URL, 그 외 타입은 `null` |
+
+**알림 타입 (`type`)**
+
+| Type     | 발생 시점                          |
+|----------|------------------------------------|
+| LIKE     | 내 피드(버킷)에 좋아요가 눌린 경우   |
+| COMMENT  | 내 버킷에 댓글이 등록된 경우        |
+| FOLLOW   | 누군가 나를 팔로우한 경우 (imgUrl 포함) |
+| BADGE    | 뱃지를 달성해 획득한 경우          |
+| TOGETHER | 함께하는 사람이 버킷을 완성한 경우  |
+| NOTICE   | 공지                               |
+| EVENT    | 이벤트                             |
+| D_DAY    | 디데이가 7일 남은 버킷이 있는 경우   |
 
 ---
 
@@ -775,7 +795,7 @@ FCM 토큰 업데이트
 
 ## Subscription (구독, Waver+)
 
-구글 인앱 구독 시작·취소. 상태 변경(갱신/만료 등)은 RTDN(Pub/Sub)으로 자동 동기화된다.
+구글 인앱 구독 시작. 취소 및 상태 변경(갱신/만료 등)은 Play 스토어 조작 → RTDN(Pub/Sub)으로 자동 동기화된다. 별도의 취소 API는 제공하지 않으며, 클라이언트는 사용자를 Play 스토어 구독 관리 화면으로 안내한다.
 
 ### POST `/waver/subscription/start`
 
@@ -796,20 +816,7 @@ FCM 토큰 업데이트
 |------|-------------|
 | 4000 | BAD_REQUEST — 구글 검증 실패(유효하지 않은 토큰/비활성 구독) |
 
----
-
-### POST `/waver/subscription/cancel`
-
-구독 취소. 구독을 취소 대기(PENDING_CANCELLATION) 상태로 전환한다. 프리미엄 혜택은 만료일까지 유지된다.
-
-**Response** `200 OK` — `SubscriptionResponse`
-
-**Errors**
-
-| Code | Description |
-|------|-------------|
-| 9100 | SUBSCRIPTION_NOT_FOUND — 활성 구독 없음 |
-| 9101 | SUBSCRIPTION_ALREADY_CANCELLED — 이미 취소 대기 중 |
+> 구독 취소는 Play 스토어에서 이루어지며 RTDN으로 서버에 반영된다. 서버 취소 API는 없다.
 
 ---
 

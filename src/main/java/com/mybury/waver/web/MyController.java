@@ -39,7 +39,11 @@ public class MyController {
         return myService.getOther(otherUserId, userId);
     }
 
-    @Operation(summary = "알림 목록", description = "받은 푸시 알림 내역을 반환합니다.")
+    @Operation(summary = "알림 목록",
+        description = "받은 푸시 알림 내역을 반환합니다. 각 알림은 타입(type)과 메시지(message)를 함께 반환하며, "
+            + "타입이 FOLLOW인 경우 팔로워의 프로필 이미지 URL(imgUrl)이 함께 내려갑니다. "
+            + "타입: LIKE(좋아요), COMMENT(댓글), FOLLOW(팔로우), BADGE(뱃지 달성), "
+            + "TOGETHER(함께하는 사람이 버킷 완성), NOTICE(공지), EVENT(이벤트), D_DAY(디데이 7일).")
     @GetMapping("push")
     public AlarmResponse push(@Parameter(hidden = true) @UserId Long userId) {
         return alarmService.getList(userId);

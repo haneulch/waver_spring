@@ -51,11 +51,21 @@ public class AlarmMessageListener {
     }
     Locale locale = user.getLocale();
 
-    String otherUserName = event.otherUserId() != null
-        ? userService.getUserNameById(event.otherUserId()) : null;
+    // 알림을 유발한 상대(좋아요/댓글/팔로우/함께하기 주체). 이름과 프로필 이미지를 함께 확보한다.
+    User otherUser = event.otherUserId() != null
+        ? userService.getUserOnlyById(event.otherUserId()) : null;
+    String otherUserName = otherUser != null ? otherUser.getName() : null;
 
     String message = switch (type) {
       case NOTICE -> alarmMessageParser.parse(type, locale);
+      // 이벤트 본문을 그대로 전달한다.
+      case EVENT -> {
+        if (StringUtils.hasText(event.message())) {
+          yield alarmMessageParser.parse(type, locale, event.message());
+        }
+        log.warn("Event content is null for event: {}", event);
+        yield null;
+      }
       case FEED_COMMENT -> {
         if (StringUtils.hasText(otherUserName)) {
           yield alarmMessageParser.parse(type, locale, otherUserName);
@@ -71,6 +81,30 @@ public class AlarmMessageListener {
         log.warn("Other user is null for event: {}", event);
         yield null;
       }
+      // OOO님이 회원님을 팔로우하기 시작했습니다.
+      case FOLLOW -> {
+        if (StringUtils.hasText(otherUserName)) {
+          yield alarmMessageParser.parse(type, locale, otherUserName);
+        }
+        log.warn("Other user is null for event: {}", event);
+        yield null;
+      }
+      // OOO 뱃지를 획득했습니다.
+      case BADGE -> {
+        if (StringUtils.hasText(event.message())) {
+          yield alarmMessageParser.parse(type, locale, event.message());
+        }
+        log.warn("Badge title is null for event: {}", event);
+        yield null;
+      }
+      // OOO님이 함께하는 버킷 "제목"을(를) 완성했습니다.
+      case TOGETHER -> {
+        if (StringUtils.hasText(otherUserName) && StringUtils.hasText(event.bucketTitle())) {
+          yield alarmMessageParser.parse(type, locale, otherUserName, event.bucketTitle());
+        }
+        log.warn("Other user or bucket title is null for event: {}", event);
+        yield null;
+      }
       // 디데이가 7일 남은 버킷리스트가 있습니다.\n:버킷리스트제목
       case D_DAY_7 -> {
         if (StringUtils.hasText(event.bucketTitle())) {
@@ -82,7 +116,15 @@ public class AlarmMessageListener {
     };
 
     if (StringUtils.hasText(message)) {
-      Alarm alarm = Alarm.builder().userId(userId).message(message).build();
+      // 팔로우 알림에는 팔로워의 프로필 이미지를 함께 저장한다.
+      String imgUrl = type == AlarmMessageType.FOLLOW && otherUser != null
+          ? otherUser.getImgUrl() : null;
+      Alarm alarm = Alarm.builder()
+          .userId(userId)
+          .type(type.getPushType())
+          .message(message)
+          .imgUrl(imgUrl)
+          .build();
       alarmService.create(alarm);
       if (StringUtils.hasText(user.getFcmToken())) {
         sendPush(user.getFcmToken(), message);

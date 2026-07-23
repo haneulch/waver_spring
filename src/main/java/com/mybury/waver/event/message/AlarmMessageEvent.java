@@ -30,4 +30,20 @@ public record AlarmMessageEvent(
   public static AlarmMessageEvent dday(long userId, String bucketTitle) {
     return new AlarmMessageEvent(AlarmMessageType.D_DAY_7, userId, null, null, bucketTitle, null);
   }
+
+  public static AlarmMessageEvent event(long userId, String content) {
+    return new AlarmMessageEvent(AlarmMessageType.EVENT, userId, null, null, null, content);
+  }
+
+  public static AlarmMessageEvent follow(long userId, long followerUserId) {
+    return new AlarmMessageEvent(AlarmMessageType.FOLLOW, userId, followerUserId, null, null, null);
+  }
+
+  public static AlarmMessageEvent badge(long userId, String badgeTitle) {
+    return new AlarmMessageEvent(AlarmMessageType.BADGE, userId, null, null, null, badgeTitle);
+  }
+
+  public static AlarmMessageEvent together(long userId, long completedUserId, String bucketTitle) {
+    return new AlarmMessageEvent(AlarmMessageType.TOGETHER, userId, completedUserId, null, bucketTitle, null);
+  }
 }

@@ -1,6 +1,9 @@
 package com.mybury.waver.domain;
 
+import com.mybury.waver.common.code.PushType;
 import jakarta.persistence.Entity;
+import jakarta.persistence.EnumType;
+import jakarta.persistence.Enumerated;
 import jakarta.persistence.GeneratedValue;
 import jakarta.persistence.GenerationType;
 import jakarta.persistence.Id;
@@ -19,7 +22,13 @@ public class Alarm extends BaseEntity {
 
   private Long userId;
 
+  @Enumerated(EnumType.STRING)
+  private PushType type;
+
   private String message;
+
+  // 알림을 유발한 상대의 프로필 이미지(팔로우 알림에서 팔로워 사진). 그 외 타입은 null.
+  private String imgUrl;
 
   private boolean isRead;
 }

@@ -3,6 +3,7 @@ package com.mybury.waver.event;
 import com.mybury.waver.common.code.YesNo;
 import com.mybury.waver.domain.Badge;
 import com.mybury.waver.domain.BadgeType;
+import com.mybury.waver.event.message.AlarmMessageEvent;
 import com.mybury.waver.event.message.BadgeCountEvent;
 import com.mybury.waver.repository.BadgeRepository;
 import com.mybury.waver.repository.BadgeTypeRepository;
@@ -13,6 +14,7 @@ import java.util.function.Function;
 import java.util.stream.Collectors;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
+import org.springframework.context.ApplicationEventPublisher;
 import org.springframework.context.event.EventListener;
 import org.springframework.stereotype.Component;
 import org.springframework.transaction.annotation.Transactional;
@@ -30,6 +32,7 @@ public class BadgeCountEventListener {
 
   private final BadgeRepository badgeRepository;
   private final BadgeTypeRepository badgeTypeRepository;
+  private final ApplicationEventPublisher publisher;
 
   @Transactional
   @EventListener
@@ -65,6 +68,8 @@ public class BadgeCountEventListener {
 
         if (badge.getAchieveCount() >= ACHIEVE_COUNT_THRESHOLD) {
           badge.setAchieveYn(YesNo.Y);
+          // 뱃지를 새로 달성한 순간 알림 발행
+          publisher.publishEvent(AlarmMessageEvent.badge(userId, badgeType.getTitle()));
         }
       } else {
         Badge newBadge = Badge.builder()

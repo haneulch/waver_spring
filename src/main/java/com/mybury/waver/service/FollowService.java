@@ -1,9 +1,8 @@
 package com.mybury.waver.service;
 
-import com.mybury.waver.common.code.ResultCode;
 import com.mybury.waver.common.code.YesNo;
 import com.mybury.waver.domain.Follow;
-import com.mybury.waver.exception.WaverException;
+import com.mybury.waver.event.message.AlarmMessageEvent;
 import com.mybury.waver.repository.FollowRepository;
 import com.mybury.waver.repository.UserRepository;
 import com.mybury.waver.web.message.v1.follow.FollowElement;
@@ -16,7 +15,9 @@ import java.util.Objects;
 import java.util.Set;
 import java.util.stream.Collectors;
 import lombok.RequiredArgsConstructor;
+import org.springframework.context.ApplicationEventPublisher;
 import org.springframework.stereotype.Service;
+import org.springframework.transaction.annotation.Transactional;
 
 @Service
 @RequiredArgsConstructor
@@ -24,7 +25,9 @@ public class FollowService {
 
   private final FollowRepository followRepository;
   private final UserRepository userRepository;
+  private final ApplicationEventPublisher publisher;
 
+  @Transactional
   public void follow(Long userId, Long targetUserId) {
     if (!userRepository.existsByIdAndDeleteYn(targetUserId, YesNo.N)) {
       return;
@@ -35,6 +38,9 @@ public class FollowService {
     }
 
     followRepository.insertFollow(userId, targetUserId);
+
+    // targetUserId(팔로우 당한 사람)에게 userId(팔로워)가 팔로우했다는 알림 발행
+    publisher.publishEvent(AlarmMessageEvent.follow(targetUserId, userId));
   }
 
   public GetFollowersResponse getFollowList(Long userId) {

@@ -7,5 +7,6 @@ public enum PushType {
   D_DAY,
   EVENT,
   TOGETHER,
-  FOLLOW
+  FOLLOW,
+  BADGE
 }
