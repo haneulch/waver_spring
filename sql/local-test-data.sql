@@ -192,6 +192,7 @@ CREATE TABLE `alarm` (
   type       VARCHAR(20)  NULL,
   message    VARCHAR(255) NULL,
   img_url    VARCHAR(255) NULL,
+  bucket_id  BIGINT       NULL,
   is_read    BIT(1)       NOT NULL,
   created_at TIMESTAMP    DEFAULT CURRENT_TIMESTAMP,
   updated_at TIMESTAMP    DEFAULT CURRENT_TIMESTAMP ON UPDATE CURRENT_TIMESTAMP,
@@ -320,16 +321,16 @@ INSERT INTO `follow` (user_id, follow_user_id) VALUES
 (100, 102);
 
 -- ---- 알림 (타입별 다양하게. FOLLOW는 팔로워 프로필 이미지 포함) ----
-INSERT INTO `alarm` (user_id, type, message, img_url, is_read) VALUES
-(100, 'FOLLOW',   '준호님이 회원님을 팔로우하기 시작했습니다.',        'https://cdn.test.com/profile/junho.png', 0),
-(100, 'FOLLOW',   '서연님이 회원님을 팔로우하기 시작했습니다.',        'https://cdn.test.com/profile/seoyeon.png', 1),
-(100, 'LIKE',     '서연님이 회원님의 버킷리스트를 좋아합니다.',        NULL, 1),
-(100, 'COMMENT',  '준호님이 회원님의 버킷리스트에 댓글을 남겼습니다.', NULL, 0),
-(100, 'BADGE',    '여행 뱃지를 획득했습니다.',                        NULL, 0),
-(101, 'COMMENT',  '민지님이 회원님의 버킷리스트에 댓글을 남겼습니다.', NULL, 0),
-(102, 'TOGETHER', '민지님이 함께하는 버킷 "사진전 열기"을(를) 완성했습니다.', NULL, 0),
-(102, 'NOTICE',   '[공지] 서비스 점검 안내드립니다.',                 NULL, 1),
-(101, 'EVENT',    '[이벤트] 첫 버킷 완성 시 뱃지 2배!',               NULL, 0);
+INSERT INTO `alarm` (user_id, type, message, img_url, bucket_id, is_read) VALUES
+(100, 'FOLLOW',   '준호님이 회원님을 팔로우하기 시작했습니다.',        'https://cdn.test.com/profile/junho.png', NULL, 0),
+(100, 'FOLLOW',   '서연님이 회원님을 팔로우하기 시작했습니다.',        'https://cdn.test.com/profile/seoyeon.png', NULL, 1),
+(100, 'LIKE',     '서연님이 회원님의 버킷리스트를 좋아합니다.',        NULL, 300, 1),
+(100, 'COMMENT',  '준호님이 회원님의 버킷리스트에 댓글을 남겼습니다.', NULL, 300, 0),
+(100, 'BADGE',    '여행 뱃지를 획득했습니다.',                        NULL, NULL, 0),
+(101, 'COMMENT',  '민지님이 회원님의 버킷리스트에 댓글을 남겼습니다.', NULL, 310, 0),
+(102, 'TOGETHER', '민지님이 함께하는 버킷 "사진전 열기"을(를) 완성했습니다.', NULL, 323, 0),
+(102, 'NOTICE',   '[공지] 서비스 점검 안내드립니다.',                 NULL, NULL, 1),
+(101, 'EVENT',    '[이벤트] 첫 버킷 완성 시 뱃지 2배!',               NULL, NULL, 0);
 
 -- ---- 최근 검색어 --------------------------------------------------
 INSERT INTO `recent_search` (query, user_id) VALUES

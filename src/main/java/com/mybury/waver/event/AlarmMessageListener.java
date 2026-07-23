@@ -124,6 +124,7 @@ public class AlarmMessageListener {
           .type(type.getPushType())
           .message(message)
           .imgUrl(imgUrl)
+          .bucketId(event.bucketId())
           .build();
       alarmService.create(alarm);
       if (StringUtils.hasText(user.getFcmToken())) {

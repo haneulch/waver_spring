@@ -19,16 +19,16 @@ public record AlarmMessageEvent(
     return new AlarmMessageEvent(AlarmMessageType.NOTICE, userId, null, null, null, null);
   }
 
-  public static AlarmMessageEvent feedLike(long userId, long likedUserId) {
-    return new AlarmMessageEvent(AlarmMessageType.FEED_LIKE, userId, likedUserId, null, null, null);
+  public static AlarmMessageEvent feedLike(long userId, long likedUserId, Long bucketId) {
+    return new AlarmMessageEvent(AlarmMessageType.FEED_LIKE, userId, likedUserId, bucketId, null, null);
   }
 
-  public static AlarmMessageEvent feedComment(long userId, long commentUserId) {
-    return new AlarmMessageEvent(AlarmMessageType.FEED_COMMENT, userId, commentUserId, null, null, null);
+  public static AlarmMessageEvent feedComment(long userId, long commentUserId, Long bucketId) {
+    return new AlarmMessageEvent(AlarmMessageType.FEED_COMMENT, userId, commentUserId, bucketId, null, null);
   }
 
-  public static AlarmMessageEvent dday(long userId, String bucketTitle) {
-    return new AlarmMessageEvent(AlarmMessageType.D_DAY_7, userId, null, null, bucketTitle, null);
+  public static AlarmMessageEvent dday(long userId, Long bucketId, String bucketTitle) {
+    return new AlarmMessageEvent(AlarmMessageType.D_DAY_7, userId, null, bucketId, bucketTitle, null);
   }
 
   public static AlarmMessageEvent event(long userId, String content) {
@@ -43,7 +43,9 @@ public record AlarmMessageEvent(
     return new AlarmMessageEvent(AlarmMessageType.BADGE, userId, null, null, null, badgeTitle);
   }
 
-  public static AlarmMessageEvent together(long userId, long completedUserId, String bucketTitle) {
-    return new AlarmMessageEvent(AlarmMessageType.TOGETHER, userId, completedUserId, null, bucketTitle, null);
+  public static AlarmMessageEvent together(long userId, long completedUserId, Long bucketId,
+      String bucketTitle) {
+    return new AlarmMessageEvent(AlarmMessageType.TOGETHER, userId, completedUserId, bucketId,
+        bucketTitle, null);
   }
 }

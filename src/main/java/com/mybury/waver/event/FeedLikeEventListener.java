@@ -39,7 +39,7 @@ public class FeedLikeEventListener {
 
       Long bucketUserId = bucketRepository.findUserIdById(id);
       if (bucketUserId != null) {
-        publisher.publishEvent(AlarmMessageEvent.feedLike(bucketUserId, userId));
+        publisher.publishEvent(AlarmMessageEvent.feedLike(bucketUserId, userId, id));
       }
     }
   }

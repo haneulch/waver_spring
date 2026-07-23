@@ -12,7 +12,8 @@ public record AlarmResponse(
 
     public static AlarmResponse of(List<Alarm> alarmList) {
         List<AlarmElement> elements = alarmList.stream()
-            .map(alarm -> new AlarmElement(alarm.getType(), alarm.getMessage(), alarm.getImgUrl()))
+            .map(alarm -> new AlarmElement(alarm.getType(), alarm.getMessage(), alarm.getImgUrl(),
+                alarm.getBucketId()))
             .toList();
         return new AlarmResponse(elements);
     }
@@ -24,7 +25,10 @@ public record AlarmResponse(
         String message,
         @Schema(description = "FOLLOW 타입일 때 팔로워 프로필 이미지 URL. 그 외 타입은 null",
             example = "https://cdn.test.com/profile/minji.png")
-        String imgUrl
+        String imgUrl,
+        @Schema(description = "버킷 관련 알림(LIKE/COMMENT/TOGETHER/D_DAY)일 때 대상 버킷 ID. 그 외 타입은 null",
+            example = "1024")
+        Long bucketId
     ) {
 
     }

@@ -44,7 +44,7 @@ public class CommentService {
         .mentionIds(mentionIds).build();
     commentRepository.save(comment);
 
-    publisher.publishEvent(AlarmMessageEvent.feedComment(bucketUserId, userId));
+    publisher.publishEvent(AlarmMessageEvent.feedComment(bucketUserId, userId, request.bucketId()));
   }
 
   @Transactional

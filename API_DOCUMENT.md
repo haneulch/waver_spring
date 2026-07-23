@@ -536,10 +536,11 @@ FCM 토큰 업데이트
 
 | Field           | Type   | Description                                             |
 |-----------------|--------|---------------------------------------------------------|
-| alarms          | Array  | 알림 목록                                               |
-| alarms[].type   | String | 알림 타입 (`PushType`)                                  |
-| alarms[].message| String | 알림 메시지                                             |
-| alarms[].imgUrl | String | `FOLLOW` 타입일 때 팔로워 프로필 이미지 URL, 그 외 타입은 `null` |
+| alarms            | Array  | 알림 목록                                               |
+| alarms[].type     | String | 알림 타입 (`PushType`)                                  |
+| alarms[].message  | String | 알림 메시지                                             |
+| alarms[].imgUrl   | String | `FOLLOW` 타입일 때 팔로워 프로필 이미지 URL, 그 외 타입은 `null` |
+| alarms[].bucketId | Long   | 버킷 관련 타입(`LIKE`/`COMMENT`/`TOGETHER`/`D_DAY`)일 때 대상 버킷 ID, 그 외 타입은 `null` |
 
 **알림 타입 (`type`)**
 
