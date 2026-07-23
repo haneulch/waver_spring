@@ -15,10 +15,18 @@ import java.util.List;
 
 record FriendElement(
         long id,
-        String name) {
+        String name,
+        String imgUrl,
+        int goalCount,
+        int userCount) {
 
-    public FriendElement(User friend) {
-        this(friend.getId(), friend.getName());
+    public static FriendElement of(User friend, Bucket bucket) {
+        return new FriendElement(
+                friend.getId(),
+                friend.getName(),
+                FileImageUtils.imagePath(friend.getImgUrl()),
+                bucket.getGoalCount(),
+                bucket.getUserCount());
     }
 }
 
@@ -48,8 +56,8 @@ public record BucketDetailResponse(
             List<KeywordElement> keywordList, List<User> friendUserList, boolean isLike,
             List<Long> reportedCommentIds) {
         CategoryElement category = new CategoryElement(bucket.getCategory());
-        List<FriendElement> friendUsers = friendUserList.stream().map(
-                FriendElement::new).toList();
+        List<FriendElement> friendUsers = friendUserList.stream()
+                .map(friend -> FriendElement.of(friend, bucket)).toList();
         List<String> images = bucket.getImgUrl() != null
                 ? Arrays.stream(bucket.getImgUrl().split(",")).map(FileImageUtils::imagePath).toList()
                 : List.of();

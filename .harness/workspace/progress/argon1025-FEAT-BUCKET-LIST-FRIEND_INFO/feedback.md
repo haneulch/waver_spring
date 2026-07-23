@@ -2,3 +2,4 @@
   - evidence: src/main/java/com/mybury/waver/service/BucketService.java:264-298
 - 버킷 상세 friendUsers의 프로필 이미지 필드명은 클라이언트 요청 문구(profileImage) 대신 기존 유저 DTO 관례인 imgUrl로 확정했다(사용자 확정). 값은 FileImageUtils.imagePath()로 풀 URL 변환한다.
   - evidence: src/main/java/com/mybury/waver/web/message/v1/user/UserElement.java
+- `./mvnw test`는 현재 로컬 환경에서 baseline(무변경 HEAD)부터 2건 실패한다 — WaverApplicationTests.contextLoads와 JwtTokenParserTest.generateToken이 `@SpringBootTest`로 전체 컨텍스트를 띄우는데 테스트용 JDBC url이 없어 Hibernate가 Dialect를 결정하지 못한다("Unable to determine Dialect without JDBC metadata"). 이 실패는 코드 변경과 무관하므로, 변경 검증은 `./mvnw compile` 통과로 판단하고 test 실패를 이 원인과 대조해 구분한다.
