@@ -50,8 +50,28 @@ public class Subscribe extends BaseEntity {
   @Column(nullable = false)
   private String subscribeId;
 
-  public void cancel(LocalDateTime now) {
-    this.status = SubscriptionStatus.PENDING_CANCELLATION;
-    this.cancelledAt = now;
+  /** 자동 갱신됨 — 활성 상태로 만료일을 연장하고 취소 표시를 해제한다. */
+  public void renew(LocalDateTime expiredAt) {
+    this.status = SubscriptionStatus.ACTIVE;
+    if (expiredAt != null) {
+      this.expiredAt = expiredAt;
+    }
+    this.cancelledAt = null;
+  }
+
+  /** 자동 갱신 해제됨 — 만료일까지 접근은 유지되므로 status는 ACTIVE로 두고 취소 시각만 기록한다. */
+  public void markCancelled(LocalDateTime cancelledAt, LocalDateTime expiredAt) {
+    this.status = SubscriptionStatus.ACTIVE;
+    if (this.cancelledAt == null) {
+      this.cancelledAt = cancelledAt;
+    }
+    if (expiredAt != null) {
+      this.expiredAt = expiredAt;
+    }
+  }
+
+  /** 만료·보류 등으로 접근이 종료됨. */
+  public void expire() {
+    this.status = SubscriptionStatus.EXPIRED;
   }
 }

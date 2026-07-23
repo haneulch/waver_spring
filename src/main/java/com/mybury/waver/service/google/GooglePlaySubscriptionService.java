@@ -5,6 +5,10 @@ import com.google.api.services.androidpublisher.model.SubscriptionPurchaseV2;
 import com.mybury.waver.common.code.ResultCode;
 import com.mybury.waver.exception.WaverException;
 import java.io.IOException;
+import java.time.Instant;
+import java.time.LocalDateTime;
+import java.time.ZoneId;
+import java.time.format.DateTimeParseException;
 import java.util.List;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
@@ -53,6 +57,28 @@ public class GooglePlaySubscriptionService {
     }
   }
 
+  /**
+   * 구글 서버에서 구독 상태와 만료 시각을 조회한다. RTDN 동기화에서 상태 분기에 사용한다.
+   *
+   * @throws WaverException 구글 API 호출에 실패한 경우 (RTDN 재시도 대상)
+   */
+  public GoogleSubscriptionState getSubscriptionState(String purchaseToken) {
+    try {
+      SubscriptionPurchaseV2 subscription = androidPublisher.purchases().subscriptionsv2()
+          .get(packageName, purchaseToken)
+          .execute();
+
+      String state = subscription.getSubscriptionState();
+      LocalDateTime expiry = parseExpiryTime(extractExpiryTime(subscription));
+      log.info("구독 상태 조회: state={}, 만료일={}", state, expiry);
+      return new GoogleSubscriptionState(state, expiry);
+
+    } catch (IOException e) {
+      log.error("구독 상태 조회 중 에러 발생: {}", e.getMessage(), e);
+      throw new WaverException(ResultCode.INTERNAL_SERVER_ERROR);
+    }
+  }
+
   private String extractExpiryTime(SubscriptionPurchaseV2 subscription) {
     List<com.google.api.services.androidpublisher.model.SubscriptionPurchaseLineItem> lineItems =
         subscription.getLineItems();
@@ -60,5 +86,18 @@ public class GooglePlaySubscriptionService {
       return null;
     }
     return lineItems.get(0).getExpiryTime();
+  }
+
+  /** 구글의 RFC3339 시각 문자열을 서버 시간대 기준 LocalDateTime으로 변환한다. */
+  private LocalDateTime parseExpiryTime(String rfc3339) {
+    if (rfc3339 == null) {
+      return null;
+    }
+    try {
+      return LocalDateTime.ofInstant(Instant.parse(rfc3339), ZoneId.systemDefault());
+    } catch (DateTimeParseException e) {
+      log.warn("만료 시각 파싱 실패: {}", rfc3339);
+      return null;
+    }
   }
 }

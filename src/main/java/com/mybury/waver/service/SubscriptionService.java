@@ -10,6 +10,7 @@ import com.mybury.waver.exception.WaverException;
 import com.mybury.waver.repository.SubscribeRepository;
 import com.mybury.waver.repository.UserRepository;
 import com.mybury.waver.service.google.GooglePlaySubscriptionService;
+import com.mybury.waver.service.google.GoogleSubscriptionState;
 import java.time.LocalDateTime;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
@@ -50,24 +51,8 @@ public class SubscriptionService {
     return subscribeRepository.save(subscription);
   }
 
-  @Transactional
-  public Subscribe cancel(Long userId) {
-    Subscribe subscription = subscribeRepository.findTopByUserIdOrderByStartAtDesc(userId)
-        .orElseThrow(() -> new WaverException(ResultCode.SUBSCRIPTION_NOT_FOUND));
-
-    if (subscription.getStatus() == SubscriptionStatus.PENDING_CANCELLATION) {
-      throw new WaverException(ResultCode.SUBSCRIPTION_ALREADY_CANCELLED);
-    }
-    if (subscription.getStatus() != SubscriptionStatus.ACTIVE) {
-      throw new WaverException(ResultCode.SUBSCRIPTION_NOT_FOUND);
-    }
-
-    subscription.cancel(LocalDateTime.now());
-    return subscription;
-  }
-
   /**
-   * RTDN 수신 시 구매 토큰으로 구글 최신 상태를 재조회해 사용자 프리미엄 상태를 동기화한다.
+   * RTDN 수신 시 구매 토큰으로 구글 최신 상태를 재조회해 구독 정보와 사용자 프리미엄 상태를 동기화한다.
    */
   @Transactional
   public void syncSubscriptionState(String purchaseToken) {
@@ -79,9 +64,24 @@ public class SubscriptionService {
       return;
     }
 
-    boolean active = googlePlaySubscriptionService.verifySubscription(purchaseToken);
+    GoogleSubscriptionState state = googlePlaySubscriptionService.getSubscriptionState(purchaseToken);
+    LocalDateTime now = LocalDateTime.now();
+
+    PremiumStatus premiumStatus;
+    if (state.isActive()) {
+      subscribe.renew(state.expiryTime());
+      premiumStatus = PremiumStatus.ACTIVE;
+    } else if (state.isCanceled()) {
+      // Play 스토어에서 자동 갱신 해제 - 만료일까지는 프리미엄 유지
+      subscribe.markCancelled(now, state.expiryTime());
+      premiumStatus = PremiumStatus.ACTIVE;
+    } else {
+      // 만료·보류·일시중지·환불 취소 등 - 접근 종료
+      subscribe.expire();
+      premiumStatus = PremiumStatus.EXPIRED;
+    }
 
     userRepository.findById(subscribe.getUserId())
-        .ifPresent(user -> user.setPremiumStatus(active ? PremiumStatus.ACTIVE : PremiumStatus.EXPIRED));
+        .ifPresent(user -> user.setPremiumStatus(premiumStatus));
   }
 }

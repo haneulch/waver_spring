@@ -17,7 +17,7 @@ import org.springframework.web.bind.annotation.RequestBody;
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RestController;
 
-@Tag(name = "구독(Waver+)", description = "구글 인앱 구독 시작·취소. 상태 변경은 RTDN으로 자동 동기화됩니다.")
+@Tag(name = "구독(Waver+)", description = "구글 인앱 구독 시작. 취소·상태 변경은 Play 스토어/RTDN으로 자동 동기화됩니다.")
 @RestController
 @RequestMapping("waver/subscription")
 @RequiredArgsConstructor
@@ -36,18 +36,6 @@ public class SubscriptionController {
       @Parameter(hidden = true) @UserId Long userId,
       @Valid @RequestBody SubscriptionStartRequest request) {
     Subscribe subscription = subscriptionService.start(userId, request.billingCycle(), request.subscribeId());
-    return SubscriptionResponse.from(subscription);
-  }
-
-  @Operation(summary = "구독 취소",
-      description = "구독을 취소 대기(PENDING_CANCELLATION) 상태로 전환합니다. 프리미엄 혜택은 만료일까지 유지됩니다.")
-  @ApiResponses({
-      @ApiResponse(responseCode = "9100", description = "SUBSCRIPTION_NOT_FOUND — 활성 구독 없음"),
-      @ApiResponse(responseCode = "9101", description = "SUBSCRIPTION_ALREADY_CANCELLED — 이미 취소 대기 중")
-  })
-  @PostMapping("cancel")
-  public SubscriptionResponse cancel(@Parameter(hidden = true) @UserId Long userId) {
-    Subscribe subscription = subscriptionService.cancel(userId);
     return SubscriptionResponse.from(subscription);
   }
 }
