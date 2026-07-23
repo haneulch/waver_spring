@@ -1,0 +1,5 @@
+{
+  "enabledPlugins": {
+    "dev-harness@my-claude-plugin-market": true
+  }
+}

@@ -1,6 +1,0 @@
-- 하네스 초기화 목적으로 사용자가 `.harness/docs/` 컨벤션 문서 6개의 직접 작성을 지시함 — 평소 "위키는 writing-docs 스킬 경유만" 규칙의 명시적 예외이며 이 브랜치의 컨벤션 제정 작업에 한정됨.
-- waver_spring 코드 컨벤션의 들여쓰기는 4-space로 확정 — 현행 서비스·엔티티·레포 다수 파일이 2-space임에도 사용자가 Java 생태계 기본값(IntelliJ·Oracle) 근거로 Google Java Style(2-space) 대안을 기각함.
-- 컨벤션 문서 커밋은 기능 브랜치 argon1025/FEAT-BUCKET-LIST-FRIEND_INFO에서 진행 — 사용자가 전용 브랜치 분리 권장안을 기각함.
-- waver_spring의 오류 응답은 HTTP 200 + BaseResponse(success:false, ResultCode 문자열 코드) 계약으로 동결 — 배포된 모바일 클라이언트가 이 코드로 분기하므로 서버 단독 변경 불가.
-  - evidence: src/main/java/com/mybury/waver/advice/BaseControllerAdvice.java
-- 컨벤션은 신규 파일과 수정 지점부터 적용하며 기존 코드 일괄 리팩토링은 범위 외 — 사용자 확정 결정.
