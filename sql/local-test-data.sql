@@ -55,7 +55,8 @@ CREATE TABLE `user` (
   created_at     TIMESTAMP    DEFAULT CURRENT_TIMESTAMP,
   updated_at     TIMESTAMP    DEFAULT CURRENT_TIMESTAMP ON UPDATE CURRENT_TIMESTAMP,
   PRIMARY KEY (id),
-  UNIQUE KEY uk_user_uid (uid)
+ㅎ  -- uid VARCHAR(1500) 전체에 유니크를 걸면 인덱스 최대 길이(3072 bytes)를 초과하므로 prefix 인덱스 사용
+  UNIQUE KEY uk_user_uid (uid(191))
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4;
 
 CREATE TABLE `badge_type` (
