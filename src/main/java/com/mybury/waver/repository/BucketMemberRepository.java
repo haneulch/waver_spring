@@ -10,4 +10,6 @@ public interface BucketMemberRepository extends JpaRepository<BucketMember, Long
   List<BucketMember> findByBucketId(Long bucketId);
 
   Optional<BucketMember> findByBucketIdAndUserId(Long bucketId, Long userId);
+
+  List<BucketMember> findByUserIdAndBucketIdIn(Long userId, List<Long> bucketIds);
 }

@@ -5,6 +5,7 @@ import com.mybury.waver.domain.Bucket;
 import com.mybury.waver.domain.BucketMember;
 import com.mybury.waver.domain.FreeTier;
 import com.mybury.waver.domain.User;
+import com.mybury.waver.event.message.AlarmMessageEvent;
 import com.mybury.waver.event.message.BadgeCountEvent;
 import com.mybury.waver.exception.WaverException;
 import com.mybury.waver.repository.BucketMemberRepository;
@@ -25,6 +26,7 @@ import org.springframework.util.ObjectUtils;
 import org.springframework.util.StringUtils;
 
 import java.time.LocalDate;
+import java.time.LocalDateTime;
 import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.LinkedHashSet;
@@ -118,6 +120,11 @@ public class BucketService {
             ? bucket.getCategoryId()
             : categoryRepository.findIdByUserIdAndDefaultYn(memberUserId, YesNo.Y);
         bucketMemberRepository.save(BucketMember.of(bucket.getId(), memberUserId, categoryId));
+        if (!isOwner) {
+          // 새로 추가된 친구에게 초대 알림 (트랜잭션 커밋 후 발송)
+          publisher.publishEvent(AlarmMessageEvent.togetherInvite(
+              memberUserId, bucket.getUserId(), bucket.getId(), bucket.getTitle()));
+        }
       } else if (isOwner) {
         member.setCategoryId(bucket.getCategoryId()); // 소유자가 버킷 카테고리를 바꾼 경우 따라간다
       }
@@ -223,7 +230,7 @@ public class BucketService {
     return bucketDetail(id, userId);
   }
 
-  public List<Bucket> bucketList(long userId, @Valid BucketRequest request) {
+  public BucketResponse bucketList(long userId, @Valid BucketRequest request) {
     Long targetUserId = null;
     boolean hasMyBucket = request.hasMyBucket() == YesNo.Y;
     if (hasMyBucket) {
@@ -233,7 +240,19 @@ public class BucketService {
     List<Long> reportedBucketIds =
         reportRepository.findBucketlistIdsByReportUserIdAndReportType(userId, ReportType.BUCKET);
 
-    return findBuckets(targetUserId, request, reportedBucketIds);
+    List<Bucket> buckets = findBuckets(targetUserId, request, reportedBucketIds);
+
+    // 함께하기 버킷은 조회자 본인의 참여자 진행도로 표시한다
+    List<Long> togetherBucketIds = buckets.stream()
+        .filter(bucket -> bucket.getType() == ContentType.TOGETHER)
+        .map(Bucket::getId)
+        .toList();
+    Map<Long, BucketMember> memberByBucketId = togetherBucketIds.isEmpty()
+        ? Map.of()
+        : bucketMemberRepository.findByUserIdAndBucketIdIn(userId, togetherBucketIds).stream()
+            .collect(Collectors.toMap(BucketMember::getBucketId, Function.identity()));
+
+    return BucketResponse.of(buckets, memberByBucketId);
   }
 
   private List<Bucket> findBuckets(Long targetUserId, BucketRequest request, List<Long> reportedBucketIds) {
@@ -304,8 +323,20 @@ public class BucketService {
     }
     boolean isLike = likeBucketRepository.existsByUserIdAndBucketId(userId, id);
 
+    // 함께하기: 참여자(소유자 포함) 기준으로 조회. friendUsers에는 조회자 본인을 제외한 전원이 담긴다
+    Map<Long, BucketMember> memberByUserId = bucket.getType() == ContentType.TOGETHER
+        ? bucketMemberRepository.findByBucketId(id).stream()
+            .collect(Collectors.toMap(BucketMember::getUserId, Function.identity()))
+        : Map.of();
+
     List<User> friendUserList = new ArrayList<>();
-    if (StringUtils.hasText(bucket.getFriendUserIds())) {
+    if (!memberByUserId.isEmpty()) {
+      List<Long> otherMemberIds = memberByUserId.keySet().stream()
+          .filter(memberUserId -> memberUserId != userId)
+          .toList();
+      friendUserList = userRepository.findAllById(otherMemberIds);
+    } else if (StringUtils.hasText(bucket.getFriendUserIds())) {
+      // 참여자 row가 없는 레거시 데이터 fallback
       List<Long> friendIds = Arrays.stream(bucket.getFriendUserIds().split(","))
           .map(String::trim)
           .filter(StringUtils::hasText)
@@ -317,15 +348,31 @@ public class BucketService {
     List<Long> reportedCommentIds =
         reportRepository.findCommentIdsByReportUserIdAndReportType(userId, ReportType.COMMENT);
 
-    return BucketDetailResponse.of(bucket, userId, keywords, friendUserList, isLike, reportedCommentIds);
+    return BucketDetailResponse.of(bucket, userId, keywords, friendUserList, isLike, reportedCommentIds,
+        memberByUserId);
   }
 
   public void delete(long id, long userId) {
     bucketRepository.deleteBucket(id, userId);
   }
 
+  @Transactional
   public void achieve(long id, long userId) {
     Bucket bucket = getBucketForCount(id, userId);
+
+    // 함께하기는 호출자 본인의 참여자 row만 증가시킨다 (다른 참여자 진행도에 영향 없음)
+    if (isTogether(bucket)) {
+      BucketMember member = getOrCreateMember(bucket, userId);
+      member.setUserCount(member.getUserCount() + 1);
+      boolean completedNow = member.getStatus() != BucketStatus.COMPLETE
+          && member.getUserCount() >= bucket.getGoalCount();
+      if (completedNow) {
+        member.setStatus(BucketStatus.COMPLETE);
+        member.setCompletedDate(LocalDateTime.now());
+        notifyTogetherComplete(bucket, userId);
+      }
+      return;
+    }
 
     if (bucket.getGoalCount() == bucket.getUserCount() + 1) {
       bucketRepository.complete(id, bucket.getUserId());
@@ -334,8 +381,18 @@ public class BucketService {
     }
   }
 
+  @Transactional
   public void achieveCancel(long id, long userId) {
     Bucket bucket = getBucketForCount(id, userId);
+
+    if (isTogether(bucket)) {
+      BucketMember member = getOrCreateMember(bucket, userId);
+      member.setUserCount(Math.max(0, member.getUserCount() - 1));
+      member.setStatus(BucketStatus.PROGRESS);
+      member.setCompletedDate(null);
+      return;
+    }
+
     bucketRepository.achieveCancel(id, bucket.getUserId());
   }
 
@@ -361,8 +418,43 @@ public class BucketService {
         .anyMatch(target::equals);
   }
 
+  @Transactional
   public void reset(long id, long userId) {
+    Bucket bucket = getBucketForCount(id, userId);
+
+    if (isTogether(bucket)) {
+      BucketMember member = getOrCreateMember(bucket, userId);
+      member.setUserCount(0);
+      member.setStatus(BucketStatus.PROGRESS);
+      member.setCompletedDate(null);
+      return;
+    }
+
     bucketRepository.reset(id, userId);
+  }
+
+  private boolean isTogether(Bucket bucket) {
+    return bucket.getType() == ContentType.TOGETHER && StringUtils.hasText(bucket.getFriendUserIds());
+  }
+
+  // 마이그레이션 전 레거시 버킷 안전망: 참여자 row가 없으면 만들어서 진행한다
+  private BucketMember getOrCreateMember(Bucket bucket, long userId) {
+    return bucketMemberRepository.findByBucketIdAndUserId(bucket.getId(), userId)
+        .orElseGet(() -> {
+          Long categoryId = bucket.getUserId() == userId
+              ? bucket.getCategoryId()
+              : categoryRepository.findIdByUserIdAndDefaultYn(userId, YesNo.Y);
+          return bucketMemberRepository.save(BucketMember.of(bucket.getId(), userId, categoryId));
+        });
+  }
+
+  // 함께하는 버킷 완성 알림 - 달성자를 제외한 참여자 전원에게 발송
+  private void notifyTogetherComplete(Bucket bucket, long completedUserId) {
+    bucketMemberRepository.findByBucketId(bucket.getId()).stream()
+        .map(BucketMember::getUserId)
+        .filter(memberUserId -> memberUserId != completedUserId)
+        .forEach(memberUserId -> publisher.publishEvent(
+            AlarmMessageEvent.together(memberUserId, completedUserId, bucket.getId(), bucket.getTitle())));
   }
 
   public void patchGoalCount(long id, long userId, int goalCount) {

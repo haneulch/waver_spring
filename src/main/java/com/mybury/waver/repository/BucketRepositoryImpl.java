@@ -1,9 +1,9 @@
 package com.mybury.waver.repository;
 
-import com.mybury.waver.common.code.ContentType;
 import com.mybury.waver.common.code.ExposureStatus;
 import com.mybury.waver.common.code.YesNo;
 import com.mybury.waver.domain.Bucket;
+import com.mybury.waver.domain.BucketMember;
 import com.mybury.waver.domain.Follow;
 import com.mybury.waver.web.message.v1.bucket.BucketRequest;
 import jakarta.persistence.EntityManager;
@@ -50,12 +50,13 @@ public class BucketRepositoryImpl implements BucketRepositoryCustom {
     predicates.add(cb.equal(root.get("deleted"), YesNo.N));
 
     if (userId != null) {
-      // 내가 만든 버킷 + 내가 함께하기 친구로 등록된 TOGETHER 버킷
+      // 내가 만든 버킷 + 내가 참여자(bucket_member)로 등록된 TOGETHER 버킷
       Predicate isOwner = cb.equal(root.get("userId"), userId);
-      Predicate isTogetherFriend = cb.and(
-          cb.equal(root.get("type"), ContentType.TOGETHER),
-          friendUserIdsContains(cb, root, userId));
-      predicates.add(cb.or(isOwner, isTogetherFriend));
+      Subquery<Long> memberBucketIds = query.subquery(Long.class);
+      Root<BucketMember> member = memberBucketIds.from(BucketMember.class);
+      memberBucketIds.select(member.get("bucketId"))
+          .where(cb.equal(member.get("userId"), userId));
+      predicates.add(cb.or(isOwner, root.get("id").in(memberBucketIds)));
     }
 
     if (excludedBucketIds != null && !excludedBucketIds.isEmpty()) {
@@ -83,7 +84,21 @@ public class BucketRepositoryImpl implements BucketRepositoryCustom {
     }
 
     if (request.categoryId() != null) {
-      predicates.add(cb.equal(root.get("categoryId"), request.categoryId()));
+      if (userId != null) {
+        // 함께하기 버킷은 참여자 각자의 카테고리(bucket_member.categoryId)로 노출된다
+        Subquery<Long> memberCategoryBucketIds = query.subquery(Long.class);
+        Root<BucketMember> memberCategory = memberCategoryBucketIds.from(BucketMember.class);
+        memberCategoryBucketIds.select(memberCategory.get("bucketId"))
+            .where(cb.and(
+                cb.equal(memberCategory.get("userId"), userId),
+                cb.equal(memberCategory.get("categoryId"), request.categoryId())));
+        predicates.add(cb.or(
+            cb.and(cb.equal(root.get("categoryId"), request.categoryId()),
+                cb.equal(root.get("userId"), userId)),
+            root.get("id").in(memberCategoryBucketIds)));
+      } else {
+        predicates.add(cb.equal(root.get("categoryId"), request.categoryId()));
+      }
     }
 
     if (request.hasImage() != null && request.hasImage() == YesNo.Y) {
@@ -121,17 +136,6 @@ public class BucketRepositoryImpl implements BucketRepositoryCustom {
 
     query.orderBy(orders);
     return em.createQuery(query).setMaxResults(request.limit()).getResultList();
-  }
-
-  // friendUserIds는 ','로 구분된 사용자 ID 문자열 - 단독/맨앞/맨뒤/중간 위치를 모두 매칭한다
-  private Predicate friendUserIdsContains(CriteriaBuilder cb, Root<Bucket> root, Long userId) {
-    Path<String> friendUserIds = root.get("friendUserIds");
-    String id = String.valueOf(userId);
-    return cb.or(
-        cb.equal(friendUserIds, id),
-        cb.like(friendUserIds, id + ",%"),
-        cb.like(friendUserIds, "%," + id),
-        cb.like(friendUserIds, "%," + id + ",%"));
   }
 
   @Override

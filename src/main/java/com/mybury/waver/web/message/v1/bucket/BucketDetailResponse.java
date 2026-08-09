@@ -4,6 +4,7 @@ import com.mybury.waver.common.code.BucketStatus;
 import com.mybury.waver.common.code.ExposureStatus;
 import com.mybury.waver.common.code.YesNo;
 import com.mybury.waver.domain.Bucket;
+import com.mybury.waver.domain.BucketMember;
 import com.mybury.waver.domain.User;
 import com.mybury.waver.util.FileImageUtils;
 import com.mybury.waver.web.message.v1.category.CategoryElement;
@@ -12,21 +13,25 @@ import java.time.LocalDate;
 import java.time.LocalDateTime;
 import java.util.Arrays;
 import java.util.List;
+import java.util.Map;
 
 record FriendElement(
         long id,
         String name,
         String imgUrl,
         int goalCount,
-        int userCount) {
+        int userCount,
+        BucketStatus status) {
 
-    public static FriendElement of(User friend, Bucket bucket) {
+    // 함께하기 참여자의 개인 진행도. 참여자 row가 없는 레거시 데이터는 버킷 공유값으로 fallback
+    public static FriendElement of(User friend, Bucket bucket, BucketMember member) {
         return new FriendElement(
                 friend.getId(),
                 friend.getName(),
                 FileImageUtils.imagePath(friend.getImgUrl()),
                 bucket.getGoalCount(),
-                bucket.getUserCount());
+                member != null ? member.getUserCount() : bucket.getUserCount(),
+                member != null ? member.getStatus() : bucket.getStatus());
     }
 }
 
@@ -54,10 +59,11 @@ public record BucketDetailResponse(
 
     public static BucketDetailResponse of(Bucket bucket, long userId,
             List<KeywordElement> keywordList, List<User> friendUserList, boolean isLike,
-            List<Long> reportedCommentIds) {
+            List<Long> reportedCommentIds, Map<Long, BucketMember> memberByUserId) {
         CategoryElement category = new CategoryElement(bucket.getCategory());
         List<FriendElement> friendUsers = friendUserList.stream()
-                .map(friend -> FriendElement.of(friend, bucket)).toList();
+                .map(friend -> FriendElement.of(friend, bucket, memberByUserId.get(friend.getId())))
+                .toList();
         List<String> images = bucket.getImgUrl() != null
                 ? Arrays.stream(bucket.getImgUrl().split(",")).map(FileImageUtils::imagePath).toList()
                 : List.of();
@@ -67,22 +73,29 @@ public record BucketDetailResponse(
                 .filter(item -> item.getIsHide() != YesNo.Y)
                 .filter(item -> reportedCommentIds == null || !reportedCommentIds.contains(item.getId()))
                 .map(item -> new CommentElement(item, userId)).toList().reversed();
+
+        // 함께하기면 상단 진행도/상태는 조회자 본인의 참여자 row 기준
+        BucketMember viewer = memberByUserId.get(userId);
+        BucketStatus status = viewer != null ? viewer.getStatus() : bucket.getStatus();
+        int userCount = viewer != null ? viewer.getUserCount() : bucket.getUserCount();
+        LocalDateTime completedDate = viewer != null ? viewer.getCompletedDate() : bucket.getCompletedDate();
+
         return new BucketDetailResponse(
                 bucket.getId(),
                 bucket.getUserId(),
                 bucket.getTitle(),
                 bucket.getMemo(),
                 bucket.getExposureStatus(),
-                bucket.getStatus(),
+                status,
                 bucket.getPin(),
-                bucket.getCompletedDate() != null ? YesNo.Y : YesNo.N,
+                completedDate != null ? YesNo.Y : YesNo.N,
                 bucket.getScrapYn(),
                 bucket.getUserId().equals(userId) ? YesNo.Y : YesNo.N,
                 isLike ? YesNo.Y : YesNo.N,
                 category,
                 bucket.getGoalCount(),
-                bucket.getUserCount(),
-                bucket.getCompletedDate(),
+                userCount,
+                completedDate,
                 bucket.getTargetDate(),
                 keywordList,
                 friendUsers,

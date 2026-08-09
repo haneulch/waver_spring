@@ -105,6 +105,14 @@ public class AlarmMessageListener {
         log.warn("Other user or bucket title is null for event: {}", event);
         yield null;
       }
+      // OOO님이 함께하는 버킷 "제목"에 회원님을 초대했습니다.
+      case TOGETHER_INVITE -> {
+        if (StringUtils.hasText(otherUserName) && StringUtils.hasText(event.bucketTitle())) {
+          yield alarmMessageParser.parse(type, locale, otherUserName, event.bucketTitle());
+        }
+        log.warn("Other user or bucket title is null for event: {}", event);
+        yield null;
+      }
       // 디데이가 7일 남은 버킷리스트가 있습니다.\n:버킷리스트제목
       case D_DAY_7 -> {
         if (StringUtils.hasText(event.bucketTitle())) {

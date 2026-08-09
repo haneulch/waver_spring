@@ -1,7 +1,6 @@
 package com.mybury.waver.web;
 
 import com.mybury.waver.annotation.UserId;
-import com.mybury.waver.domain.Bucket;
 import com.mybury.waver.service.BucketService;
 import com.mybury.waver.web.message.v1.bucket.BucketCreateRequest;
 import com.mybury.waver.web.message.v1.bucket.BucketDetailResponse;
@@ -14,7 +13,6 @@ import io.swagger.v3.oas.annotations.Operation;
 import io.swagger.v3.oas.annotations.Parameter;
 import io.swagger.v3.oas.annotations.tags.Tag;
 import jakarta.validation.Valid;
-import java.util.List;
 import lombok.RequiredArgsConstructor;
 import org.springdoc.core.annotations.ParameterObject;
 import org.springframework.http.MediaType;
@@ -46,13 +44,13 @@ public class BucketController {
     }
 
     @Operation(summary = "버킷리스트 목록",
-        description = "필터·정렬 조건으로 목록을 조회합니다. hasMyBucket=Y이면 내 버킷과 함께하기 친구로 등록된 버킷이 함께 반환됩니다. "
+        description = "필터·정렬 조건으로 목록을 조회합니다. hasMyBucket=Y이면 내 버킷과 내가 참여자인 함께하기 버킷이 함께 반환됩니다. "
+            + "함께하기 버킷은 참여자 각자의 카테고리로 노출되고 진행도(userCount)/상태(status)는 조회자 본인 기준입니다. "
             + "신고한 버킷은 자동 제외됩니다.")
     @GetMapping
     public BucketResponse bucketList(@Parameter(hidden = true) @UserId Long userId,
         @Valid @ParameterObject BucketRequest request) {
-        List<Bucket> bucketList = bucketService.bucketList(userId, request);
-        return BucketResponse.of(bucketList);
+        return bucketService.bucketList(userId, request);
     }
 
     @Operation(summary = "인기 버킷리스트 조회",
@@ -72,7 +70,9 @@ public class BucketController {
     }
 
     @Operation(summary = "버킷리스트 상세",
-        description = "키워드, 함께하는 친구 목록, 좋아요 여부, 댓글까지 포함한 상세 정보를 반환합니다.")
+        description = "키워드, 함께하는 친구 목록, 좋아요 여부, 댓글까지 포함한 상세 정보를 반환합니다. "
+            + "함께하기 버킷은 userCount/status/complete가 조회자 본인 기준이며, "
+            + "friendUsers에는 본인을 제외한 참여자 전원(소유자 포함)이 개인 진행도와 함께 담깁니다.")
     @GetMapping("{id}")
     public BucketDetailResponse bucketDetail(@Parameter(hidden = true) @UserId Long userId, @PathVariable Long id) {
         return bucketService.bucketDetail(id, userId);
@@ -86,7 +86,8 @@ public class BucketController {
 
     @Operation(summary = "버킷리스트 달성(횟수 +1)",
         description = "달성 횟수를 1 올립니다. 목표 횟수에 도달하면 COMPLETE 상태로 전환됩니다. "
-            + "소유자와 함께하기(TOGETHER) 친구만 호출할 수 있습니다(아니면 4030).")
+            + "소유자와 함께하기(TOGETHER) 참여자만 호출할 수 있습니다(아니면 4030). "
+            + "함께하기 버킷은 호출자 본인의 진행도만 올라가며, 완성 시 다른 참여자에게 알림이 발송됩니다.")
     @GetMapping("{id}/achieve")
     public void bucketAchieve(@Parameter(hidden = true) @UserId Long userId, @PathVariable Long id) {
         bucketService.achieve(id, userId);

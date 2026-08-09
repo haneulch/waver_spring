@@ -48,4 +48,10 @@ public record AlarmMessageEvent(
     return new AlarmMessageEvent(AlarmMessageType.TOGETHER, userId, completedUserId, bucketId,
         bucketTitle, null);
   }
+
+  public static AlarmMessageEvent togetherInvite(long userId, long inviterUserId, Long bucketId,
+      String bucketTitle) {
+    return new AlarmMessageEvent(AlarmMessageType.TOGETHER_INVITE, userId, inviterUserId, bucketId,
+        bucketTitle, null);
+  }
 }
