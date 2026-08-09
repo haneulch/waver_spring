@@ -2,6 +2,7 @@ package com.mybury.waver.web.message.v1.alarm;
 
 import com.mybury.waver.common.code.PushType;
 import com.mybury.waver.domain.Alarm;
+import com.mybury.waver.util.FileImageUtils;
 import io.swagger.v3.oas.annotations.media.Schema;
 import java.util.List;
 
@@ -12,7 +13,8 @@ public record AlarmResponse(
 
     public static AlarmResponse of(List<Alarm> alarmList) {
         List<AlarmElement> elements = alarmList.stream()
-            .map(alarm -> new AlarmElement(alarm.getType(), alarm.getMessage(), alarm.getImgUrl(),
+            .map(alarm -> new AlarmElement(alarm.getType(), alarm.getMessage(),
+                FileImageUtils.imagePath(alarm.getImgUrl()),
                 alarm.getBucketId()))
             .toList();
         return new AlarmResponse(elements);
