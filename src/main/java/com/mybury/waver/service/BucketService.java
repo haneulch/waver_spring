@@ -2,11 +2,14 @@ package com.mybury.waver.service;
 
 import com.mybury.waver.common.code.*;
 import com.mybury.waver.domain.Bucket;
+import com.mybury.waver.domain.BucketMember;
 import com.mybury.waver.domain.FreeTier;
 import com.mybury.waver.domain.User;
 import com.mybury.waver.event.message.BadgeCountEvent;
 import com.mybury.waver.exception.WaverException;
+import com.mybury.waver.repository.BucketMemberRepository;
 import com.mybury.waver.repository.BucketRepository;
+import com.mybury.waver.repository.CategoryRepository;
 import com.mybury.waver.repository.FreeTierRepository;
 import com.mybury.waver.repository.LikeBucketRepository;
 import com.mybury.waver.repository.ReportRepository;
@@ -24,7 +27,11 @@ import org.springframework.util.StringUtils;
 import java.time.LocalDate;
 import java.util.ArrayList;
 import java.util.Arrays;
+import java.util.LinkedHashSet;
 import java.util.List;
+import java.util.Map;
+import java.util.Set;
+import java.util.function.Function;
 import java.util.stream.Collectors;
 
 @Service
@@ -40,6 +47,8 @@ public class BucketService {
   private final ReportRepository reportRepository;
   private final UserRepository userRepository;
   private final FreeTierRepository freeTierRepository;
+  private final BucketMemberRepository bucketMemberRepository;
+  private final CategoryRepository categoryRepository;
   private final ApplicationEventPublisher publisher;
 
   @Transactional
@@ -57,11 +66,62 @@ public class BucketService {
       bucket.setImgUrl(imageUrl);
     }
     Bucket saved = bucketRepository.save(bucket);
+    syncBucketMembers(saved);
     bucketRepository.commit();
 
     processBadgeCount(userId, request.keywords());
 
     return bucketDetail(saved.getId(), userId);
+  }
+
+  /**
+   * 함께하기(TOGETHER) 참여자 동기화.
+   * 소유자 + friendUserIds 전원의 BucketMember row를 유지한다.
+   * 카테고리 매핑: 소유자 = 버킷에 지정한 카테고리, 친구 = 각자의 기본(default) 카테고리.
+   * 참여자에서 빠진 사용자 row는 삭제하고, 기존 참여자의 진행도는 유지한다.
+   */
+  private void syncBucketMembers(Bucket bucket) {
+    List<BucketMember> existing = bucketMemberRepository.findByBucketId(bucket.getId());
+
+    boolean together = bucket.getType() == ContentType.TOGETHER
+        && StringUtils.hasText(bucket.getFriendUserIds());
+    if (!together) {
+      if (!existing.isEmpty()) {
+        bucketMemberRepository.deleteAll(existing);
+      }
+      return;
+    }
+
+    Set<Long> memberUserIds = new LinkedHashSet<>();
+    memberUserIds.add(bucket.getUserId());
+    Arrays.stream(bucket.getFriendUserIds().split(","))
+        .map(String::trim)
+        .filter(id -> id.matches("\\d+"))
+        .map(Long::parseLong)
+        .forEach(memberUserIds::add);
+
+    Map<Long, BucketMember> existingByUserId = existing.stream()
+        .collect(Collectors.toMap(BucketMember::getUserId, Function.identity()));
+
+    List<BucketMember> removed = existing.stream()
+        .filter(member -> !memberUserIds.contains(member.getUserId()))
+        .toList();
+    if (!removed.isEmpty()) {
+      bucketMemberRepository.deleteAll(removed);
+    }
+
+    for (Long memberUserId : memberUserIds) {
+      boolean isOwner = memberUserId.equals(bucket.getUserId());
+      BucketMember member = existingByUserId.get(memberUserId);
+      if (member == null) {
+        Long categoryId = isOwner
+            ? bucket.getCategoryId()
+            : categoryRepository.findIdByUserIdAndDefaultYn(memberUserId, YesNo.Y);
+        bucketMemberRepository.save(BucketMember.of(bucket.getId(), memberUserId, categoryId));
+      } else if (isOwner) {
+        member.setCategoryId(bucket.getCategoryId()); // 소유자가 버킷 카테고리를 바꾼 경우 따라간다
+      }
+    }
   }
 
   /**
@@ -158,6 +218,7 @@ public class BucketService {
           .collect(Collectors.joining(","));
       bucket.setImgUrl(imageUrl);
     }
+    syncBucketMembers(bucket);
     bucketRepository.commit();
     return bucketDetail(id, userId);
   }
