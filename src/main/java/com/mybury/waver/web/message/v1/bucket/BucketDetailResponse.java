@@ -15,23 +15,27 @@ import java.util.Arrays;
 import java.util.List;
 import java.util.Map;
 
-record FriendElement(
+// 함께하는 참여자(본인 제외)의 진행 상태. completedDt는 달성 완료(COMPLETE)일 때만 내려간다
+// 참여자 row가 없는 레거시 데이터는 버킷 공유값으로 fallback
+record FriendStatusElement(
         long id,
         String name,
         String imgUrl,
-        int goalCount,
         int userCount,
-        BucketStatus status) {
+        BucketStatus status,
+        LocalDateTime completedDt) {
 
-    // 함께하기 참여자의 개인 진행도. 참여자 row가 없는 레거시 데이터는 버킷 공유값으로 fallback
-    public static FriendElement of(User friend, Bucket bucket, BucketMember member) {
-        return new FriendElement(
+    public static FriendStatusElement of(User friend, Bucket bucket, BucketMember member) {
+        int userCount = member != null ? member.getUserCount() : bucket.getUserCount();
+        BucketStatus status = member != null ? member.getStatus() : bucket.getStatus();
+        LocalDateTime completedDate = member != null ? member.getCompletedDate() : bucket.getCompletedDate();
+        return new FriendStatusElement(
                 friend.getId(),
                 friend.getName(),
                 FileImageUtils.imagePath(friend.getImgUrl()),
-                bucket.getGoalCount(),
-                member != null ? member.getUserCount() : bucket.getUserCount(),
-                member != null ? member.getStatus() : bucket.getStatus());
+                userCount,
+                status,
+                status == BucketStatus.COMPLETE ? completedDate : null);
     }
 }
 
@@ -53,7 +57,7 @@ public record BucketDetailResponse(
         LocalDateTime completedDt,
         LocalDate targetDate,
         List<KeywordElement> keywords,
-        List<FriendElement> friendUsers,
+        List<FriendStatusElement> friendStatusList,
         List<String> images,
         List<CommentElement> comment) {
 
@@ -61,8 +65,8 @@ public record BucketDetailResponse(
             List<KeywordElement> keywordList, List<User> friendUserList, boolean isLike,
             List<Long> reportedCommentIds, Map<Long, BucketMember> memberByUserId) {
         CategoryElement category = new CategoryElement(bucket.getCategory());
-        List<FriendElement> friendUsers = friendUserList.stream()
-                .map(friend -> FriendElement.of(friend, bucket, memberByUserId.get(friend.getId())))
+        List<FriendStatusElement> friendStatusList = friendUserList.stream()
+                .map(friend -> FriendStatusElement.of(friend, bucket, memberByUserId.get(friend.getId())))
                 .toList();
         List<String> images = bucket.getImgUrl() != null
                 ? Arrays.stream(bucket.getImgUrl().split(",")).map(FileImageUtils::imagePath).toList()
@@ -98,7 +102,7 @@ public record BucketDetailResponse(
                 completedDate,
                 bucket.getTargetDate(),
                 keywordList,
-                friendUsers,
+                friendStatusList,
                 images,
                 comment);
     }

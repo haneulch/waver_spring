@@ -72,7 +72,7 @@ public class BucketController {
     @Operation(summary = "버킷리스트 상세",
         description = "키워드, 함께하는 친구 목록, 좋아요 여부, 댓글까지 포함한 상세 정보를 반환합니다. "
             + "함께하기 버킷은 userCount/status/complete가 조회자 본인 기준이며, "
-            + "friendUsers에는 본인을 제외한 참여자 전원(소유자 포함)이 개인 진행도와 함께 담깁니다.")
+            + "friendStatusList에는 본인을 제외한 참여자 전원(소유자 포함)이 개인 진행도·상태·완료일시와 함께 담깁니다.")
     @GetMapping("{id}")
     public BucketDetailResponse bucketDetail(@Parameter(hidden = true) @UserId Long userId, @PathVariable Long id) {
         return bucketService.bucketDetail(id, userId);
