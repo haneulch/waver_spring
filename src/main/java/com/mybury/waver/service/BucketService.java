@@ -201,7 +201,8 @@ public class BucketService {
         from,
         now,
         POPULAR_BUCKET_LIMIT,
-        null
+        null,
+        ExposureStatus.PUBLIC
     );
 
     BucketRequest recommendRequest = new BucketRequest(
@@ -215,7 +216,8 @@ public class BucketService {
         from,
         now,
         POPULAR_BUCKET_LIMIT,
-        YesNo.Y
+        YesNo.Y,
+        ExposureStatus.PUBLIC
     );
 
     List<Long> reportedBucketIds = null;

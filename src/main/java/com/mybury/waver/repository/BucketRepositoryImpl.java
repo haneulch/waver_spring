@@ -90,6 +90,10 @@ public class BucketRepositoryImpl implements BucketRepositoryCustom {
       predicates.add(cb.isNotNull(root.get("imgUrl")));
     }
 
+    if (request.exposureStatus() != null) {
+      predicates.add(cb.equal(root.get("exposureStatus"), request.exposureStatus()));
+    }
+
     if (request.createdFrom() != null) {
       LocalDateTime from = request.createdFrom().atStartOfDay();
       predicates.add(cb.greaterThanOrEqualTo(root.get("createdAt"), from));
