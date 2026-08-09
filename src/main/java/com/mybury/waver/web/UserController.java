@@ -3,6 +3,7 @@ package com.mybury.waver.web;
 import com.mybury.waver.annotation.Public;
 import com.mybury.waver.annotation.UserId;
 import com.mybury.waver.common.code.PremiumStatus;
+import com.mybury.waver.domain.User;
 import com.mybury.waver.security.JwtTokenProvider;
 import com.mybury.waver.service.UserService;
 import com.mybury.waver.web.message.v1.main.LoginResponse;
@@ -43,9 +44,17 @@ public class UserController {
           + "이메일 또는 이름이 중복이면 6001을 반환합니다.")
   @PostMapping(value = "join", consumes = MediaType.MULTIPART_FORM_DATA_VALUE)
   public LoginResponse createUser(@Valid @ModelAttribute UserCreateRequest request, Locale locale) {
-    long userId = userService.create(request, locale);
-    String token = jwtTokenProvider.generateToken(userId);
-    return new LoginResponse(token, PremiumStatus.NONE);
+    User user = userService.create(request, locale);
+    String token = jwtTokenProvider.generateToken(user.getId());
+    return new LoginResponse(token, PremiumStatus.NONE, user.getMyburyYn());
+  }
+
+  @Operation(summary = "mybury 데이터 이관 요청",
+      description = "mybury 기존 회원(myburyYn=Y)만 요청할 수 있습니다. 요청된 사용자는 스케줄러가 순차적으로 데이터를 이관합니다. "
+          + "mybury 회원이 아니면 8200, 이미 이관 완료면 8201, 이미 요청됐으면 8202를 반환합니다.")
+  @PostMapping("migration")
+  public void requestMigration(@Parameter(hidden = true) @UserId Long userId) {
+    userService.requestMigration(userId);
   }
 
   @Operation(summary = "프로필 조회",

@@ -36,6 +36,6 @@ public class MainController {
   public LoginResponse login(@Valid @RequestBody LoginRequest request) {
     LoginProjection login = userService.getUserIdByUid(request.uid());
     String token = jwtTokenProvider.generateToken(login.getId());
-    return new LoginResponse(token, login.getPremiumStatus());
+    return new LoginResponse(token, login.getPremiumStatus(), login.getMyburyYn());
   }
 }

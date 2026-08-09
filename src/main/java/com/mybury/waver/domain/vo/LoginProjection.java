@@ -10,4 +10,6 @@ public interface LoginProjection {
   PremiumStatus getPremiumStatus();
 
   YesNo getDeleteYn();
+
+  YesNo getMyburyYn();
 }

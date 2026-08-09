@@ -35,6 +35,15 @@ public enum ResultCode {
   // 함께하기 사용 제한 초과 (무료: 최대 3회)
   TOGETHER_LIMIT_EXCEEDED("8101", "TOGETHER_LIMIT_EXCEEDED"),
 
+  // mybury 회원이 아닌 사용자의 이관 요청 (myburyYn != Y)
+  MIGRATION_NOT_ALLOWED("8200", "MIGRATION_NOT_ALLOWED"),
+
+  // 이미 이관 완료된 사용자의 이관 요청
+  MIGRATION_ALREADY_COMPLETED("8201", "MIGRATION_ALREADY_COMPLETED"),
+
+  // 이미 이관 요청한 사용자의 중복 요청
+  MIGRATION_ALREADY_REQUESTED("8202", "MIGRATION_ALREADY_REQUESTED"),
+
   // 탈퇴한 사용자
   WITHDRAWAL_USER("9000", "WITHDRAWAL_USER"),
 
