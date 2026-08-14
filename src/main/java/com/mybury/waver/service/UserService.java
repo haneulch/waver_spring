@@ -17,6 +17,7 @@ import com.mybury.waver.repository.CategoryRepository;
 import com.mybury.waver.repository.FollowRepository;
 import com.mybury.waver.repository.FreeTierRepository;
 import com.mybury.waver.repository.MigrationInfoRepository;
+import com.mybury.waver.repository.MyburyUserRepository;
 import com.mybury.waver.repository.UserRepository;
 import com.mybury.waver.util.FileUploadUtils;
 import com.mybury.waver.web.message.v1.user.ProfileResponse;
@@ -44,6 +45,7 @@ public class UserService {
   private final BucketRepository bucketRepository;
   private final FreeTierRepository freeTierRepository;
   private final MigrationInfoRepository migrationInfoRepository;
+  private final MyburyUserRepository myburyUserRepository;
 
   @Transactional
   public LoginProjection getUserIdByUid(String uid) {
@@ -68,9 +70,8 @@ public class UserService {
     }
 
     User user = request.user(locale);
-    // TODO: mybury DB 연동 후 이메일로 기존 mybury 회원 여부 조회해서 myburyYn 세팅
-    //  ex) user.setMyburyYn(myburyUserRepository.existsByEmail(request.email()) ? YesNo.Y : YesNo.N);
-    //  연동 전까지는 N 고정 (엔티티 기본값)
+    // mybury 레거시 DB에 같은 이메일이 있으면 기존 회원 → 이관 요청 가능 대상으로 표시
+    user.setMyburyYn(myburyUserRepository.existsByEmail(request.email()) ? YesNo.Y : YesNo.N);
     if (request.profileImage() != null) {
       String uploadPath = fileUploadUtils.uploadFile(request.profileImage());
       user.setImgUrl(uploadPath);

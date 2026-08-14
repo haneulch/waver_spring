@@ -79,7 +79,7 @@ public class User extends BaseEntity {
   @Column(length = 10, nullable = false)
   private PremiumStatus premiumStatus = PremiumStatus.NONE;
 
-  // mybury 기존 회원 여부. 이메일 회원가입 시점에 mybury DB를 조회해 판별한다 (연동 전까지 N 고정)
+  // mybury 기존 회원 여부. 회원가입 시점에 mybury DB(mt_user)를 이메일로 조회해 판별한다
   @Builder.Default
   @Enumerated(EnumType.STRING)
   @Column(length = 1, nullable = false)
