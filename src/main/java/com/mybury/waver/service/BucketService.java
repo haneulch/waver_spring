@@ -296,7 +296,7 @@ public class BucketService {
         from,
         now,
         POPULAR_BUCKET_LIMIT,
-        YesNo.Y,
+        null,
         ExposureStatus.PUBLIC
     );
 
