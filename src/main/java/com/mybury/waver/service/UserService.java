@@ -96,7 +96,11 @@ public class UserService {
         .orElseThrow(() -> new WaverException(ResultCode.NOT_FOUND));
 
     if (user.getMyburyYn() != YesNo.Y) {
-      throw new WaverException(ResultCode.MIGRATION_NOT_ALLOWED);
+      // 가입 시점 판별 도입 전 가입자 등 myburyYn이 N으로 남아있을 수 있어 요청 시점에 재판별한다
+      if (!myburyUserRepository.existsByEmail(user.getEmail())) {
+        throw new WaverException(ResultCode.MIGRATION_NOT_ALLOWED);
+      }
+      user.setMyburyYn(YesNo.Y);
     }
 
     migrationInfoRepository.findByUserId(userId).ifPresent(info -> {

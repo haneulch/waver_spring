@@ -4,6 +4,7 @@ import com.mybury.waver.common.code.YesNo;
 import com.mybury.waver.domain.Category;
 import jakarta.transaction.Transactional;
 import java.util.List;
+import java.util.Optional;
 import org.springframework.data.jpa.repository.JpaRepository;
 import org.springframework.data.jpa.repository.Modifying;
 import org.springframework.data.jpa.repository.Query;
@@ -21,6 +22,8 @@ public interface CategoryRepository extends JpaRepository<Category, Long> {
   List<Category> findByUserIdAndDeletedOrderBySeqAsc(long userId, YesNo deleted);
 
   List<Category> findByUserIdAndNameContainsAndDeletedOrderBySeqAsc(long userId, String query, YesNo deleted);
+
+  Optional<Category> findFirstByUserIdAndNameAndDeleted(long userId, String name, YesNo deleted);
 
   @Query(value = "SELECT id FROM Category WHERE userId = :userId AND defaultYn = :defaultYn")
   Long findIdByUserIdAndDefaultYn(long userId, YesNo defaultYn);

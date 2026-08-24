@@ -28,6 +28,7 @@ target
 upload
 src/main/resources/application-prod.yml
 .DS_Store
+*.key
 **/.DS_Store
 
 src/main/resources/waver-service-account.json

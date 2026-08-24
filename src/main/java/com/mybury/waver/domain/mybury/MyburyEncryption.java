@@ -16,6 +16,14 @@ public final class MyburyEncryption {
   public static final String DEC_USER_NAME = DEC_PREFIX + "name" + DEC_SUFFIX;
   public static final String DEC_USER_IMG_URL = DEC_PREFIX + "img_url" + DEC_SUFFIX;
 
+  public static final String DEC_BUCKETLIST_TITLE = DEC_PREFIX + "title" + DEC_SUFFIX;
+  public static final String DEC_BUCKETLIST_MEMO = DEC_PREFIX + "memo" + DEC_SUFFIX;
+  public static final String DEC_BUCKETLIST_IMG_URL_1 = DEC_PREFIX + "img_url_1" + DEC_SUFFIX;
+  public static final String DEC_BUCKETLIST_IMG_URL_2 = DEC_PREFIX + "img_url_2" + DEC_SUFFIX;
+  public static final String DEC_BUCKETLIST_IMG_URL_3 = DEC_PREFIX + "img_url_3" + DEC_SUFFIX;
+
+  public static final String DEC_CATEGORY_NAME = DEC_PREFIX + "name" + DEC_SUFFIX;
+
   private MyburyEncryption() {
   }
 }
