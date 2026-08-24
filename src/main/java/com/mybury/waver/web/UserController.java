@@ -7,6 +7,7 @@ import com.mybury.waver.domain.User;
 import com.mybury.waver.security.JwtTokenProvider;
 import com.mybury.waver.service.UserService;
 import com.mybury.waver.web.message.v1.main.LoginResponse;
+import com.mybury.waver.web.message.v1.user.FcmTokenRequest;
 import com.mybury.waver.web.message.v1.user.ProfileResponse;
 import com.mybury.waver.web.message.v1.user.UserCreateRequest;
 import com.mybury.waver.web.message.v1.user.UserStatusRequest;
@@ -111,7 +112,8 @@ public class UserController {
   @Operation(summary = "FCM 토큰 업데이트",
       description = "푸시 알림 수신용 FCM 토큰을 갱신합니다. 앱 시작 또는 토큰 변경 시 호출하세요.")
   @PostMapping("fcm-token")
-  public void updateFcmToken(@Parameter(hidden = true) @UserId Long userId, @RequestBody String fcmToken) {
-    userService.updateFcmToken(userId, fcmToken);
+  public void updateFcmToken(@Parameter(hidden = true) @UserId Long userId,
+      @Valid @RequestBody FcmTokenRequest request) {
+    userService.updateFcmToken(userId, request.fcmToken());
   }
 }
