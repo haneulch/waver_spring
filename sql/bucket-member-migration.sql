@@ -24,12 +24,21 @@ CREATE TABLE IF NOT EXISTS `bucket_member` (
   KEY `idx_bucket_member_user_id` (`user_id`)
 );
 
+-- 0) type 보정: 친구가 지정된 버킷은 TOGETHER로 맞춘다
+--    (클라이언트가 친구를 지정하면서 bucketType을 ORIGINAL로 보낸 데이터가 있어
+--     type 기준으로만 처리하면 참여자 백필에서 누락된다)
+UPDATE bucket
+SET type = 'TOGETHER'
+WHERE deleted = 'N'
+  AND type = 'ORIGINAL'
+  AND friend_user_ids IS NOT NULL
+  AND TRIM(friend_user_ids) <> '';
+
 -- 소유자 백필 (기존 공유 진행도는 소유자에게 승계)
 INSERT INTO bucket_member (bucket_id, user_id, category_id, user_count, status, completed_date)
 SELECT b.id, b.user_id, b.category_id, b.user_count, b.status, b.completed_date
 FROM bucket b
-WHERE b.type = 'TOGETHER'
-  AND b.deleted = 'N'
+WHERE b.deleted = 'N'
   AND b.friend_user_ids IS NOT NULL AND TRIM(b.friend_user_ids) <> ''
   AND NOT EXISTS (SELECT 1 FROM bucket_member m WHERE m.bucket_id = b.id AND m.user_id = b.user_id);
 
@@ -45,8 +54,7 @@ LEFT JOIN (SELECT user_id, MIN(id) AS category_id
            FROM category
            WHERE default_yn = 'Y' AND deleted = 'N'
            GROUP BY user_id) c ON c.user_id = jt.uid
-WHERE b.type = 'TOGETHER'
-  AND b.deleted = 'N'
+WHERE b.deleted = 'N'
   AND b.friend_user_ids IS NOT NULL AND TRIM(b.friend_user_ids) <> ''
   AND jt.uid <> b.user_id
   AND NOT EXISTS (SELECT 1 FROM bucket_member m WHERE m.bucket_id = b.id AND m.user_id = jt.uid);

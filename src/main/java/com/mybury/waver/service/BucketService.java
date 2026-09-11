@@ -3,6 +3,7 @@ package com.mybury.waver.service;
 import com.mybury.waver.common.code.*;
 import com.mybury.waver.domain.Bucket;
 import com.mybury.waver.domain.BucketMember;
+import com.mybury.waver.domain.Category;
 import com.mybury.waver.domain.FreeTier;
 import com.mybury.waver.domain.User;
 import com.mybury.waver.event.message.AlarmMessageEvent;
@@ -61,6 +62,7 @@ public class BucketService {
         StringUtils.hasText(request.friendUserIds()));
 
     Bucket bucket = request.toBucket(userId);
+    normalizeContentType(bucket);
 
     if (!ObjectUtils.isEmpty(request.images())) {
       String imageUrl = request.images().stream().map(fileUploadUtils::uploadFile)
@@ -85,9 +87,7 @@ public class BucketService {
   private void syncBucketMembers(Bucket bucket) {
     List<BucketMember> existing = bucketMemberRepository.findByBucketId(bucket.getId());
 
-    boolean together = bucket.getType() == ContentType.TOGETHER
-        && StringUtils.hasText(bucket.getFriendUserIds());
-    if (!together) {
+    if (!bucket.isTogether()) {
       if (!existing.isEmpty()) {
         bucketMemberRepository.deleteAll(existing);
       }
@@ -118,7 +118,7 @@ public class BucketService {
       if (member == null) {
         Long categoryId = isOwner
             ? bucket.getCategoryId()
-            : categoryRepository.findIdByUserIdAndDefaultYn(memberUserId, YesNo.Y);
+            : resolveMemberCategoryId(memberUserId);
         bucketMemberRepository.save(BucketMember.of(bucket.getId(), memberUserId, categoryId));
         if (!isOwner) {
           // 새로 추가된 친구에게 초대 알림 (트랜잭션 커밋 후 발송)
@@ -225,6 +225,7 @@ public class BucketService {
           .collect(Collectors.joining(","));
       bucket.setImgUrl(imageUrl);
     }
+    normalizeContentType(bucket);
     syncBucketMembers(bucket);
     bucketRepository.commit();
     return bucketDetail(id, userId);
@@ -244,7 +245,7 @@ public class BucketService {
 
     // 함께하기 버킷은 조회자 본인의 참여자 진행도로 표시한다
     List<Long> togetherBucketIds = buckets.stream()
-        .filter(bucket -> bucket.getType() == ContentType.TOGETHER)
+        .filter(Bucket::isTogether)
         .map(Bucket::getId)
         .toList();
     Map<Long, BucketMember> memberByBucketId = togetherBucketIds.isEmpty()
@@ -324,7 +325,7 @@ public class BucketService {
     boolean isLike = likeBucketRepository.existsByUserIdAndBucketId(userId, id);
 
     // 함께하기: 참여자(소유자 포함) 기준으로 조회. friendUsers에는 조회자 본인을 제외한 전원이 담긴다
-    Map<Long, BucketMember> memberByUserId = bucket.getType() == ContentType.TOGETHER
+    Map<Long, BucketMember> memberByUserId = bucket.isTogether()
         ? bucketMemberRepository.findByBucketId(id).stream()
             .collect(Collectors.toMap(BucketMember::getUserId, Function.identity()))
         : Map.of();
@@ -361,7 +362,7 @@ public class BucketService {
     Bucket bucket = getBucketForCount(id, userId);
 
     // 함께하기는 호출자 본인의 참여자 row만 증가시킨다 (다른 참여자 진행도에 영향 없음)
-    if (isTogether(bucket)) {
+    if (bucket.isTogether()) {
       BucketMember member = getOrCreateMember(bucket, userId);
       member.setUserCount(member.getUserCount() + 1);
       boolean completedNow = member.getStatus() != BucketStatus.COMPLETE
@@ -371,6 +372,7 @@ public class BucketService {
         member.setCompletedDate(LocalDateTime.now());
         notifyTogetherComplete(bucket, userId);
       }
+      mirrorOwnerProgress(bucket, userId, member);
       return;
     }
 
@@ -385,11 +387,12 @@ public class BucketService {
   public void achieveCancel(long id, long userId) {
     Bucket bucket = getBucketForCount(id, userId);
 
-    if (isTogether(bucket)) {
+    if (bucket.isTogether()) {
       BucketMember member = getOrCreateMember(bucket, userId);
       member.setUserCount(Math.max(0, member.getUserCount() - 1));
       member.setStatus(BucketStatus.PROGRESS);
       member.setCompletedDate(null);
+      mirrorOwnerProgress(bucket, userId, member);
       return;
     }
 
@@ -409,7 +412,7 @@ public class BucketService {
   }
 
   private boolean isTogetherFriend(Bucket bucket, long userId) {
-    if (bucket.getType() != ContentType.TOGETHER || !StringUtils.hasText(bucket.getFriendUserIds())) {
+    if (!bucket.isTogether()) {
       return false;
     }
     String target = String.valueOf(userId);
@@ -422,29 +425,57 @@ public class BucketService {
   public void reset(long id, long userId) {
     Bucket bucket = getBucketForCount(id, userId);
 
-    if (isTogether(bucket)) {
+    if (bucket.isTogether()) {
       BucketMember member = getOrCreateMember(bucket, userId);
       member.setUserCount(0);
       member.setStatus(BucketStatus.PROGRESS);
       member.setCompletedDate(null);
+      mirrorOwnerProgress(bucket, userId, member);
       return;
     }
 
     bucketRepository.reset(id, userId);
   }
 
-  private boolean isTogether(Bucket bucket) {
-    return bucket.getType() == ContentType.TOGETHER && StringUtils.hasText(bucket.getFriendUserIds());
+  /**
+   * 함께하기 버킷은 friendUserIds 지정 여부로 판단하고, type도 TOGETHER로 맞춰둔다.
+   * (클라이언트가 친구를 지정하면서 bucketType은 ORIGINAL로 보내는 경우가 있어
+   * type을 그대로 믿으면 참여자 row/초대 알림이 만들어지지 않고 달성 진행도가 공유된다)
+   */
+  private void normalizeContentType(Bucket bucket) {
+    if (bucket.isTogether()) {
+      // CHALLENGE는 그대로 둔다 (동작은 isTogether() 기준이라 영향 없고, 앱 표시 타입만 보존)
+      if (bucket.getType() == ContentType.ORIGINAL) {
+        bucket.setType(ContentType.TOGETHER);
+      }
+    } else if (bucket.getType() == ContentType.TOGETHER) {
+      bucket.setType(ContentType.ORIGINAL);
+    }
+  }
+
+  /**
+   * 소유자의 참여자 진행도를 버킷 본체에도 반영한다.
+   * 피드/탐색/다른 사용자 프로필 등 참여자가 아닌 화면은 bucket의 userCount/status를 쓰기 때문에,
+   * 반영하지 않으면 소유자가 달성해도 공개 화면에는 0으로 남는다.
+   */
+  private void mirrorOwnerProgress(Bucket bucket, long userId, BucketMember member) {
+    if (bucket.getUserId() == null || bucket.getUserId() != userId) {
+      return;
+    }
+    bucket.setUserCount(member.getUserCount());
+    bucket.setStatus(member.getStatus());
+    bucket.setCompletedDate(member.getCompletedDate());
   }
 
   // 마이그레이션 전 레거시 버킷 안전망: 참여자 row가 없으면 만들어서 진행한다
   private BucketMember getOrCreateMember(Bucket bucket, long userId) {
     return bucketMemberRepository.findByBucketIdAndUserId(bucket.getId(), userId)
         .orElseGet(() -> {
-          Long categoryId = bucket.getUserId() == userId
-              ? bucket.getCategoryId()
-              : categoryRepository.findIdByUserIdAndDefaultYn(userId, YesNo.Y);
-          return bucketMemberRepository.save(BucketMember.of(bucket.getId(), userId, categoryId));
+          // 호출자 row만 만들면 나머지 참여자는 계속 진행도를 공유하게 되므로 참여자 전원을 생성한다
+          syncBucketMembers(bucket);
+          return bucketMemberRepository.findByBucketIdAndUserId(bucket.getId(), userId)
+              .orElseGet(() -> bucketMemberRepository.save(
+                  BucketMember.of(bucket.getId(), userId, resolveMemberCategoryId(userId))));
         });
   }
 
@@ -455,6 +486,20 @@ public class BucketService {
         .filter(memberUserId -> memberUserId != completedUserId)
         .forEach(memberUserId -> publisher.publishEvent(
             AlarmMessageEvent.together(memberUserId, completedUserId, bucket.getId(), bucket.getTitle())));
+  }
+
+  /**
+   * 참여자 버킷이 담길 카테고리. 기본(default) 카테고리가 없으면 보유한 첫 카테고리로 대체한다.
+   * (null이면 카테고리 필터 조회에서 버킷이 사라진다)
+   */
+  private Long resolveMemberCategoryId(long userId) {
+    List<Category> categories = categoryRepository.findByUserIdAndDeletedOrderBySeqAsc(userId, YesNo.N);
+    return categories.stream()
+        .filter(category -> category.getDefaultYn() == YesNo.Y)
+        .findFirst()
+        .or(() -> categories.stream().findFirst())
+        .map(Category::getId)
+        .orElse(null);
   }
 
   public void patchGoalCount(long id, long userId, int goalCount) {

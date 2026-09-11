@@ -121,6 +121,14 @@ public class Bucket extends BaseEntity {
   @OneToMany(fetch = FetchType.LAZY, mappedBy = "bucket")
   private List<Comment> comments;
 
+  /**
+   * 함께하기(TOGETHER) 여부. 참여자 지정(friendUserIds)이 단일 기준이다.
+   * type 값은 클라이언트가 ORIGINAL로 보내오는 경우가 있어 신뢰하지 않는다.
+   */
+  public boolean isTogether() {
+    return friendUserIds != null && !friendUserIds.isBlank();
+  }
+
   @PostLoad
   private void postLoad() {
     if (this.targetDate != null) {

@@ -75,7 +75,27 @@ public class BucketRepositoryImpl implements BucketRepositoryCustom {
     }
 
     if (request.status() != null) {
-      predicates.add(cb.equal(root.get("status"), request.status()));
+      if (userId != null) {
+        // 함께하기 버킷의 진행 상태는 참여자 각자의 bucket_member.status 기준이다
+        Subquery<Long> myMemberBucketIds = query.subquery(Long.class);
+        Root<BucketMember> statusMember = myMemberBucketIds.from(BucketMember.class);
+        myMemberBucketIds.select(statusMember.get("bucketId"))
+            .where(cb.equal(statusMember.get("userId"), userId));
+
+        Subquery<Long> myMemberBucketIdsWithStatus = query.subquery(Long.class);
+        Root<BucketMember> statusMatched = myMemberBucketIdsWithStatus.from(BucketMember.class);
+        myMemberBucketIdsWithStatus.select(statusMatched.get("bucketId"))
+            .where(cb.and(
+                cb.equal(statusMatched.get("userId"), userId),
+                cb.equal(statusMatched.get("status"), request.status())));
+
+        predicates.add(cb.or(
+            cb.and(cb.equal(root.get("status"), request.status()),
+                cb.not(root.get("id").in(myMemberBucketIds))),
+            root.get("id").in(myMemberBucketIdsWithStatus)));
+      } else {
+        predicates.add(cb.equal(root.get("status"), request.status()));
+      }
     }
 
     if (StringUtils.hasText(request.query())) {
