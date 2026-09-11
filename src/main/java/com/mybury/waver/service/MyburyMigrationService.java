@@ -25,6 +25,7 @@ import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
+import org.springframework.util.StringUtils;
 
 /**
  * mybury 레거시 DB → waver 데이터 이관.
@@ -100,7 +101,14 @@ public class MyburyMigrationService {
     Long defaultCategoryId = categoryRepository.findIdByUserIdAndDefaultYn(userId, YesNo.Y);
 
     List<MyburyBucketlist> buckets = myburyBucketlistRepository.findByUserIdOrderByOrderSeqAsc(myburyUserId);
+    int migrated = 0;
     for (MyburyBucketlist mybury : buckets) {
+      // waver의 title은 NOT NULL이다. 한 건 때문에 사용자 전체 이관이 롤백되고
+      // 매 주기 재시도만 반복하는 상황을 막기 위해 해당 버킷만 건너뛴다.
+      if (!StringUtils.hasText(mybury.getTitle())) {
+        log.warn("mybury bucket skipped. title is empty: myburyBucketId={}", mybury.getId());
+        continue;
+      }
       boolean completed = mybury.getCompletedDt() != null;
       Bucket bucket = Bucket.builder()
           .title(mybury.getTitle())
@@ -118,7 +126,8 @@ public class MyburyMigrationService {
           .imgUrl(mybury.getImgUrl1())
           .build();
       bucketRepository.save(bucket);
+      migrated++;
     }
-    return buckets.size();
+    return migrated;
   }
 }
