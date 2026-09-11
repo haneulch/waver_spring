@@ -25,9 +25,12 @@ public class MyburyBucketlist {
   @Id
   private String id;
 
+  // title/memo는 레거시가 longtext, pin은 bit(1) — schema validate를 위해 실제 타입을 명시한다
+  @Column(columnDefinition = "longtext")
   @ColumnTransformer(read = MyburyEncryption.DEC_BUCKETLIST_TITLE)
   private String title;
 
+  @Column(columnDefinition = "longtext")
   @ColumnTransformer(read = MyburyEncryption.DEC_BUCKETLIST_MEMO)
   private String memo;
 
@@ -52,6 +55,7 @@ public class MyburyBucketlist {
   @Column(name = "user_count")
   private Integer userCount;
 
+  @Column(columnDefinition = "bit(1)")
   private Boolean pin;
 
   @Column(name = "category_id")

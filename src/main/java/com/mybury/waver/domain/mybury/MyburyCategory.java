@@ -31,7 +31,8 @@ public class MyburyCategory {
   @Column(name = "user_id")
   private String userId;
 
-  @Column(name = "is_default", length = 1)
+  // 레거시는 char(1). columnDefinition을 명시해야 schema validate를 통과한다
+  @Column(name = "is_default", columnDefinition = "char(1)")
   private String isDefault;
 
   public boolean isDefaultCategory() {
