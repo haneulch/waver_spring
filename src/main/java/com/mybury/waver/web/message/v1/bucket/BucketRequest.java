@@ -57,4 +57,9 @@ public record BucketRequest(
     }
   }
 
+  public BucketRequest withExposureStatus(ExposureStatus exposureStatus) {
+    return new BucketRequest(dDayBucketOnly, isPassed, status, sort, query, categoryId, hasMyBucket,
+        createdFrom, createdTo, limit, hasImage, exposureStatus);
+  }
+
 }

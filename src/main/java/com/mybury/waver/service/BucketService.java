@@ -52,6 +52,7 @@ public class BucketService {
   private final FreeTierRepository freeTierRepository;
   private final BucketMemberRepository bucketMemberRepository;
   private final CategoryRepository categoryRepository;
+  private final BucketAccessPolicy bucketAccessPolicy;
   private final ApplicationEventPublisher publisher;
 
   @Transactional
@@ -238,6 +239,10 @@ public class BucketService {
       targetUserId = userId;
     }
 
+    // 노출 범위는 서버가 정한다. 내 목록(내가 참여자인 함께하기 포함)은 제한 없고, 그 외에는 전체공개만.
+    // exposureStatus는 내부용 파라미터지만 요청으로 들어올 수 있어, 그대로 쓰면 타인의 비공개 버킷이 노출된다.
+    request = request.withExposureStatus(hasMyBucket ? null : ExposureStatus.PUBLIC);
+
     List<Long> reportedBucketIds =
         reportRepository.findBucketlistIdsByReportUserIdAndReportType(userId, ReportType.BUCKET);
 
@@ -315,7 +320,8 @@ public class BucketService {
   public BucketDetailResponse bucketDetail(long id, long userId) {
     Bucket bucket = bucketRepository.findByIdAndDeleted(id, YesNo.N)
         .orElseThrow(() -> new WaverException(ResultCode.NOT_FOUND));
-    
+    bucketAccessPolicy.checkViewable(bucket, userId);
+
     List<KeywordElement> keywords = new ArrayList<>();
     if (StringUtils.hasText(bucket.getKeywords())) {
       String[] selectedKeyword = bucket.getKeywords().split(",");
@@ -404,21 +410,10 @@ public class BucketService {
     Bucket bucket = bucketRepository.findByIdAndDeleted(id, YesNo.N)
         .orElseThrow(() -> new WaverException(ResultCode.NOT_FOUND));
 
-    boolean isOwner = bucket.getUserId() != null && bucket.getUserId() == userId;
-    if (!isOwner && !isTogetherFriend(bucket, userId)) {
+    if (!bucketAccessPolicy.isOwner(bucket, userId) && !bucketAccessPolicy.isParticipant(bucket, userId)) {
       throw new WaverException(ResultCode.FORBIDDEN);
     }
     return bucket;
-  }
-
-  private boolean isTogetherFriend(Bucket bucket, long userId) {
-    if (!bucket.isTogether()) {
-      return false;
-    }
-    String target = String.valueOf(userId);
-    return Arrays.stream(bucket.getFriendUserIds().split(","))
-        .map(String::trim)
-        .anyMatch(target::equals);
   }
 
   @Transactional

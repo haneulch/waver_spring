@@ -1,10 +1,15 @@
 package com.mybury.waver.event;
 
+import com.mybury.waver.common.code.ResultCode;
+import com.mybury.waver.common.code.YesNo;
+import com.mybury.waver.domain.Bucket;
 import com.mybury.waver.domain.LikeBucket;
 import com.mybury.waver.event.message.AlarmMessageEvent;
 import com.mybury.waver.event.message.FeedLikeEvent;
+import com.mybury.waver.exception.WaverException;
 import com.mybury.waver.repository.BucketRepository;
 import com.mybury.waver.repository.LikeBucketRepository;
+import com.mybury.waver.service.BucketAccessPolicy;
 import lombok.RequiredArgsConstructor;
 import org.springframework.context.ApplicationEventPublisher;
 import org.springframework.context.event.EventListener;
@@ -20,6 +25,7 @@ public class FeedLikeEventListener {
 
   private final BucketRepository bucketRepository;
   private final LikeBucketRepository likeBucketRepository;
+  private final BucketAccessPolicy bucketAccessPolicy;
   private final ApplicationEventPublisher publisher;
 
   @Transactional
@@ -27,6 +33,10 @@ public class FeedLikeEventListener {
   public void handle(FeedLikeEvent event) {
     long id = event.id();
     long userId = event.userId();
+
+    Bucket bucket = bucketRepository.findByIdAndDeleted(id, YesNo.N)
+        .orElseThrow(() -> new WaverException(ResultCode.NOT_FOUND));
+    bucketAccessPolicy.checkViewable(bucket, userId);
 
     boolean isLiked = likeBucketRepository.existsByUserIdAndBucketId(userId, id);
     bucketRepository.updateLike(id, isLiked ? -1 : 1);

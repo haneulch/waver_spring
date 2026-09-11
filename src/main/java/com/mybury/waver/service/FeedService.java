@@ -30,6 +30,7 @@ public class FeedService {
   private final UserKeywordRepository userKeywordRepository;
   private final LikeBucketRepository likeBucketRepository;
   private final CategoryRepository categoryRepository;
+  private final BucketAccessPolicy bucketAccessPolicy;
   private final ApplicationEventPublisher publisher;
 
   @Transactional
@@ -102,6 +103,8 @@ public class FeedService {
   public long copy(long userId, long id) {
     Bucket bucket = bucketRepository.findByIdAndDeletedAndScrapYn(id, YesNo.N, YesNo.Y)
         .orElseThrow(() -> new WaverException(ResultCode.NOT_FOUND));
+    // 스크랩은 제목·메모·이미지를 그대로 복사하므로 열람 권한이 없으면 막는다
+    bucketAccessPolicy.checkViewable(bucket, userId);
 
     Long categoryId = categoryRepository.findIdByUserIdAndDefaultYn(userId, YesNo.Y);
 

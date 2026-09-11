@@ -27,13 +27,16 @@ public class CommentService {
   private final CommentRepository commentRepository;
   private final BucketRepository bucketRepository;
   private final ReportRepository reportRepository;
+  private final BucketAccessPolicy bucketAccessPolicy;
   private final ApplicationEventPublisher publisher;
 
   @Transactional
   public void commentCreate(Long userId, @Valid CommentCreateRequest request) {
-    // 버킷 존재 확인
-    long bucketUserId = bucketRepository.findById(request.bucketId()).map(Bucket::getUserId)
+    // 버킷 존재 확인 + 열람 권한 확인 (열람할 수 없는 버킷에는 댓글을 달 수 없다)
+    Bucket bucket = bucketRepository.findById(request.bucketId())
         .orElseThrow(() -> new WaverException(ResultCode.NOT_FOUND));
+    bucketAccessPolicy.checkViewable(bucket, userId);
+    long bucketUserId = bucket.getUserId();
 
     // 코멘트 생성
     String mentionIds = request.mentionIds() != null ? String.join(",", request.mentionIds()) : null;
