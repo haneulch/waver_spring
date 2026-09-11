@@ -62,6 +62,9 @@ waver:
     statics:
       path: ${FILE_STATICS_PATH:http://localhost:8080/images}
   service-key-path: ${WAVER_SERVICE_KEY_PATH:}
+  mybury:
+    # TODO 이관 검증 기간 한시 설정: 1분마다. 검증 끝나면 매일 04:00("0 0 4 * * *")으로 되돌린다
+    migration-cron: ${MYBURY_MIGRATION_CRON:0 * * * * *}
 
 google:
   play:
@@ -71,4 +74,6 @@ google:
 logging:
   level:
     root: info
+    # TODO 이관 검증 기간 한시 설정: 스케줄러 실행 여부(대상 0건 포함)를 보기 위함. 검증 끝나면 제거
+    com.mybury.waver.scheduler: ${MIGRATION_LOG_LEVEL:debug}
 

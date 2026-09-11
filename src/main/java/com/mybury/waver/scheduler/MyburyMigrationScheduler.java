@@ -23,11 +23,14 @@ public class MyburyMigrationScheduler {
   private final MigrationInfoRepository migrationInfoRepository;
   private final MyburyMigrationService myburyMigrationService;
 
-  // 매일 04:00 (트래픽 적은 시간대). 로컬 검증용으로 프로퍼티 오버라이드 가능
+  // 주기는 waver.mybury.migration-cron로 설정한다 (기본 매일 04:00 — 트래픽 적은 시간대).
+  // 이관 검증 기간에는 application.yml에서 1분마다로 올려둔 상태.
   @Scheduled(cron = "${waver.mybury.migration-cron:0 0 4 * * *}")
   public void migrate() {
     List<MigrationInfo> targets = migrationInfoRepository.findByStatus(MigrationStatus.REQUESTED);
     if (targets.isEmpty()) {
+      // 스케줄러가 돌았는지 자체를 확인할 수 있어야 한다 (대상 0건과 미실행을 구분)
+      log.debug("mybury migration skipped. no requested target");
       return;
     }
     log.info("mybury migration start. target count: {}", targets.size());
