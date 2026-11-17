@@ -190,7 +190,8 @@ FCM 토큰 업데이트
 | categoryId  | Long    | ✅       | 카테고리 ID           |
 | goalCount   | Integer | ❌       | 목표 달성 횟수         |
 | image       | File    | ❌       | 첨부 이미지            |
-| isPublic    | Boolean | ❌       | 공개 여부             |
+| exposureStatus | String | ✅       | `PRIVATE`, `PUBLIC`, `FOLLOWER`(맞팔 공개). 함께하기는 요청값과 관계없이 `PUBLIC` |
+| friendUserIds | String | ❌       | 함께할 친구 ID 목록(쉼표 구분) |
 
 **Response** `200 OK` — `BucketDetailResponse`
 
@@ -510,6 +511,14 @@ FCM 토큰 업데이트
 
 마이페이지 메인
 
+**Query Parameters**
+
+| Param | Type | Required | Description |
+|-------|------|----------|-------------|
+| sort | String | ❌ | `CREATED`, `CREATED_DESC`, `UPDATED`, `UPDATED_DESC`, `LIKE_COUNT_DESC`. 기본값 `CREATED_DESC`(최신 등록순) |
+
+버킷 목록은 삭제되지 않은 본인 버킷을 선택한 기준으로 정렬하며, 같은 값은 ID를 같은 방향으로 정렬한다.
+
 **Response** `200 OK` — `MyResponse`
 
 ---
@@ -517,6 +526,8 @@ FCM 토큰 업데이트
 ### GET `/waver/my/{otherUserId}`
 
 타인 마이페이지 메인
+
+버킷 목록과 개수에는 조회자가 열람할 수 있는 삭제되지 않은 버킷만 포함한다.
 
 **Path Parameters**
 
@@ -530,7 +541,8 @@ FCM 토큰 업데이트
 
 ### GET `/waver/my/push`
 
-푸시 알림 목록. 발송된 푸시는 알림 목록에 저장되며, 각 알림의 타입과 메시지를 함께 반환한다.
+푸시 알림 목록. 생성 시각 내림차순으로 반환하고, 같은 시각이면 ID 내림차순으로 정렬한다.
+발송된 푸시는 알림 목록에 저장되며, 각 알림의 타입과 메시지를 함께 반환한다.
 
 **Response** `200 OK` — `AlarmResponse`
 

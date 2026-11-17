@@ -6,5 +6,5 @@ import org.springframework.data.jpa.repository.JpaRepository;
 
 public interface AlarmRepository extends JpaRepository<Alarm, Long> {
 
-    List<Alarm> findByUserId(long userId);
+    List<Alarm> findByUserIdOrderByCreatedAtDescIdDesc(long userId);
 }

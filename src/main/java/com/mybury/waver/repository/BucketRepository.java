@@ -4,6 +4,7 @@ import com.mybury.waver.common.code.YesNo;
 import com.mybury.waver.domain.Bucket;
 import com.mybury.waver.domain.vo.BucketGoalCount;
 import jakarta.transaction.Transactional;
+import org.springframework.data.domain.Sort;
 import org.springframework.data.jpa.repository.JpaRepository;
 import org.springframework.data.jpa.repository.Modifying;
 import org.springframework.data.jpa.repository.Query;
@@ -14,6 +15,8 @@ import java.util.Optional;
 public interface BucketRepository extends JpaRepository<Bucket, Long>, BucketRepositoryCustom {
 
   List<Bucket> findByUserId(Long userId);
+
+  List<Bucket> findByUserIdAndDeleted(Long userId, YesNo deleted, Sort sort);
 
   @Modifying
   @Transactional

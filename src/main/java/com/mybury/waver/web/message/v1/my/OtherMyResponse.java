@@ -46,8 +46,10 @@ public record OtherMyResponse(
     OtherBucketInfo bucketInfo
 ) {
 
-    public OtherMyResponse(User user, Badge selected, int followingCount, int followerCount, YesNo isFollowing) {
-        this(user.getId(), user.getImgUrl(), user.getName(), user.getBio(), selected.getBadgeType().getTitle(),
-            followingCount, followerCount, isFollowing, OtherBucketInfo.of(user.getBucketlist()));
+    public static OtherMyResponse of(User user, Badge selected, int followingCount, int followerCount,
+            YesNo isFollowing, List<Bucket> visibleBuckets) {
+        return new OtherMyResponse(user.getId(), user.getImgUrl(), user.getName(), user.getBio(),
+                selected.getBadgeType().getTitle(), followingCount, followerCount, isFollowing,
+                OtherBucketInfo.of(visibleBuckets));
     }
 }

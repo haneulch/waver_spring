@@ -40,9 +40,10 @@ public record MyResponse(
     BucketInfo bucketInfo
 ) {
 
-  public MyResponse(User user, Badge selected, int followingCount, int followerCount) {
-    this(user.getId(), FileImageUtils.imagePath(user.getImgUrl()), user.getName(), user.getBio(),
-        selected.getBadgeType().getTitle(), getImgUrl(selected.getBadgeStep(), selected.getBadgeType()), followingCount,
-        followerCount, BucketInfo.of(user.getBucketlist()));
-  }
+    public static MyResponse of(User user, Badge selected, int followingCount, int followerCount,
+            List<Bucket> buckets) {
+        return new MyResponse(user.getId(), FileImageUtils.imagePath(user.getImgUrl()), user.getName(), user.getBio(),
+                selected.getBadgeType().getTitle(), getImgUrl(selected.getBadgeStep(), selected.getBadgeType()),
+                followingCount, followerCount, BucketInfo.of(buckets));
+    }
 }

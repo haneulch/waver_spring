@@ -63,7 +63,7 @@ public class BucketService {
         StringUtils.hasText(request.friendUserIds()));
 
     Bucket bucket = request.toBucket(userId);
-    normalizeContentType(bucket);
+    normalizeTogetherBucket(bucket);
 
     if (!ObjectUtils.isEmpty(request.images())) {
       String imageUrl = request.images().stream().map(fileUploadUtils::uploadFile)
@@ -226,7 +226,7 @@ public class BucketService {
           .collect(Collectors.joining(","));
       bucket.setImgUrl(imageUrl);
     }
-    normalizeContentType(bucket);
+    normalizeTogetherBucket(bucket);
     syncBucketMembers(bucket);
     bucketRepository.commit();
     return bucketDetail(id, userId);
@@ -437,8 +437,9 @@ public class BucketService {
    * (클라이언트가 친구를 지정하면서 bucketType은 ORIGINAL로 보내는 경우가 있어
    * type을 그대로 믿으면 참여자 row/초대 알림이 만들어지지 않고 달성 진행도가 공유된다)
    */
-  private void normalizeContentType(Bucket bucket) {
+  private void normalizeTogetherBucket(Bucket bucket) {
     if (bucket.isTogether()) {
+      bucket.setExposureStatus(ExposureStatus.PUBLIC);
       // CHALLENGE는 그대로 둔다 (동작은 isTogether() 기준이라 영향 없고, 앱 표시 타입만 보존)
       if (bucket.getType() == ContentType.ORIGINAL) {
         bucket.setType(ContentType.TOGETHER);

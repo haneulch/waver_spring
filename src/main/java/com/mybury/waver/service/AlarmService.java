@@ -24,7 +24,7 @@ public class AlarmService {
     }
 
     public AlarmResponse getList(long userId) {
-        List<Alarm> alarms = alarmRepository.findByUserId(userId);
+        List<Alarm> alarms = alarmRepository.findByUserIdOrderByCreatedAtDescIdDesc(userId);
         return AlarmResponse.of(alarms);
     }
 }

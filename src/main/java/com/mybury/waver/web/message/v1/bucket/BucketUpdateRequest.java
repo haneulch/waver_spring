@@ -17,7 +17,7 @@ public record BucketUpdateRequest(
     ContentType bucketType,
 
     @NotNull
-    @Schema(description = "공개여부", implementation = ExposureStatus.class)
+    @Schema(description = "공개여부(함께할 친구 지정 시 PUBLIC으로 고정)", implementation = ExposureStatus.class)
     ExposureStatus exposureStatus,
 
     @NotBlank

@@ -1,6 +1,7 @@
 package com.mybury.waver.web;
 
 import com.mybury.waver.annotation.UserId;
+import com.mybury.waver.common.code.SortType;
 import com.mybury.waver.service.AlarmService;
 import com.mybury.waver.service.MyService;
 import com.mybury.waver.web.message.v1.alarm.AlarmResponse;
@@ -14,6 +15,7 @@ import lombok.RequiredArgsConstructor;
 import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.PathVariable;
 import org.springframework.web.bind.annotation.RequestMapping;
+import org.springframework.web.bind.annotation.RequestParam;
 import org.springframework.web.bind.annotation.RestController;
 
 @Tag(name = "마이페이지", description = "내 정보 요약, 타인 페이지, 알림 목록")
@@ -26,10 +28,12 @@ public class MyController {
     private final AlarmService alarmService;
 
     @Operation(summary = "마이페이지 메인",
-        description = "내 프로필, 대표 배지, 팔로잉/팔로워 수를 반환합니다.")
+        description = "내 프로필, 대표 배지, 팔로잉/팔로워 수를 반환합니다. "
+            + "버킷 목록은 sort로 정렬하며 기본값은 최신 등록순(CREATED_DESC)입니다.")
     @GetMapping
-    public MyResponse my(@Parameter(hidden = true) @UserId Long userId) {
-        return myService.my(userId);
+    public MyResponse my(@Parameter(hidden = true) @UserId Long userId,
+            @RequestParam(defaultValue = "CREATED_DESC") SortType sort) {
+        return myService.my(userId, sort);
     }
 
     @Operation(summary = "타인 마이페이지",
@@ -40,7 +44,7 @@ public class MyController {
     }
 
     @Operation(summary = "알림 목록",
-        description = "받은 푸시 알림 내역을 반환합니다. 각 알림은 타입(type)과 메시지(message)를 함께 반환하며, "
+        description = "받은 푸시 알림 내역을 최신순으로 반환합니다. 각 알림은 타입(type)과 메시지(message)를 함께 반환하며, "
             + "타입이 FOLLOW인 경우 팔로워의 프로필 이미지 URL(imgUrl)이 함께 내려갑니다. "
             + "타입: LIKE(좋아요), COMMENT(댓글), FOLLOW(팔로우), BADGE(뱃지 달성), "
             + "TOGETHER(함께하는 사람이 버킷 완성), NOTICE(공지), EVENT(이벤트), D_DAY(디데이 7일).")

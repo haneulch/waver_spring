@@ -143,6 +143,7 @@ public class Bucket extends BaseEntity {
         .userId(userId)
         .categoryId(categoryId)
         .type(bucket.getType())
+        .exposureStatus(bucket.isTogether() ? ExposureStatus.PUBLIC : ExposureStatus.PRIVATE)
         .targetDate(bucket.getTargetDate())
         .dDay(bucket.getDDay())
         .goalCount(bucket.getGoalCount())
